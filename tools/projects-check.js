@@ -8,7 +8,17 @@
    NOT covered (manual verification required):
      - whether each 16:10 centre crop keeps its subject legible
      - whether these are the six projects the client wants to lead with
-     - whether contract values belong on the homepage at all */
+     - whether contract values belong on the homepage at all
+     - whether lazy-loading actually defers the fetch in a real browser.
+       The preview pane this harness runs in never fires lazy-load fetches
+       and never scrolls, so the image checks force the fetch and therefore
+       prove only that the files exist and decode. That the browser WOULD
+       have deferred them is covered only indirectly, by the synchronous
+       loading="lazy" attribute check. Confirm it once in a normal browser.
+     - whether the block's aspect-ratio boxes actually hold layout steady.
+       "image frames reserve a 16:10 box" asserts the CSS declaration, not
+       a measured shift; getComputedStyle reports the declared value even
+       where it has no effect. */
 (function () {
   'use strict';
 

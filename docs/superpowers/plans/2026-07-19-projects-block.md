@@ -189,6 +189,29 @@ fixed for the rail harness in commit `4498392`, and it must not be reintroduced.
 
 - [ ] **Step 1: Write the harness**
 
+> **The code below is the original draft and is now out of date. The committed
+> `tools/projects-check.js` is the source of truth.** Code review found two real
+> defects in this draft and they were fixed in `f0f2e20` and `917eccd`:
+>
+> 1. `no image is upscaled in its slot` passed vacuously when every image was
+>    broken — the outer count guard was defeated by an unguarded early `return`
+>    inside the loop, so six 404ing images produced a green line claiming "all
+>    sources >= their rendered width". It now requires `measured === CARD_COUNT`.
+>    Both the implementer and the reviewer demonstrated the old code passing and
+>    the new code failing against six deliberately-404ing cards.
+> 2. The fixed 1200ms wait after `scrollIntoView()` was a flake risk, and worse,
+>    the preview pane never fires lazy-load fetches and never scrolls at all
+>    (`scrollY` stays 0 after an explicit `scrollTo`). The harness now forces the
+>    fetch and polls `img.complete` with a 5000ms cap.
+>
+> Plus eight minor fixes: a `CARD_COUNT` constant replacing the magic `6`, `GET`
+> instead of `HEAD` (static servers often answer `HEAD` with 405), a terminal
+> `.catch()` so one throw cannot discard all 14 results, `documentElement`
+> instead of `body` for the overflow check (the old comparison had a
+> scrollbar's width of built-in slack), and better failure messages.
+>
+> Read the draft for intent; run the committed file.
+
 Create `tools/projects-check.js`:
 
 ```javascript
