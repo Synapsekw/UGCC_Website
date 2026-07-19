@@ -587,3 +587,75 @@
 .block-header .block-header-item:last-child .item-content::after {
   display: none;
 }
+
+/* ==========================================================================
+   Nav — vertical alignment + true screen-centred link group
+   ========================================================================== */
+
+/* Two client-reported bugs, one shared root cause in the builder markup.
+   ul.block-header__nav-links is display:flex with no align-items set, so
+   every <li> top-aligns on the flex line; the five 21px-tall text links
+   and the 41px-tall Contact pill (padding: 9px 20px, from the rule above)
+   land at different vertical centres even though the logo and pill are
+   already aligned with each other. align-items:center on the flex row is
+   the actual fix for that.
+   Second bug: the desktop layout is a 2-column grid (logo | nav), so the
+   link group centres on the nav column, not the screen - the client wants
+   the logo hard left, Contact Us hard right, and the five remaining links
+   centred on the screen. Fix: take the logo and the pill (last nav item)
+   out of flow with position:absolute pinned to the header's own
+   --padding-left/--padding-right (so their on-screen position stays
+   pixel-identical to today), collapse the grid to one full-width track,
+   and let the remaining five links centre in that full width - which
+   lands on the true screen centre because the header box itself is
+   horizontally centred on the page (max-width:1224px, justify-self:center).
+   Scoped to the desktop subtree only (builder breakpoint is 920px); the
+   mobile header (.block-header-layout-mobile) is a separate DOM subtree
+   and is untouched. */
+@media (min-width: 921px) {
+  .block-header-layout-desktop {
+    position: relative !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .block-header-layout-desktop .block-header-logo {
+    position: absolute;
+    left: var(--padding-left, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .block-header-layout-desktop .block-header__nav-links {
+    align-items: center !important;
+    justify-content: center !important;
+    /* Without the pill in flow, the row's natural height collapses to the
+       21px-tall text links, and the header shrinks by ~20px - shifting
+       every inner page's content up (the exact regression the frost-only
+       scroll approach above was written to avoid). Restore the row's
+       original height explicitly: it used to be set by the pill's own box
+       (line-height + 2x9px padding + 2x1px border from the pill rule
+       below = ~41px), so pin it back to that. */
+    min-height: 41px;
+  }
+
+  /* At the narrow end of the desktop range the five now screen-centred
+     links crowd the logo (measured: they overlap it by ~55px at 921px
+     using the builder's own --link-spacing:46px). Rather than let them
+     collide, shrink the gap as width shrinks: 12px at 921px (verified
+     ~10px clear of the logo), fluidly widening back to the builder's own
+     46px by ~1274px and capped there, so nothing changes at 1280+ where
+     the default spacing already clears both the logo and the pill. */
+  .block-header-layout-desktop {
+    --link-spacing: clamp(12px, 10vw - 79px, 46px);
+  }
+
+  /* Contact Us pill: pulled out of the flex row so it no longer competes
+     for centre-line space with the five text links, and pinned to the
+     header's own right padding so it keeps its original on-screen edge. */
+  .block-header-layout-desktop .block-header-item:last-child {
+    position: absolute;
+    right: var(--padding-right, 16px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
