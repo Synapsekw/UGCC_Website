@@ -79,19 +79,31 @@ rules:
                        color at .25s var(--v2-ease-out-quart)
 .v2-btn:hover          translateY(-2px) + var(--v2-shadow-lift)
 .v2-btn:active         translateY(0)
-.v2-btn--primary       #fff on #101010 text — for dark grounds
-.v2-btn--dark          var(--v2-navy) ground, #fff text — for light grounds
+.v2-btn--on-dark       #fff ground, #101010 text — sits ON a dark ground
+.v2-btn--on-light      var(--v2-navy) ground, #fff text — sits ON a light ground
 .v2-btn--ghost         transparent, 1px rgba(255,255,255,.5) border, #fff text
 ```
 
-`.v2-btn--primary` and `.v2-btn--dark` both carry the shine sweep
-(`::after`, `hero-shine` keyframes) gated behind
-`@media (prefers-reduced-motion: no-preference)`.
+The variants are named for the ground they sit on, not by importance. An
+earlier draft used `--primary` / `--dark`, which mixed two axes for two things
+that are not opposites: `--primary` was the white button and `--dark` the navy
+one, so anyone building on the near-white Who-are-we ground would reach for
+"primary" and get a white pill on white.
+
+Only `.v2-btn--on-dark` carries the shine sweep (`::after`, `v2-shine`
+keyframes — renamed from `hero-shine` when it moved out of `hero.css`), gated
+behind `@media (prefers-reduced-motion: no-preference)`. It is deliberately not
+on `--on-light`: the gradient is white, so over navy it would be a pronounced
+sweep nothing in the design asked for. Note that over the white `--on-dark`
+button it is white-on-white and renders nothing — the hero's shine has never
+actually been visible. Left as-is rather than corrected, because the hero is
+finished and client-reviewed.
 
 The hero keeps its markup. Its button rules **move out of** `hero.css` into
 `sections.css`, where `#aCqA2TkE7 .hero-btn` is listed as an additional selector
-on each `.v2-btn` rule — `.hero-btn--primary` alongside `--primary`,
-`.hero-btn--secondary` alongside `--ghost`. One source, no cross-file
+on each `.v2-btn` rule — `.hero-btn--primary` alongside `--on-dark`,
+`.hero-btn--secondary` alongside `--ghost`. The hero's own class names are
+unchanged; only the shared variants are renamed. One source, no cross-file
 specificity race. `#aCqA2TkE7 .hero-cta` is layout, not button treatment, and
 stays in `hero.css`. The hero's computed styles must be identical before and
 after, proven by `tools/hero-check.js`.
@@ -112,7 +124,7 @@ properties and its `.block-background` (flat `rgb(0, 42, 65)`) are untouched.
       engineering projects across the Middle East.</h2>
     <p class="about-sub">Quality control, planning and project management held to
       one standard — in Kuwait, the GCC and internationally.</p>
-    <a class="v2-btn v2-btn--primary" href="/about-contractor-kuwait">Read More</a>
+    <a class="v2-btn v2-btn--on-dark" href="/about-contractor-kuwait">Read More</a>
   </div>
 </div>
 ```
@@ -162,7 +174,7 @@ Replace the entire 46-row `.block-layout` subtree. The `<section>` and its fixed
       <p class="wr-intro">Technical excellence and innovative solutions across
         complex infrastructure and building projects.</p>
     </div>
-    <a class="v2-btn v2-btn--dark" href="/business-lines-construction-services-kuwait">Explore More</a>
+    <a class="v2-btn v2-btn--on-light" href="/business-lines-construction-services-kuwait">Explore More</a>
   </header>
   <nav class="wr-list" aria-label="Business lines">
     <a class="wr-row" href="…"><span class="wr-num">01</span><span class="wr-name">ROADS AND BRIDGES</span><span class="wr-desc">…</span><span class="wr-arrow" aria-hidden="true">→</span></a>
