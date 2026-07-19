@@ -56,6 +56,16 @@ Do not reorder the tasks. Do not "just quickly" add the `<link>` tag early.
 7. **Locate by string, never by byte offset or line number.** Every offset in the spec was already invalidated once. `id="zZFMdo"` was not.
 8. **The markup you insert must contain no newline characters.** The page body is one line; splitting it turns every other session's edit to that line into a conflicting hunk. Task 3's script builds the markup as a single Python string for exactly this reason — do not reformat it across lines to make it prettier.
 
+9. **Re-verify every shared class name before you use it.** This plan consumes exactly one thing it does not own: the button, `.v2-btn.v2-btn--on-light` from `sections.css`.
+
+   This bit once already. The plan was first written against `.v2-btn--dark`; the About session's commit `a786382`, "name the button variants by the ground they sit on", renamed it to `.v2-btn--on-light` while this plan was being drafted. The old name was silently dead — the pill rendered with a transparent background and no error anywhere. **Assume it can be renamed again.** Before Task 3, run:
+
+   ```bash
+   grep -n "v2-btn--on-light" assets/css/sections.css
+   ```
+
+   If that returns nothing, the variant was renamed again. Find the current light-ground variant — it is the one whose rule is `background: var(--v2-navy); color: #fff` — and use that name in Task 3's markup, in Task 2's `credentials.css`, and in Task 1's check. Do not edit `sections.css` to add the old name back.
+
 ### Serving the site
 
 Another session already holds port 8747. Do not fight it — that server serves this same working tree, so it is already serving your changes.
@@ -670,9 +680,11 @@ What must *not* happen is the added count exceeding 1. One added line means the 
 
 Reload `http://localhost:8747/` at 1280x720 and paste `tools/credentials-check.js` into the console.
 
-Expected: **12 passed, 0 failed.**
+Expected: **12 passed, 0 failed.** The height check should report a number near **591px** — that is the measured height of this exact markup and CSS at 1280px wide, taken during planning. A result within ~40px of it is right; a result near 1779 or near 200 means something did not apply.
 
 If `the CTA reuses the shared button classes` fails on `border-radius`, `sections.css` did not load — check the `<link>` from Step 2 is present and ordered after `sections.css`, not before it.
+
+If the button renders with a **transparent background**, the variant was renamed again — see protocol rule 9. That is the exact symptom the rename produced, and it is silent: no console error, correct radius, invisible pill.
 
 If `section is under 700px tall` fails with a number near 1779, the builder's `--block-min-height` is still applying. It lived on the `.block-layout` div that Step 3 deleted, so this should not happen; if it does, add `#zZFMdo { min-height: 0; }` to `credentials.css` — that file is yours, `main.css` is not.
 
@@ -696,16 +708,28 @@ Name `index.html` explicitly. Do not use `-a`.
 The block is now correct at 1280px. This task proves it at phone width, where the two-column grid collapses.
 
 **Files:**
-- Modify: `assets/css/credentials.css` (only if a defect is found)
+- Modify: `tools/credentials-check.js` (the height bound — expected)
+- Modify: `assets/css/credentials.css` (only if a defect is found — not expected)
 
 - [ ] **Step 1: Check the single-column layout at 390px**
 
 Resize the browser to 390x844 and reload. Paste `tools/credentials-check.js` again.
 
-Expected: **12 passed, 0 failed** — the same as desktop. Two checks are genuinely width-sensitive and are the reason for re-running:
+Two checks are genuinely width-sensitive, and one of them is **expected to fail** here. Both numbers below were measured during planning by rendering this exact markup and CSS in a 390px viewport:
 
-- `no horizontal page overflow` — the most likely failure. The `168px` dt column is overridden at this width, but a long unbroken string could still push the grid wide.
-- `section is under 700px tall` — the block is taller in one column. If it exceeds 700px at 390px wide, that is acceptable and the *check* is what needs relaxing, not the design. Change that one check to `h < (window.innerWidth < 769 ? 1100 : 700)` and note it in your report. Do not silently widen the desktop bound.
+- `no horizontal page overflow` — should **pass**. Measured `scrollWidth` 390 against a 390px viewport, no overflow. This is the check most likely to catch a real defect, so treat a failure as genuine.
+- `section is under 700px tall` — should **fail**, reporting roughly **974px**. That is correct and expected: one column is taller than two. The *check* is what needs relaxing, not the design.
+
+So the honest expected result is **11 passed, 1 failed**, and then you fix the check. Change that one check's return line to:
+
+```javascript
+    var bound = window.innerWidth < 769 ? 1100 : 700;
+    return { ok: h < bound, detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound };
+```
+
+`1100` is the measured 974px plus headroom for longer text or a larger default font. **Do not widen the 700px desktop bound** — that one is the whole point of the work. After the edit, re-run at both widths and expect 12 passed, 0 failed at each.
+
+Commit that check change together with the Step 4 commit, naming it as a check fix rather than a design fix.
 
 - [ ] **Step 2: Read the block and confirm it reads in the right order**
 
@@ -723,12 +747,21 @@ If overflow was found, the fix goes in the `@media (max-width: 768px)` block alr
 
 - [ ] **Step 4: Commit**
 
-If Step 3 changed nothing, there is nothing to commit — say so and stop. Otherwise:
+The check-bound change from Step 1 is always expected, so there is always at least one commit here:
+
+```bash
+git add tools/credentials-check.js
+git commit -m "test(credentials): height bound is per-breakpoint, not global"
+```
+
+If Step 3 also changed the stylesheet, commit that separately so the two are reviewable apart:
 
 ```bash
 git add assets/css/credentials.css
 git commit -m "fix(credentials): <the specific defect, named>"
 ```
+
+If Step 3 changed nothing, say so plainly in your report rather than implying a fix was needed.
 
 ---
 
@@ -738,13 +771,15 @@ All four must hold before reporting this complete:
 
 1. `tools/credentials-check.js` reports 12 passed, 0 failed at both 1280x720 and 390x844.
 2. `git diff --numstat` for the `index.html` commit shows `1` added line. The removed count is expected to be 13, all of it SVG decoration.
-3. `git log --oneline` shows four commits from this work, and `git show --stat` on each confirms none of them contains a file outside the ownership list.
+3. `git log --oneline` shows four or five commits from this work — four if Task 4 Step 3 found no defect — and `git show --stat` on each confirms none contains a file outside the ownership list.
 4. `tools/home-check.js` output is recorded, with any failures attributed to this work or to another session.
 
 ## What this work does not verify
 
 State these plainly in the final report rather than implying full coverage:
 
-- **No screenshot evidence.** The browser preview pane in the authoring session renders a different surface than the one its scripts drive, so it could not capture this block. Verification is by check script and DOM measurement. If the executing session has a working preview, take a screenshot at 1280x720 and attach it — but do not claim a visual pass without one.
+- **No screenshot evidence.** The browser preview pane in the authoring session renders a different surface than the one its scripts drive — an injected fixed-position probe was invisible in captures while being fully present in the DOM — so it could not capture this block. If the executing session has a working preview, take a screenshot at 1280x720 and attach it; do not claim a visual pass without one.
+
+  What *was* measured, by rendering the exact markup and CSS from Tasks 2 and 3 in an offscreen 1280px container on the live page: height **591px**, no horizontal overflow, title in Hammersmith One at 40.96px, and the CTA computing to `background rgb(0, 42, 65)` with white text and a 999px radius. At a 390px viewport, one column, **974px**, `scrollWidth` 390, no overflow. So the layout numbers are evidence, not estimates — but nobody has *looked* at it.
 - **The colour relationship with the block above** depends on what the PROJECTS session lands. White was chosen precisely so this block is correct either way, but the seam between the two has not been looked at by a human.
 - **Copy has not been client-approved.** Every fact is a restatement of something already published on this site (see "Numbers" in the spec), so nothing new is asserted — but "6 countries" and "7 sectors" are now stated as figures rather than buried in prose, which is a change in emphasis worth flagging to the client.
