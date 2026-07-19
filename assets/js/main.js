@@ -24,6 +24,28 @@
     });
   });
 
+  /* ---------- YouTube video embeds ----------
+     The builder renders a thumbnail + play button; clicking swaps in the
+     iframe. The video id is recoverable from the i.ytimg.com poster URL. */
+  document.querySelectorAll('.video').forEach(function (video) {
+    var play = video.querySelector('.video__play');
+    var poster = video.querySelector('.video__placeholder');
+    if (!play || !poster) return;
+    var m = /\/vi\/([A-Za-z0-9_-]{6,})\//.exec(poster.src || '');
+    if (!m) return;
+
+    play.addEventListener('click', function () {
+      var iframe = document.createElement('iframe');
+      iframe.className = 'video__frame';
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + m[1] + '?autoplay=1&rel=0';
+      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.style.border = '0';
+      video.appendChild(iframe);
+      play.style.display = 'none';
+    });
+  });
+
   /* ---------- Appear-on-scroll animations ----------
      The builder hides .transition elements (opacity 0 / translated) until it
      sets data-animation-state="active" when they enter the viewport. */

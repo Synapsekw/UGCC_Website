@@ -7,7 +7,7 @@ so it can be hosted on any regular web hosting (Hostinger shared hosting, etc.).
 ## Deploying to Hostinger
 
 Upload **everything in this folder** (including the hidden `.htaccess`) into `public_html/`.
-No build step, no database, no PHP required. Total size is ~243 MB (mostly images).
+No build step, no database, no PHP required. Total size is ~758 MB (mostly images).
 
 Tip: zip the folder, upload the zip via Hostinger File Manager, and extract it there —
 much faster than uploading 1,000+ files individually.
@@ -15,7 +15,7 @@ much faster than uploading 1,000+ files individually.
 ## Structure
 
 - `index.html` — home page
-- `<page-slug>/index.html` — the other 13 pages (clean URLs, e.g. `/contact-us/`)
+- `<page-slug>/index.html` — the other 63 pages (incl. project detail and listing pages) (clean URLs, e.g. `/contact-us/`)
 - `assets/css/main.css` — the original builder stylesheet (localized)
 - `assets/css/fonts.css` + `assets/fonts/` — self-hosted Google Fonts (Hammersmith One, Open Sans, Carlito, Poppins)
 - `assets/css/custom.css`, `assets/js/main.js` — small replacement for the builder's JavaScript:

@@ -1,0 +1,119 @@
+- generic [active] [ref=e1]:
+  - main [ref=e4]:
+    - generic [ref=e8]:
+      - link [ref=e9] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e10]:
+        - list [ref=e11]:
+          - listitem [ref=e12]:
+            - link "Home" [ref=e15] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e16]:
+            - link "About" [ref=e19] [cursor=pointer]:
+              - /url: /about-contractor-kuwait
+          - listitem [ref=e20]:
+            - link "Business Lines" [ref=e23] [cursor=pointer]:
+              - /url: /business-lines-construction-services-kuwait
+          - listitem [ref=e24]:
+            - link "Facilities Overview" [ref=e27] [cursor=pointer]:
+              - /url: /facilities-overview-construction-equipment-kuwait
+          - listitem [ref=e28]:
+            - link "Projects" [ref=e31] [cursor=pointer]:
+              - /url: /construction-projects-kuwait
+          - listitem [ref=e32]:
+            - link "Contact Us" [ref=e35] [cursor=pointer]:
+              - /url: /contact-us
+    - generic [ref=e36]:
+      - generic [ref=e38]:
+        - heading "Construction, Completion, and Maintenance of 6.5 Ring Road" [level=1] [ref=e41]
+        - heading [level=2] [ref=e44]:
+          - strong [ref=e46]: RA-223
+      - generic [ref=e49]:
+        - generic [ref=e51]:
+          - heading "Project Scope" [level=3] [ref=e52]
+          - paragraph [ref=e53]: The scope of work for the 6.5 Ring Road RA/223 project includes full design-build construction and finishing of the roadway, interchanges and supporting structures along the ring road. It covers earthworks, pavement layers, drainage systems, utility conduits, manholes, lighting, signage, and service access roads. Maintenance works are included to ensure long-term operational performance and durability of the constructed assets.
+        - generic [ref=e55]:
+          - heading "Project Owner" [level=6] [ref=e56]
+          - paragraph [ref=e57]: Ministry of Public Works (MPW) / Public Authority for Roads & Transportation (PART)
+        - generic [ref=e59]:
+          - heading "Consultant" [level=6] [ref=e60]
+          - paragraph [ref=e61]: Dar Al-Handasah – SSH
+        - generic [ref=e63]:
+          - heading "Contractor" [level=6] [ref=e64]
+          - paragraph [ref=e65]: Metallurgical Corporation of China Ltd. (MCC). United Gulf Construction Co. W.L.L.
+        - generic [ref=e67]:
+          - heading "Project Schedule" [level=6] [ref=e68]
+          - paragraph [ref=e69]: Year of Commencement 2016Year of Completion 2023
+        - heading "Project Value" [level=5] [ref=e72]
+        - paragraph [ref=e75]: 316,000,000 USD (97,000,000 KWD)
+        - heading "Roads and Bridges" [level=6] [ref=e78]
+        - heading "Civil Infrastructure" [level=6] [ref=e81]
+        - heading "Electro Mechanical" [level=6] [ref=e84]
+        - generic [ref=e86]:
+          - heading "Sub Contractor" [level=6] [ref=e87]
+          - paragraph [ref=e88]: United Gulf Construction Co. W.L.L.
+      - generic [ref=e109]:
+        - heading "Project Details" [level=3] [ref=e112]
+        - generic [ref=e114]:
+          - paragraph [ref=e115]: The RA/223 Project’s scope includes, civil works, road works, water / wastewater systems, and electrical works
+          - paragraph [ref=e116]:
+            - strong [ref=e118]: Expressways
+          - paragraph [ref=e119]: Construction of dual (3-lanes and 4-Ianes) expressways including parallel collector distributor roads 2 lanes
+          - paragraph [ref=e120]:
+            - strong [ref=e122]: Overpasses
+          - paragraph [ref=e123]: Construction of seven overpasses, in addition to widening for existing bridges.
+          - paragraph [ref=e124]:
+            - strong [ref=e126]: Underpasses
+          - paragraph [ref=e127]: Construction of two underpasses
+          - paragraph [ref=e128]:
+            - strong [ref=e130]: Culverts
+          - paragraph [ref=e131]: Construction of Culvert for KOC pipelines protection
+          - paragraph [ref=e132]:
+            - strong [ref=e134]: Drainage System
+          - paragraph [ref=e135]: Construction of a storm water drainage network, including pump stations, culverts, pipes, manholes and gullies
+          - paragraph [ref=e136]:
+            - strong [ref=e138]: Electrical Works
+          - list [ref=e139]:
+            - listitem [ref=e140]:
+              - paragraph [ref=e141]: Realignment of 132 KV Overhead Cables which cross the 6.5 ring road project between Sulaibiya “AW” S/Stn and W. Jaleeb “AW” S/Stn as per MEW requirements
+            - listitem [ref=e142]:
+              - paragraph [ref=e143]: Electricity network of 11 KV
+            - listitem [ref=e144]:
+              - paragraph [ref=e145]: Street lighting, Telecommunication, Traffic signs and signals
+      - generic [ref=e148]:
+        - heading "Similar Projects" [level=3] [ref=e151]
+        - link [ref=e154] [cursor=pointer]:
+          - /url: /ra245
+        - paragraph [ref=e157]: Construction, Upgrading and Maintenance of Roads and Interchanges for Access to the Future Mutla’ City
+        - link [ref=e160] [cursor=pointer]:
+          - /url: /hst7
+        - paragraph [ref=e163]: General Maintenance of 6th and 7th Ring Road, Kuwait
+        - link [ref=e166] [cursor=pointer]:
+          - /url: /ra200
+        - paragraph [ref=e169]: Cairo Street Development Project
+        - link [ref=e172] [cursor=pointer]:
+          - /url: /koc36081
+        - paragraph [ref=e175]: New Effluent Water Transfer Pipelines and Tankage Upgradation at West Kuwait
+      - heading "Project Owners" [level=5] [ref=e181]
+      - generic [ref=e190]:
+        - paragraph [ref=e193]: Headquarters United Gulf Construction Company Al-Ardiya, Block 1, Plot 264Kuwait
+        - paragraph [ref=e196]:
+          - generic [ref=e197]: +965 220 542 50ugcc@ugcc.com
+        - generic [ref=e202]:
+          - link "Go to Facebook page" [ref=e203] [cursor=pointer]:
+            - /url: https://www.facebook.com/UGCCWLL/
+          - link "Go to Instagram page" [ref=e206] [cursor=pointer]:
+            - /url: https://www.instagram.com/UGCCkw/
+          - link "Go to Linkedin-in page" [ref=e209] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/united-gulf-construction-co./
+  - generic [ref=e212]:
+    - generic [ref=e213] [cursor=pointer]:
+      - img "Chat"
+    - generic:
+      - generic:
+        - generic: UGCC Support
+        - button "×"
+      - generic: Welcome to UGCC. How can we assist you?
+      - generic:
+        - textbox "Type a message..."
+        - button
