@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validate, MAX_LEN, rateLimited, extractText } from "./chat.mjs";
+import { validate, MAX_LEN, rateLimited, extractText } from "../netlify/functions/chat.mjs";
 
 describe("rateLimited", () => {
   it("trips after RATE_MAX requests in the window", () => {
