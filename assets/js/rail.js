@@ -1,88 +1,96 @@
-/* UGCC homepage gallery rail — scroll-linked advance.
+/* UGCC homepage gallery rail — autoplay control and handover.
    ES5, no dependencies, no build step.
 
-   The rail is a plain overflow-x:auto region and is fully usable without this
-   file. All this does is map the section's progress across the viewport onto
-   the rail's scrollLeft, so a visitor scrolling the page normally is walked
-   through all fifteen photographs.
+   The drift itself is a CSS keyframe (see rail.css) so it runs on the
+   compositor. Nothing here animates anything; this file only does the two
+   things CSS cannot:
 
-   Driving scrollLeft rather than a transform is deliberate: page-driven motion
-   and user dragging then act on the same value and compose, instead of
-   fighting each other.
+     1. The pause/resume toggle. WCAG 2.2.2 requires a pause mechanism for
+        content that moves automatically for more than five seconds, available
+        to every user. Hover and focus pausing do not satisfy it — a touch user
+        has no hover. This control is the reason the autoplay is shippable.
 
-   WCAG 2.2.2 does not apply here — nothing moves unless the user scrolls. */
+     2. Handover. The moment the visitor grabs the rail, the drift freezes at
+        exactly where it had reached and the rail becomes an ordinary scrollable
+        region for the rest of the visit. That conversion is the whole trick:
+        the animation positions the track with a transform, native scrolling
+        positions it with scrollLeft, and the two cannot both be in charge. So
+        we read the transform off, clear it, and write the equivalent
+        scrollLeft — visually identical, mechanically completely different.
+
+   The rail is fully usable with this file deleted: it still drifts, still
+   pauses on hover, and is still overflow-x: auto so it can be dragged. What is
+   lost without it is the touch-accessible pause and the clean handover. */
 (function () {
   'use strict';
 
-  /* Fraction of the rail's full scrollable width traversed across one viewport
-     transit of the section.
+  /* Horizontal offset currently applied to the track by the drift animation.
+     getComputedStyle resolves the running animation to a matrix, so this reads
+     the live position mid-flight rather than the keyframe's endpoint.
 
-     At 1.0 all fifteen cards pass in ~1.5 screenfuls of page scroll — 8 to 10
-     cards per screenful, fast enough that no individual photograph registers.
-     0.75 walks the visitor past twelve of the fifteen at a legible
-     pace; the remainder are one drag away, which costs nothing because the rail
-     is a real scrollable region.
-
-     Coverage vs legibility. Lower is calmer and shows fewer. */
-  var TRAVEL_RATIO = 0.75;
+     matrix(a, b, c, d, tx, ty)                    -> tx is index 4
+     matrix3d(m11 ... m41, m42, m43, m44)          -> tx is index 12 */
+  function currentTranslateX(el) {
+    var t = window.getComputedStyle(el).transform;
+    if (!t || t === 'none') return 0;
+    var open = t.indexOf('(');
+    var parts = t.slice(open + 1, t.lastIndexOf(')')).split(',');
+    var idx = t.slice(0, open) === 'matrix3d' ? 12 : 4;
+    return parseFloat(parts[idx]) || 0;
+  }
 
   function init() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
     var rails = document.querySelectorAll('.v2-rail');
+
     Array.prototype.forEach.call(rails, function (rail) {
       var vp = rail.querySelector('.v2-rail__viewport');
-      if (!vp) return;
+      var track = rail.querySelector('.v2-rail__track');
+      var btn = rail.querySelector('.v2-rail__toggle');
+      if (!vp || !track) return;
 
-      /* Published on the element so tools/rail-check.js asserts against this
-         value rather than duplicating it. One source of truth. */
-      rail.setAttribute('data-travel-ratio', String(TRAVEL_RATIO));
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      var taken = false;    /* the user has taken hold; stop driving, for good */
-      var ticking = false;
+      /* Nothing is drifting under reduced motion, so there is nothing to pause
+         and nothing to hand over. The rail is already a scrollable region. */
+      if (reduced) return;
 
-      function release() {
-        taken = true;
-        rail.setAttribute('data-user-scrolled', 'true');
+      var manual = false;
+
+      function handOver() {
+        if (manual) return;
+        manual = true;
+
+        var dx = currentTranslateX(track);   /* negative: the track has moved left */
+
+        /* Order matters. Set the attribute first so the stylesheet drops the
+           animation, then clear the inline transform, then adopt the equivalent
+           scroll position. Doing it the other way round lets one frame render
+           with neither transform nor scrollLeft applied — a visible jump back
+           to the first card. */
+        rail.setAttribute('data-manual', 'true');
+        track.style.transform = 'none';
+        vp.scrollLeft = -dx;
       }
 
-      vp.addEventListener('pointerdown', release);
-      vp.addEventListener('touchstart', release, { passive: true });
-      vp.addEventListener('focusin', release);
+      vp.addEventListener('pointerdown', handOver);
+      vp.addEventListener('touchstart', handOver, { passive: true });
+      vp.addEventListener('focusin', handOver);
       vp.addEventListener('wheel', function (e) {
-        /* Only a deliberate horizontal gesture counts. A normal vertical
-           wheel over the rail is the visitor scrolling the page, not
-           grabbing the rail. */
-        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) release();
+        /* Only a deliberate horizontal gesture counts. A vertical wheel over
+           the rail is the visitor scrolling the page, not grabbing the rail. */
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) handOver();
       }, { passive: true });
 
-      function apply() {
-        ticking = false;
-        if (taken) return;
+      if (!btn) return;
 
-        var r = rail.getBoundingClientRect();
-        var span = window.innerHeight + r.height;
-        if (span <= 0) return;
-
-        var max = vp.scrollWidth - vp.clientWidth;
-        if (max <= 0) return;      /* everything already fits; nothing to drive */
-
-        var p = (window.innerHeight - r.top) / span;
-        if (p < 0) p = 0;
-        if (p > 1) p = 1;
-
-        vp.scrollLeft = p * max * TRAVEL_RATIO;
-      }
-
-      function onScroll() {
-        if (ticking) return;
-        ticking = true;
-        window.requestAnimationFrame(apply);
-      }
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll);
-      apply();
+      btn.addEventListener('click', function () {
+        var paused = rail.getAttribute('data-paused') === 'true';
+        var next = !paused;
+        rail.setAttribute('data-paused', next ? 'true' : 'false');
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        btn.setAttribute('aria-label',
+          next ? 'Resume the moving gallery' : 'Pause the moving gallery');
+      });
     });
   }
 

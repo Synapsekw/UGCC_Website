@@ -3,9 +3,10 @@
    Replaces the builder slideshow. Loaded by index.html only.
    Tokens (--v2-navy, --v2-red, --v2-red-text, --v2-ease-out-quart) come from v2.css.
 
-   The rail is a natively scrollable region at all times. assets/js/rail.js
-   drives its scrollLeft from the page scroll position; the CSS makes no
-   assumption that the JS is present, so the rail is fully usable without it.
+   The drift is a pure-CSS compositor animation and needs no JavaScript.
+   assets/js/rail.js adds only the pause toggle and the handover to native
+   scrolling, so the rail still drifts, still pauses on hover and is still
+   scrollable with that file removed.
    ========================================================================== */
 
 .v2-rail-block {
@@ -47,40 +48,66 @@
 }
 
 /* ---------- track ----------
-   overflow-x is auto in BOTH media states: it is the reduced-motion fallback
-   and the manual drag affordance at the same time. Do not set
-   scroll-behavior: smooth here — it fights the per-frame scrollLeft writes. */
+   overflow-x is auto in EVERY state — while drifting, after handover, and under
+   reduced motion. It is the reduced-motion fallback and the manual drag
+   affordance at once, and keeping it always-on is what lets a drag begin
+   naturally from wherever the drift had reached.
+
+   Do not set scroll-behavior: smooth here. */
 
 .v2-rail__viewport {
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x proximity;
   /* Keep a horizontal swipe that overshoots the rail's end inside the rail.
      Without this, iOS Safari hands the overscroll to its back-navigation
      gesture and the visitor leaves the page by swiping a photo. */
   overscroll-behavior-x: contain;
-  /* Must match .v2-rail__track's inline padding. Without it the first card's
-     snap position is 24px in, so the rail rests at scrollLeft 24 instead of 0
-     and can never return to a true start. */
+  /* The lead-in inset lives here rather than on the track, so it aligns the
+     cards with the heading above without contributing to the track's width —
+     which the -50% loop depends on. scroll-padding matches it so the
+     reduced-motion snap targets the card edge rather than the viewport edge. */
+  padding-left: 24px;
   scroll-padding-left: 24px;
   scrollbar-width: none;          /* the rail is its own affordance */
 }
 
+/* No scroll-snap after handover, deliberately.
+   Snap was tried here and broke the thing handover exists to guarantee: setting
+   data-manual activates snap in the same tick as rail.js writes the equivalent
+   scrollLeft, so the browser quantizes that write to the nearest card boundary.
+   The drift is almost never on a boundary, so the rail visibly jumped — up to a
+   full card period, and all the way back to the first card whenever the drift
+   was less than half a card in. Measured at 173px on a 1280 viewport.
+   Free scrolling after handover costs nothing; a jump at the moment the visitor
+   touches the rail is exactly the judder this design is meant to remove. */
+
 .v2-rail__viewport::-webkit-scrollbar { display: none; }
 
+/* The track carries NO horizontal padding and NO flex gap, and every item owns
+   its own trailing margin instead. That is what makes translateX(-50%) land on
+   exactly one repeat period.
+
+   With `gap` and `padding: 0 24px` the track's border box was 10956px while the
+   true period was 15 x (352 + 12) = 5460px — 29 gaps between 30 items, plus 48px
+   of end padding. Half of 10956 is 5478, so the loop jumped 18px every cycle.
+   With a trailing margin each item occupies exactly card + gap, 30 of them span
+   exactly two periods, and -50% is exact at every breakpoint with no per-
+   breakpoint constant to keep in sync.
+
+   The lead-in inset lives on the viewport (padding-left) where it shifts the
+   content without contributing to the track's width. */
 .v2-rail__track {
   display: flex;
-  gap: 12px;
   width: max-content;
   margin: 0;
-  padding: 0 24px;
+  padding: 0;
   list-style: none;
 }
 
 .v2-rail__item {
   flex: none;
   width: 352px;
-  scroll-snap-align: start;
+  margin-right: 12px;
 }
 
 .v2-rail__card {
@@ -134,6 +161,85 @@
   background: var(--v2-red);
 }
 
+/* ---------- pause toggle ---------- */
+
+.v2-rail__toggle {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, border-color .2s, opacity .2s;
+}
+
+.v2-rail__toggle:hover {
+  background: var(--v2-red);
+  border-color: var(--v2-red);
+}
+
+.v2-rail__icon { width: 16px; height: 16px; }
+.v2-rail__icon--play { display: none; }
+
+.v2-rail[data-paused="true"] .v2-rail__icon--pause { display: none; }
+.v2-rail[data-paused="true"] .v2-rail__icon--play  { display: block; }
+
+/* Once the visitor has taken the rail over there is no longer any autoplay to
+   pause, so the control stops being meaningful. Hidden from assistive tech too,
+   not merely faded — a button that no longer does anything should not be
+   reachable. Same reasoning under reduced motion, where drift never starts. */
+.v2-rail[data-manual="true"] .v2-rail__toggle { display: none; }
+
+/* ---------- drift ----------
+   A compositor-driven transform, not per-frame JavaScript: this is the smoothest
+   motion available and smoothness is the whole point of the autoplay.
+
+   The track holds two identical sets of 15, so translating by exactly -50%
+   advances by one full set and the loop has no visible seam. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .v2-rail__track {
+    animation: v2-rail-drift 70s linear infinite;
+    will-change: transform;
+  }
+
+  .v2-rail__viewport:hover .v2-rail__track,
+  .v2-rail__viewport:focus-within .v2-rail__track,
+  .v2-rail[data-paused="true"] .v2-rail__track {
+    animation-play-state: paused;
+  }
+
+  /* After handover the track is positioned by scrollLeft, not by transform.
+     rail.js clears the inline transform; this stops the animation from
+     reasserting one. */
+  .v2-rail[data-manual="true"] .v2-rail__track {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+@keyframes v2-rail-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Under reduced motion nothing drifts and nothing needs pausing. The rail is
+   already overflow-x: auto, so it is simply a scrollable region — every card
+   reachable by drag, swipe, trackpad and keyboard. */
+@media (prefers-reduced-motion: reduce) {
+  .v2-rail__viewport {
+    scroll-snap-type: x proximity;
+  }
+  .v2-rail__item { scroll-snap-align: start; }
+  .v2-rail__toggle { display: none; }
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 1024px) {
@@ -148,6 +254,5 @@
   .v2-rail__card { height: 172px; }
   .v2-rail__title { font-size: 22px; }
   .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
-  .v2-rail__track { padding: 0 16px; }
-  .v2-rail__viewport { scroll-padding-left: 16px; }
+  .v2-rail__viewport { padding-left: 16px; scroll-padding-left: 16px; }
 }

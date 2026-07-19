@@ -4,16 +4,21 @@
 
    Resize to 1280x720 before running the height check.
 
-   ORDERING MATTERS. The synchronous checks run first. Then the link fetches.
-   Then the scroll-driving check, which needs the rail untouched. Then the
-   user-override check, which permanently disables scroll-driving for the
-   page — anything after it would measure a rail that has stopped listening.
+   ORDERING MATTERS. The synchronous checks run first, then the link fetches,
+   then the drift and pause checks, which need a rail that is still drifting.
+   The handover check is LAST because handover is one-way for the life of the
+   page — anything after it would measure a rail that has permanently stopped.
    Reload before re-running.
 
+   Several checks sample the track's live transform over a few hundred
+   milliseconds rather than reading a CSS declaration, so a run takes a couple
+   of seconds. That is deliberate: "an animation is declared" and "the thing is
+   actually moving" are different claims, and only the second one matters.
+
    NOT covered (manual verification required):
-     - whether the scroll-to-travel ratio feels right
+     - whether the drift speed feels right
      - caption legibility over each individual photograph
-     - touch drag behaviour on a real device */
+     - touch drag and handover on a real device */
 (function () {
   'use strict';
 
@@ -43,8 +48,14 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var branch = reduced ? 'reduce' : 'no-preference';
 
-  function cards() {
+  function allCards() {
     return Array.prototype.slice.call(document.querySelectorAll('.v2-rail__item'));
+  }
+  /* The 15 real ones. The duplicate set is loop padding, not content. */
+  function cards() {
+    return allCards().filter(function (li) {
+      return li.getAttribute('aria-hidden') !== 'true';
+    });
   }
   function viewport() { return document.querySelector('.v2-rail__viewport'); }
 
@@ -61,13 +72,27 @@
     return { ok: n === 0, detail: n + ' legacy slideshow nodes remain' };
   });
 
-  check('track holds exactly 15 items and no aria-hidden', function () {
-    var all = cards().length;
-    var hidden = document.querySelectorAll('.v2-rail [aria-hidden]').length;
+  /* The seamless -50% loop needs the 15 projects emitted twice. The duplicate
+     set must be invisible to assistive tech and unreachable by tabbing, or the
+     page announces fifteen projects as thirty. */
+  check('track holds 30 items, 15 of them hidden duplicates', function () {
+    var all = allCards().length;
+    var hidden = allCards().filter(function (li) {
+      return li.getAttribute('aria-hidden') === 'true';
+    }).length;
     return {
-      ok: all === 15 && hidden === 0,
-      detail: all + ' items, ' + hidden + ' aria-hidden nodes (want 15 / 0)'
+      ok: all === 30 && hidden === 15,
+      detail: all + ' items, ' + hidden + ' aria-hidden (want 30 / 15)'
     };
+  });
+
+  check('duplicate set is not keyboard reachable', function () {
+    var bad = allCards().filter(function (li) {
+      if (li.getAttribute('aria-hidden') !== 'true') return false;
+      var a = li.querySelector('a');
+      return !a || a.getAttribute('tabindex') !== '-1';
+    }).length;
+    return { ok: bad === 0, detail: bad + ' hidden cards lack tabindex="-1"' };
   });
 
   check('every card has alt text, intrinsic size and lazy loading', function () {
@@ -99,8 +124,8 @@
   });
 
   /* The rail must be a real scrollable region in BOTH media states: under
-     reduce it is the entire fallback, and under no-preference it is the
-     manual affordance. A transform-based rail would fail this. */
+     reduce it is the entire fallback, and under no-preference it is what
+     handover converts into. */
   check('viewport is genuinely horizontally scrollable', function () {
     var vp = viewport();
     if (!vp) return { ok: false, detail: 'rail not implemented' };
@@ -110,6 +135,37 @@
       ok: ovx === 'auto' && scrollable,
       detail: '[' + branch + '] overflow-x=' + ovx +
               '; scrollWidth=' + vp.scrollWidth + ' clientWidth=' + vp.clientWidth
+    };
+  });
+
+  check('drift matches the motion preference', function () {
+    var track = document.querySelector('.v2-rail__track');
+    if (!track) return { ok: false, detail: 'rail not implemented' };
+    var name = getComputedStyle(track).animationName;
+    if (reduced) {
+      return { ok: name === 'none', detail: '[reduce] animation-name=' + name };
+    }
+    return {
+      ok: name === 'v2-rail-drift',
+      detail: '[no-preference] animation-name=' + name
+    };
+  });
+
+  check('pause control is present exactly when it is meaningful', function () {
+    var btn = document.querySelector('.v2-rail__toggle');
+    if (reduced) {
+      /* Nothing drifts, so a pause button would be a control for nothing. */
+      var gone = !btn || getComputedStyle(btn).display === 'none';
+      return { ok: gone, detail: '[reduce] toggle hidden=' + gone };
+    }
+    if (!btn) return { ok: false, detail: 'no .v2-rail__toggle — WCAG 2.2.2 needs one' };
+    var shown = getComputedStyle(btn).display !== 'none';
+    var labelled = !!btn.getAttribute('aria-label');
+    var pressable = btn.getAttribute('aria-pressed') !== null;
+    return {
+      ok: shown && labelled && pressable,
+      detail: '[no-preference] visible=' + shown + ' aria-label=' + labelled +
+              ' aria-pressed=' + pressable
     };
   });
 
@@ -129,18 +185,6 @@
 
   /* ---------- async section ---------- */
 
-  function frames() {
-    /* Two frames: one for the driver's rAF to fire, one for it to land. */
-    return new Promise(function (res) {
-      requestAnimationFrame(function () { requestAnimationFrame(res); });
-    });
-  }
-  function scrollPageTo(y) {
-    document.documentElement.style.scrollBehavior = 'auto';
-    window.scrollTo(0, y);
-    return frames();
-  }
-
   var hrefs = cards().map(function (li) {
     var a = li.querySelector('a');
     return a ? a.getAttribute('href') : null;
@@ -158,95 +202,117 @@
       dead.length ? 'dead: ' + dead.join(', ') : linkResults.length + '/' + linkResults.length + ' ok');
 
     var vp = viewport();
-    var sec = document.getElementById(SECTION);
-    if (!vp || !sec) {
-      record('page scroll drives the rail', false, 'rail not implemented');
-      record('user interaction takes the rail over', false, 'rail not implemented');
+    var rail = document.querySelector('.v2-rail');
+    var track = document.querySelector('.v2-rail__track');
+    if (!vp || !rail || !track) {
+      record('the rail actually drifts', false, 'rail not implemented');
+      record('pause toggle stops the drift', false, 'rail not implemented');
+      record('interaction hands over to native scrolling', false, 'rail not implemented');
       return;
     }
 
-    var startY = window.scrollY;
-    var secTop = sec.getBoundingClientRect().top + window.scrollY;
-    var before = Math.max(0, secTop - window.innerHeight - 50);
-    var after = secTop + sec.offsetHeight + 50;
-    var max = vp.scrollWidth - vp.clientWidth;
+    function translateX() {
+      var t = getComputedStyle(track).transform;
+      if (!t || t === 'none') return 0;
+      var open = t.indexOf('(');
+      var parts = t.slice(open + 1, t.lastIndexOf(')')).split(',');
+      return parseFloat(parts[t.slice(0, open) === 'matrix3d' ? 12 : 4]) || 0;
+    }
+    function wait(ms) {
+      return new Promise(function (res) { setTimeout(res, ms); });
+    }
+    /* Two animation frames: one for the style change to be committed, one for
+       it to take effect. */
+    function frames() {
+      return new Promise(function (res) {
+        requestAnimationFrame(function () { requestAnimationFrame(res); });
+      });
+    }
 
-    /* The driver traverses only a fraction of the rail per viewport transit, and
-       publishes that fraction on .v2-rail so this check asserts the real target
-       instead of duplicating the constant. Absent (reduced motion, or no JS at
-       all) it defaults to 1 — which is also the correct expectation for the
-       no-JS case, where nothing should move at all. */
-    var rail = document.querySelector('.v2-rail');
-    var ratio = parseFloat((rail && rail.getAttribute('data-travel-ratio')) || '1');
-    var want = max * ratio;
+    /* Sample the live transform twice. Reading the computed style resolves a
+       running animation to its current matrix, so a genuinely moving track
+       reports two different offsets. This is the difference between asserting
+       "an animation is declared" and "the thing is actually moving" — the
+       former passes on a track whose animation is paused, zero-duration, or
+       overridden by something later in the cascade. */
+    var t0 = translateX();
+    return wait(400).then(function () {
+      var t1 = translateX();
+      var moved = Math.abs(t1 - t0);
+      if (reduced) {
+        record('the rail actually drifts',
+          moved < 1,
+          '[reduce] translateX ' + Math.round(t0) + ' -> ' + Math.round(t1) +
+            ' (want no movement)');
+      } else {
+        record('the rail actually drifts',
+          moved > 1 && t1 < t0,
+          '[no-preference] translateX ' + Math.round(t0) + ' -> ' + Math.round(t1) +
+            ' over 400ms (want leftward movement)');
+      }
+    }).then(function () {
+      var btn = document.querySelector('.v2-rail__toggle');
+      if (reduced) {
+        record('pause toggle stops the drift', true,
+          '[reduce] not applicable — nothing drifts');
+        return;
+      }
+      if (!btn) {
+        record('pause toggle stops the drift', false, 'no toggle');
+        return;
+      }
+      btn.click();
+      var pressed = btn.getAttribute('aria-pressed');
+      /* Sample only AFTER the pause has actually landed. Reading synchronously
+         after the click catches the one frame of drift already committed —
+         about 1.3px at desktop rates — which is in-flight motion, not a failure
+         to pause. Two frames is the difference between measuring the product
+         and measuring our own timing. */
+      return frames().then(function () {
+      var paused0 = translateX();
+      return wait(400).then(function () {
+        var paused1 = translateX();
+        var state = getComputedStyle(track).animationPlayState;
+        btn.click();   /* restore, so the handover check below sees a live rail */
+        record('pause toggle stops the drift',
+          pressed === 'true' && state === 'paused' && Math.abs(paused1 - paused0) < 0.5,
+          'aria-pressed=' + pressed + ' play-state=' + state +
+            '; translateX moved ' + (Math.abs(paused1 - paused0)).toFixed(2) +
+            'px over 400ms while paused (want 0)');
+      });
+      });
+    }).then(function () {
+      /* MUST BE LAST: handover is one-way for the life of the page. */
+      if (reduced) {
+        record('interaction hands over to native scrolling', true,
+          '[reduce] not applicable — nothing to hand over');
+        return;
+      }
+      return wait(300).then(function () {
+        /* Measure what the VISITOR sees. Comparing scrollLeft to -translateX
+           only checks that two numbers we chose agree; a card's on-screen
+           position is the actual claim — that nothing moves at the moment of
+           handover. An earlier version of this check compared the numbers and
+           passed or failed depending on where the drift happened to be. */
+        var probe = allCards()[4];
+        var beforeRect = probe.getBoundingClientRect().left;
+        var beforeX = translateX();
 
-    /* scroll-snap quantizes where the rail comes to REST, so the settled
-       scrollLeft is the nearest card boundary to what the driver wrote — off by
-       up to half a card pitch, in either direction, essentially arbitrarily.
-       Asserting an exact target here is not achievable, and making the driver
-       write snap-aligned values instead would make the motion visibly stepped.
-
-       Half a pitch is the theoretical bound on that error, and measurement lands
-       right at it: -153px against a half-pitch of 156 at 768x1024, leaving 6px of
-       margin. That is not a pass worth trusting. 0.6 of a pitch buys real
-       headroom and still discriminates — at 768x1024 it accepts [2774, 3148],
-       which excludes both a rail that never moved (0) and one that ran to its
-       maximum (3948), the two failures that actually matter. */
-    var itemEls = document.querySelectorAll('.v2-rail__item');
-    var pitch = itemEls.length > 1 ? (itemEls[1].offsetLeft - itemEls[0].offsetLeft) : 0;
-    var tol = Math.max(3, pitch * 0.6 + 3);
-
-    /* Where the rail actually came to rest, for the override check below to
-       compare against. That check is about whether the rail HELD, not about
-       where it was — comparing it to `want` would make it inherit the snap
-       error and fail for an unrelated reason. */
-    var settled = null;
-
-    return scrollPageTo(before)
-      .then(function () {
-        var atStart = vp.scrollLeft;
-        return scrollPageTo(after).then(function () {
-          var atEnd = vp.scrollLeft;
-          if (reduced) {
-            /* Under reduce the driver must not attach at all. */
-            record('page scroll drives the rail',
-              atStart === 0 && atEnd === 0,
-              '[reduce] scrollLeft stayed ' + atStart + ' -> ' + atEnd + ' (want 0 -> 0)');
-          } else {
-            /* Both bounds matter. A lower bound alone would pass a rail that
-               overshot to max, silently losing the tuning; an upper bound alone
-               would pass a rail that never moved. */
-            settled = atEnd;
-            record('page scroll drives the rail',
-              atStart <= 2 && Math.abs(atEnd - want) <= tol && want > 0,
-              '[no-preference] scrollLeft ' + Math.round(atStart) + ' -> ' +
-                Math.round(atEnd) + ' (want ' + Math.round(want) + ' +/- ' +
-                Math.round(tol) + ', ratio ' + ratio + ' of ' + max + ')');
-          }
-        });
-      })
-      .then(function () {
-        /* MUST BE LAST: this permanently disables scroll-driving. */
-        if (reduced) {
-          record('user interaction takes the rail over', true,
-            '[reduce] not applicable — driver never attached');
-          return;
-        }
         vp.dispatchEvent(new Event('pointerdown', { bubbles: true }));
-        return scrollPageTo(before).then(function () {
-          var held = vp.scrollLeft;
-          /* `settled > 0` is not redundant. Comparing held to settled alone is
-             satisfied vacuously by a rail parked at 0 that never moved and never
-             could — 0 holds at 0. Requiring it to have travelled somewhere first
-             makes this a statement about yielding rather than about stillness. */
-          record('user interaction takes the rail over',
-            settled !== null && settled > 0 && Math.abs(held - settled) <= 3,
-            'after pointerdown, scrollLeft held at ' + Math.round(held) +
-              ' (want ~' + Math.round(settled) + ', where it already was — ' +
-              'i.e. page scroll ignored)');
+
+        return frames().then(function () {
+          var isManual = rail.getAttribute('data-manual') === 'true';
+          var anim = getComputedStyle(track).animationName;
+          var shift = Math.abs(probe.getBoundingClientRect().left - beforeRect);
+          record('interaction hands over to native scrolling',
+            isManual && anim === 'none' && beforeX < -1 && shift <= 2,
+            'data-manual=' + isManual + ' animation=' + anim +
+              '; card moved ' + shift.toFixed(2) + 'px across handover ' +
+              '(want 0; translateX was ' + Math.round(beforeX) +
+              ', scrollLeft now ' + Math.round(vp.scrollLeft) + ')');
         });
-      })
-      .then(function () { return scrollPageTo(startY); });
+      });
+    });
   }).then(function () {
     var passed = results.filter(function (r) { return r.ok; }).length;
     var failed = results.length - passed;
