@@ -1,0 +1,250 @@
+/* ==========================================================================
+   UGCC — homepage PROJECTS block (#zd_fdi)
+   Replaces the builder's 46-row grid and 8-image square gallery.
+   Loaded by index.html only.
+
+   Tokens (--v2-navy, --v2-red, --v2-red-text, --v2-ease-out-quart) come from
+   v2.css. Container metrics and breakpoints deliberately match rail.css so the
+   two adjacent navy blocks reflow at the same widths.
+
+   No JavaScript: this block is markup and CSS only.
+   ========================================================================== */
+
+.v2-proj-block {
+  padding: 48px 0 56px;
+}
+
+.v2-proj {
+  max-width: 1224px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- head ----------
+   Grid areas rather than a wrapper div, so the markup stays flat: the eyebrow
+   spans both columns, the title and intro stack in column 1, and the exit link
+   sits bottom-right against them. */
+.v2-proj__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "eyebrow eyebrow"
+    "title   all"
+    "intro   all";
+  align-items: end;
+  column-gap: 32px;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, .16);
+}
+
+.v2-proj__eyebrow {
+  grid-area: eyebrow;
+  margin: 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--v2-red-text);
+}
+
+.v2-proj__title {
+  grid-area: title;
+  margin: 6px 0 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: #fff;
+}
+
+.v2-proj__intro {
+  grid-area: intro;
+  margin: 10px 0 0;
+  max-width: 54ch;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .68);
+}
+
+.v2-proj__all {
+  grid-area: all;
+  align-self: end;
+  justify-self: end;
+  white-space: nowrap;
+  text-decoration: none;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--v2-red);
+}
+
+/* ---------- grid ---------- */
+
+.v2-proj__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-proj__item {
+  min-width: 0;
+}
+
+.v2-proj__card {
+  display: block;
+  text-decoration: none;
+  color: #fff;
+}
+
+/* The whole card is one anchor, so the focus ring belongs on the card box —
+   not on the image alone, which would leave the title and metadata visually
+   outside the focused region. */
+.v2-proj__card:focus-visible {
+  outline: 2px solid var(--v2-red);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+/* aspect-ratio is load-bearing: it reserves the card's image box before the
+   lazy image arrives, which is what keeps the block's layout shift at zero. */
+.v2-proj__shot {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0b2233;
+}
+
+.v2-proj__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- sector tag ----------
+   The red 2px bar is the rail's caption motif, reused so the two blocks read
+   as one family. The tag is a solid plate rather than the rail's gradient
+   scrim: these images are lighter and a scrim would wash them out. */
+.v2-proj__tag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 7px 12px 6px;
+  background: rgba(0, 20, 32, .92);
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.v2-proj__tag::before {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 10px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  background: var(--v2-red);
+}
+
+/* ---------- card text ---------- */
+
+.v2-proj__name {
+  margin: 14px 0 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 400;
+  color: #fff;
+}
+
+.v2-proj__meta {
+  margin: 12px 0 0;
+  padding-top: 11px;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  display: grid;
+  gap: 5px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px;
+}
+
+.v2-proj__meta > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.v2-proj__meta dt {
+  color: rgba(255, 255, 255, .5);
+}
+
+.v2-proj__meta dd {
+  margin: 0;
+  text-align: right;
+  color: rgba(255, 255, 255, .9);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .v2-proj__shot img {
+    transition: transform .5s var(--v2-ease-out-quart),
+                filter .5s var(--v2-ease-out-quart);
+  }
+
+  .v2-proj__card:hover .v2-proj__shot img,
+  .v2-proj__card:focus-visible .v2-proj__shot img {
+    transform: scale(1.05);
+    filter: brightness(1.06) saturate(1.05);
+  }
+
+  .v2-proj__all {
+    transition: color .25s var(--v2-ease-out-quart);
+  }
+}
+
+.v2-proj__all:hover {
+  color: var(--v2-red-text);
+}
+
+/* ---------- responsive ----------
+   Breakpoints match rail.css so the two blocks reflow together. */
+
+@media (max-width: 1024px) {
+  .v2-proj__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v2-proj__title { font-size: 26px; }
+}
+
+@media (max-width: 600px) {
+  .v2-proj-block { padding: 34px 0 38px; }
+  .v2-proj { padding: 0 16px; }
+  .v2-proj__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .v2-proj__title { font-size: 22px; }
+  .v2-proj__head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "eyebrow"
+      "title"
+      "intro"
+      "all";
+    row-gap: 14px;
+  }
+  .v2-proj__all { justify-self: start; }
+}
