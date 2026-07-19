@@ -65,13 +65,50 @@
     return { ok: bad.length === 0, detail: bad.join('; ') };
   });
 
-  check('hero fits the viewport', function () {
+  check('hero exactly fills the viewport, nothing below it shows', function () {
     if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
     var hero = document.getElementById('aCqA2TkE7');
     var r = hero.getBoundingClientRect();
     if (r.height <= 0) return { ok: false, detail: 'hero not rendered (height=0)' };
-    /* +1: subpixel layout rounding, not a real tolerance for overflow. */
-    return { ok: r.height <= vh + 1, detail: 'hero height=' + Math.round(r.height) + ' vh=' + vh };
+
+    var problems = [];
+    /* 1px tolerances throughout are subpixel layout rounding, not real slack. */
+    if (Math.abs(r.top) > 1) {
+      problems.push('hero top=' + Math.round(r.top) + ', should be 0');
+    }
+    if (r.height > vh + 1) {
+      problems.push('hero height=' + Math.round(r.height) + ' > vh=' + vh);
+    }
+    /* The actual complaint this guards: a sliver of the next section
+       peeking under the hero on load. It was 6px, caused by the hero
+       being offset -6px while still exactly vh tall. */
+    var next = hero.nextElementSibling;
+    if (next) {
+      var nr = next.getBoundingClientRect();
+      if (nr.top < vh - 1) {
+        problems.push('next section visible at top=' + Math.round(nr.top) +
+                      ' (' + Math.round(vh - nr.top) + 'px of it showing)');
+      }
+    }
+    return { ok: problems.length === 0,
+             detail: problems.length ? problems.join('; ')
+                                     : 'top=0 h=' + Math.round(r.height) + ' = vh, nothing below' };
+  });
+
+  check('headline and CTAs are centred in the viewport', function () {
+    if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
+    var stack = document.querySelector('#aCqA2TkE7 .hero-stack');
+    if (!stack) return { ok: false, detail: 'no .hero-stack' };
+    var r = stack.getBoundingClientRect();
+    if (r.height <= 0) return { ok: false, detail: 'hero-stack not rendered' };
+    var stackCentre = r.top + r.height / 2;
+    var off = stackCentre - vh / 2;
+    /* 12px: enough to absorb line-box and font-metric asymmetry, tight
+       enough that a genuinely off-centre stack fails. */
+    return { ok: Math.abs(off) <= 12,
+             detail: 'stack centre=' + Math.round(stackCentre) +
+                     ' viewport centre=' + Math.round(vh / 2) +
+                     ' off by ' + Math.round(off) + 'px' };
   });
 
   check('h1 accessible name is exactly WE BUILD BETTER', function () {
@@ -130,44 +167,55 @@
     return { ok: true };
   });
 
-  check('eyebrow colour matches the --v2-red-text token', function () {
-    var token = getComputedStyle(document.documentElement).getPropertyValue('--v2-red-text').trim();
-    if (!token) return { ok: false, detail: '--v2-red-text custom property is unset/empty' };
-
-    var el = document.querySelector('#aCqA2TkE7 .hero-eyebrow');
-    if (!el) return { ok: false, detail: 'no .hero-eyebrow' };
-
-    /* Resolve the token through a throwaway element so hex, rgb(), and
-       named colours all normalise to the same computed-style string the
-       browser reports for the eyebrow itself. */
-    var probe = document.createElement('span');
-    var resolved;
-    try {
-      probe.style.color = token;
-      /* An unparseable token (or one this probe cannot resolve standalone,
-         e.g. a typo) is a silent no-op: probe.style.color stays ''. Left
-         unchecked, the probe would then report its *inherited* colour,
-         which can coincidentally match an unstyled eyebrow and false-pass.
-         Treat "did not parse" as a hard failure instead. */
-      if (probe.style.color === '') {
-        return { ok: false, detail: '--v2-red-text is not a parseable colour: ' + token };
-      }
-      document.body.appendChild(probe);
-      resolved = getComputedStyle(probe).color;
-    } finally {
-      if (probe.parentNode) probe.parentNode.removeChild(probe);
-    }
-
-    var actual = getComputedStyle(el).color;
-    return { ok: actual === resolved, detail: 'eyebrow color=' + actual + ' token(' + token + ')=>' + resolved };
+  check('eyebrow and supporting line are gone', function () {
+    /* Both were removed at the client's request: the red GRADE-I eyebrow
+       was disliked, and the hero is meant to carry only the headline and
+       the two CTAs. This is a regression guard, not a layout assertion -
+       an earlier revision of this file asserted the OPPOSITE, so without
+       this a stale revert would silently reinstate them. */
+    var problems = [];
+    if (document.querySelector('#aCqA2TkE7 .hero-eyebrow')) problems.push('.hero-eyebrow still present');
+    if (document.querySelector('#aCqA2TkE7 .hero-sub')) problems.push('.hero-sub still present');
+    return { ok: problems.length === 0,
+             detail: problems.length ? problems.join('; ') : 'both removed' };
   });
 
-  check('supporting line exists', function () {
-    var el = document.querySelector('#aCqA2TkE7 .hero-sub');
-    /* 20 chars: just enough to rule out empty/placeholder text without
-       hardcoding the final copy. */
-    return { ok: !!el && el.textContent.trim().length > 20,
-             detail: el ? 'len=' + el.textContent.trim().length : 'missing' };
+  check('service strip has a readability treatment behind it', function () {
+    /* The three columns sit directly on moving video and were reported
+       unreadable. Text-shadow alone is not enough over footage that pans
+       across bright concrete - the strip needs its own surface. Accepts
+       any of: a non-transparent background on the strip or its columns, or
+       a backdrop-filter. Deliberately does not mandate WHICH, so the
+       treatment can be tuned without rewriting this check. */
+    var strip = document.querySelector('#aCqA2TkE7 .hero-services');
+    if (!strip) return { ok: false, detail: 'no .hero-services' };
+    var col = strip.querySelector('.hero-service');
+    var candidates = col ? [strip, col] : [strip];
+    var found = [];
+    for (var i = 0; i < candidates.length; i++) {
+      var cs = getComputedStyle(candidates[i]);
+      var bf = cs.backdropFilter || cs.webkitBackdropFilter || 'none';
+      var bg = cs.backgroundColor;
+      var bgImg = cs.backgroundImage;
+      if (bf !== 'none' && bf !== '') found.push('backdrop-filter:' + bf);
+      if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') found.push('background:' + bg);
+      if (bgImg && bgImg !== 'none') found.push('background-image present');
+    }
+    return { ok: found.length > 0,
+             detail: found.length ? found.join('; ')
+                                  : 'text sits directly on the video with no surface behind it' };
+  });
+
+  check('headline is the dominant element on the page', function () {
+    if (!atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
+    var h1 = document.querySelector('#aCqA2TkE7 .hero-title');
+    if (!h1) return { ok: false, detail: 'no .hero-title' };
+    var size = parseFloat(getComputedStyle(h1).fontSize);
+    /* 72px floor at 1280x720. The previous headline rendered around 51px;
+       the brief was "larger, it is the main statement". A floor rather than
+       an exact value so the size can stay fluid via clamp(). */
+    return { ok: size >= 72,
+             detail: 'font-size=' + Math.round(size) + 'px (floor 72px at this viewport)' };
   });
 
   check('two hero CTAs, second points at projects', function () {
