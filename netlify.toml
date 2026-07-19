@@ -1,0 +1,13 @@
+# Netlify config for the UGCC static preview.
+# Publishes the repo root as-is (no build step). Apache/Hostinger ignores this
+# file, so it only affects Netlify deploys.
+
+[build]
+  publish = "."
+  command = ""
+
+# Keep the client preview out of search engines (free Netlify has no password).
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
