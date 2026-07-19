@@ -951,6 +951,10 @@ Visit `/about-contractor-kuwait/`, `/contact-us/`, `/construction-projects-kuwai
 
 Expected on each: smaller logo, underline on hover, contact pill, condensing frosted header on scroll. Confirm the bottom hairline keeps the header distinct against these pages' light backgrounds. Confirm no hero styles leaked — `hero.css` is only linked from `index.html`.
 
+**Content jump — this is the one that cannot be automated.** On the homepage the header overlays the hero, so nothing below it can move and any automated no-jump assertion passes by construction. Inner pages are where the header is in flow and a jump can actually happen. On each of the three pages above: note the vertical position of the first content element below the header, scroll past 24px to trigger the condense, and confirm it does not shift. If it moves, the fallback in Task 4 applies — revert the condensing and keep frost only.
+
+`tools/hero-check.js` deliberately does NOT assert this. Four items are documented in that file as manual-only and all four are covered by this task: inner-page nav appearance, 375px mobile, keyboard focus visibility, and this content-jump check.
+
 - [ ] **Step 6: Keyboard**
 
 Tab through the page. Expected: visible focus ring on every nav link and both hero CTAs. The contact pill must show a focus ring distinct from its hover state.
