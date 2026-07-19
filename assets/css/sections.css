@@ -1,13 +1,21 @@
 /* ==========================================================================
    UGCC homepage — shared button, About, Who-are-we.
    Loaded only by index.html, after hero.css.
+
+   The v2- prefix here is homepage-scoped, unlike the site-wide v2- tokens
+   in v2.css: this file is loaded by index.html only, so .v2-btn on any
+   other page renders as an unstyled anchor.
    ========================================================================== */
 
-/* ---------- button ----------
-   One definition for all three homepage sections. The hero's own selectors
+/* ==========================================================================
+   Button — shared by the hero, About and Who-are-we.
+   ========================================================================== */
+
+/* One definition for all three homepage sections. The hero's own selectors
    are listed here rather than left in hero.css so the treatment has a single
-   source; the hero markup keeps its .hero-btn class names, so
-   tools/hero-check.js and any external references are unaffected. */
+   source; the hero keeps its own mobile layout overrides in hero.css; the
+   hero markup keeps its .hero-btn class names, so tools/hero-check.js and
+   any external references are unaffected. */
 .v2-btn,
 #aCqA2TkE7 .hero-btn {
   display: inline-block;
@@ -24,20 +32,23 @@
     color .25s var(--v2-ease-out-quart);
 }
 
-/* White pill — for dark grounds (hero video, About navy). */
-.v2-btn--primary,
+/* White pill. Hero video, About navy. */
+.v2-btn--on-dark,
 #aCqA2TkE7 .hero-btn--primary {
   background: #fff;
   color: #101010;
 }
 
-/* Navy pill — for light grounds (Who-are-we). */
-.v2-btn--dark {
+/* Navy pill. Who-are-we. */
+.v2-btn--on-light {
   background: var(--v2-navy);
   color: #fff;
 }
 
-.v2-btn--dark:hover {
+/* var(--v2-navy) is rgb(0, 42, 65); this is that lifted ~8% toward white,
+   which is the smallest step that reads as a state change on a light
+   ground without the pill starting to look grey. */
+.v2-btn--on-light:hover {
   background: #063a56;
 }
 
@@ -65,17 +76,23 @@
   transform: translateY(0);
 }
 
-/* Shine sweep. Moved here from hero.css with the rest of the button, and
-   renamed from hero-shine since it is no longer hero-specific. */
-.v2-btn--primary,
-.v2-btn--dark,
+/* Shine sweep. Renamed from hero-shine when it left hero.css, since it is
+   no longer hero-specific.
+
+   Deliberately NOT on --on-light: the gradient is white, so on a navy
+   ground it would be a pronounced sweep that nothing in the design asked
+   for. On the white --on-dark button it is white-on-white and renders
+   nothing at all - which means this effect has never actually been
+   visible on the hero either. Kept as-is rather than "fixed", because the
+   hero is finished and client-reviewed and this task must not change how
+   it renders. Raised separately. */
+.v2-btn--on-dark,
 #aCqA2TkE7 .hero-btn--primary {
   position: relative;
   overflow: hidden;
 }
 
-.v2-btn--primary::after,
-.v2-btn--dark::after,
+.v2-btn--on-dark::after,
 #aCqA2TkE7 .hero-btn--primary::after {
   content: '';
   position: absolute;
@@ -94,8 +111,7 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .v2-btn--primary:hover::after,
-  .v2-btn--dark:hover::after,
+  .v2-btn--on-dark:hover::after,
   #aCqA2TkE7 .hero-btn--primary:hover::after {
     animation: v2-shine .8s var(--v2-ease-out-quart);
   }
