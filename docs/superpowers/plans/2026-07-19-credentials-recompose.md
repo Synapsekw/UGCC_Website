@@ -735,15 +735,17 @@ PYEOF
 
 Expected output. **The removed and added figures are exact; the file totals are not.**
 
-The block is 20,418 bytes and the replacement is 1,930 — both measured by running this exact script against a scratch copy, and the block has not changed since, because no other session touches it. The file totals move every time another session commits: it was 132,288 bytes when this was drafted and 114,421 by the time Task 3 ran.
+The block is 20,418 bytes and the replacement is 1,934 — both measured, and the block has not changed since, because no other session touches it. The file totals move every time another session commits: it was 132,288 bytes when this was drafted and 114,421 by the time Task 3 ran.
 
 So expect this shape, with the last two numbers differing:
 
 ```
-replaced 20418 bytes with 1930; file 114421 -> 95933
+replaced 20418 bytes with 1934; file 114469 -> 95985
 ```
 
-**`replaced 20418 bytes with 1930` must match exactly.** If the removed figure differs at all, the region matched is not the region measured — stop and investigate rather than committing. The file totals should satisfy `after = before - 20418 + 1930`; check that arithmetic rather than the literal numbers.
+**`replaced 20418 bytes with 1934` must match exactly.** If the removed figure differs at all, the region matched is not the region measured — stop and investigate rather than committing. The file totals should satisfy `after = before - 20418 + 1934`; check that arithmetic rather than the literal numbers.
+
+The added figure read 1930 in an earlier draft. That was measured before the About session renamed `.v2-btn--dark` to `.v2-btn--on-light`, which is exactly four bytes longer — see protocol rule 9. Worth knowing as a worked example: a stale number here has a cause, and the cause is usually a shared thing moving underneath.
 
 If the script prints `ABORT:`, it wrote nothing. Read the message, fix the cause, run it again. The `ABORT: block already replaced` case means the step succeeded earlier — move to Step 4 rather than re-running.
 
@@ -771,7 +773,9 @@ Expected — the **shape** is measured and fixed; the absolute line counts move 
 git diff -U0 index.html | grep -c '^-.*<circle\|^-.*<line\|^-.*</svg>'
 ```
 
-Expected: `12`. Every removed line is SVG decoration. If any removed line is something else, **stop** — the region matched was wrong.
+Expected: **`13`**, not 12. Twelve are the pure decoration — five `<circle>` lines, one `<line>`, and six `</svg></div>…` tails. The thirteenth is the merged body line itself, which contains other `<svg>` markup elsewhere on the page and so matches the pattern; it is also the single *added* line, so it is counted on both sides of the diff.
+
+If the count is lower than 13, or `git diff -U0 index.html | grep '^-' | grep -v '<circle\|<line\|</svg>'` returns anything, **stop** — something that is not SVG decoration was deleted, and the region matched was wrong.
 
 What must *not* happen is the added count exceeding 1. One added line means the body is still one line. If `numstat` shows `2 13` or worse, the replacement contained a newline; run `git checkout -- index.html` **only if you are certain no other session has uncommitted work in it** (check `git status --short` and ask before doing this), and re-run Step 3.
 
