@@ -277,10 +277,10 @@
 }
 
 .v2-subnav__inner {
-  max-width: 1224px;
+  width: max-content;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
-  justify-content: center;
   gap: 12px;
   overflow-x: auto;
   scrollbar-width: none;
