@@ -80,16 +80,13 @@ async function englishSearchTerms(apiKey, text) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
-        input: [
-          { role: "system", content: "Translate the user's message into short English search keywords for a construction-company knowledge base. Reply with ONLY the English keywords, nothing else." },
-          { role: "user", content: text },
-        ],
+        input: `Translate this into short English search keywords for a construction-company knowledge base. Reply with ONLY the English keywords, nothing else:\n\n${text}`,
       }),
     });
-    if (!r.ok) return null;
-    return extractText(await r.json()) || null;
-  } catch {
-    return null;
+    if (!r.ok) return { status: r.status, text: null };
+    return { status: 200, text: extractText(await r.json()) || null };
+  } catch (e) {
+    return { status: "throw:" + (e?.message || "err"), text: null };
   }
 }
 
@@ -154,9 +151,10 @@ export default async (req) => {
   try {
     // Search in English regardless of the question's language.
     let query = v.message;
+    let tr = { status: "skip", text: null };
     if (/[\u0600-\u06FF]/.test(v.message)) {
-      const en = await englishSearchTerms(apiKey, v.message);
-      if (en) query = en;
+      tr = await englishSearchTerms(apiKey, v.message);
+      if (tr.text) query = tr.text;
     }
     const context = await retrieveContext(apiKey, vsId, query);
 
@@ -174,7 +172,7 @@ export default async (req) => {
     const data = await r.json();
     const output = extractText(data) || "Sorry, I couldn't produce an answer.";
     const payload = body?.debug === true
-      ? { output, _debug: { query, contextChars: context.length } }
+      ? { output, _debug: { query, translate: tr, contextChars: context.length } }
       : { output };
     return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch {
