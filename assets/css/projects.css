@@ -15,6 +15,13 @@
 }
 
 .v2-proj {
+  /* The builder's .block-background (main.css, z-index:14 sibling at :13) is
+     an opaque plate over the whole section. The builder lifts content above
+     it with .block-layout{z-index:14}; this block drops .block-layout, so it
+     must supply that itself or the cards render behind the navy.
+     Same hazard documented in hero.css for #aCqA2TkE7. */
+  position: relative;
+  z-index: 14;
   max-width: 1224px;
   margin: 0 auto;
   padding: 0 24px;
@@ -97,11 +104,14 @@
 }
 
 .v2-proj__item {
-  min-width: 0;
+  min-width: 0;              /* grid-blowout guard — keep even as a flex item */
+  display: flex;
 }
 
 .v2-proj__card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   text-decoration: none;
   color: #fff;
 }
@@ -169,10 +179,15 @@
   line-height: 1.3;
   font-weight: 400;
   color: #fff;
+  text-wrap: balance;
 }
 
 .v2-proj__meta {
-  margin: 12px 0 0;
+  /* margin-top: auto pins the hairline to the card's bottom edge regardless
+     of how many lines the name above it wraps to, so the rule aligns across
+     a row instead of stepping down under a two-line title. */
+  margin: 0;
+  margin-top: auto;
   padding-top: 11px;
   border-top: 1px solid rgba(255, 255, 255, .14);
   display: grid;
@@ -196,6 +211,20 @@
   text-align: right;
   color: rgba(255, 255, 255, .9);
   font-variant-numeric: tabular-nums;
+  /* break-word does not reduce a flex item's min-content contribution, so a
+     long unbroken client name would push the row wider than the card.
+     anywhere does — it is the one that actually works inside .v2-proj__meta
+     > div's flex layout. None of the six current client names trigger this;
+     it is robustness for future data. */
+  overflow-wrap: anywhere;
+}
+
+/* Static hover feedback, outside the reduced-motion gate below: a
+   reduced-motion visitor still gets a response on hover, just not the
+   image transform. */
+.v2-proj__card:hover .v2-proj__name,
+.v2-proj__card:focus-visible .v2-proj__name {
+  color: var(--v2-red-text);
 }
 
 /* ---------- motion ---------- */
