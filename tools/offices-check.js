@@ -67,13 +67,39 @@
     return { ok: !has, detail: 'class="' + s.className + '"' };
   });
 
-  check('3. each office carries its own tel:, and the digits it shows are the digits it dials', function () {
+  check('3. each office is the country it claims, and dials the digits it shows', function () {
     var s = section();
     if (!s) return { ok: false, detail: 'section missing' };
     var offices = s.querySelectorAll('.off__office');
     if (offices.length !== 3) return { ok: false, detail: 'expected 3 .off__office nodes, found ' + offices.length };
     var bad = [];
     OFFICES.forEach(function (want, i) {
+      /* Bind the LABEL to the position first, exactly as credentials-check.js
+         checks a row's name before trusting its <time>. Without this, a card
+         headed "Oman" carrying Kuwait's address and Kuwait's number satisfies
+         every other assertion here — the contact details would be internally
+         consistent and still send a caller in Muscat to Kuwait City.
+
+         Contains rather than equals: the heading also carries the "Head
+         office" badge span. Contains rather than starts-with, because
+         whether that badge precedes or follows the country name is a free
+         choice in the markup and not something this harness should pin. The
+         exclusivity test below is what actually closes the mislabelling
+         hole — the name of another office must not appear. */
+      var country = offices[i].querySelector('.off__country');
+      var label = textOf(country);
+      if (!country) {
+        bad.push('office ' + i + ' has no .off__country (want ' + want.name + ')');
+      } else if (label.indexOf(want.name) === -1) {
+        bad.push('office ' + i + ' is headed "' + label + '", want ' + want.name);
+      } else {
+        var strays = OFFICES.filter(function (o) {
+          return o.name !== want.name && label.indexOf(o.name) !== -1;
+        }).map(function (o) { return o.name; });
+        if (strays.length) {
+          bad.push('office ' + i + ' (' + want.name + ') also names ' + strays.join(' and ') + ' in "' + label + '"');
+        }
+      }
       var links = offices[i].querySelectorAll('a[href^="tel:"]');
       if (links.length !== 1) {
         bad.push('office ' + i + ' (' + want.name + ') has ' + links.length + ' tel: links, want 1');
@@ -225,9 +251,62 @@
 
   check('9b. no horizontal page overflow', function () {
     /* Check 9 walks querySelectorAll('*'), which excludes #zrby1M itself, so
-       a negative margin on the section is invisible to it. This catches it. */
-    var over = document.body.scrollWidth - document.documentElement.clientWidth;
-    return { ok: over <= 1, detail: 'viewport ' + vw() + 'px, body scrollWidth overshoots by ' + over + 'px' };
+       a negative margin on the section is invisible to it. This catches it.
+
+       Compare the documentElement against itself, matching projects-check.js.
+       body.scrollWidth excludes the vertical scrollbar while window.innerWidth
+       includes it, so that pairing cannot see an overflow narrower than the
+       scrollbar — and body.scrollWidth also misses overflow that escapes
+       <body> entirely. */
+    var de = document.documentElement;
+    var ok = de.scrollWidth <= de.clientWidth;
+    var detail = 'documentElement scrollWidth ' + de.scrollWidth +
+                 ' vs clientWidth ' + de.clientWidth + ' @ ' + window.innerWidth + 'px';
+    if (!ok) {
+      /* This check measures the whole page, so the culprit may live in a
+         block that is none of our business. Name it, and say plainly whether
+         it is ours — Task 5 may only touch assets/css/offices.css.
+
+         Two refinements, both learned the hard way against this page:
+
+         Skip elements clipped by an ancestor. The hero's client marquee is
+         deliberately wider than the viewport and sits inside an overflow
+         hidden track; it contributes nothing to the page's scrollWidth, but
+         it and its children put ~124 boxes past the right edge and bury the
+         real culprit.
+
+         Sort by how far each element overshoots, widest first, and count
+         ours across the WHOLE set rather than the handful we print. Reporting
+         "none of the first 3 are ours" off a DOM-ordered list is worse than
+         saying nothing — it points the reader away from a block that really
+         is at fault. */
+      var s = section();
+      function clipped(e) {
+        for (var p = e.parentElement; p && p !== document.documentElement; p = p.parentElement) {
+          var ox = getComputedStyle(p).overflowX;
+          if (ox && ox !== 'visible') return true;
+        }
+        return false;
+      }
+      var culprits = [].filter.call(document.body.querySelectorAll('*'), function (e) {
+        var r = e.getBoundingClientRect();
+        return r.width > 0 && r.right > de.clientWidth + 1 && !clipped(e);
+      });
+      culprits.sort(function (a, b) {
+        return b.getBoundingClientRect().right - a.getBoundingClientRect().right;
+      });
+      function ours(e) { return !!(s && (s === e || s.contains(e))); }
+      var mine = culprits.filter(ours).length;
+      var names = culprits.slice(0, 3).map(function (e) {
+        var r = e.getBoundingClientRect();
+        return (e.id ? '#' + e.id : ((typeof e.className === 'string' && e.className.trim()) ? '.' + e.className.trim().split(/\s+/).join('.') : e.tagName)) +
+               ' (+' + Math.round(r.right - de.clientWidth) + 'px' + (ours(e) ? ', inside #zrby1M' : '') + ')';
+      });
+      detail += '; ' + culprits.length + ' unclipped overflowing' + (names.length ? ', widest: ' + names.join(', ') : '') +
+                '; ' + (mine ? mine + ' of them inside #zrby1M — ours' : 'none inside #zrby1M — not ours');
+      if (!culprits.length) detail += ' (no unclipped element box overflows — suspect a margin, a pseudo-element or a table)';
+    }
+    return { ok: ok, detail: detail };
   });
 
   check('10. the ADRESS typo is gone', function () {
