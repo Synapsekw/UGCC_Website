@@ -36,78 +36,39 @@
     hero.style.setProperty(prop, h + 'px', 'important');
   }
 
-  /* ---------- line the logo rail up with the chat widget ----------
-     The brief is that the rail sits "in line with the chat icon". That
-     widget is injected by a third-party script, is position:fixed against
-     the viewport bottom, and owns its own offset - so hardcoding a matching
-     value in CSS would go stale the moment the widget changes.
+  /* ---------- the logo rail is positioned by CSS, on purpose ----------
+     hero.css bottom:34px puts the rail's midpoint 56px above the viewport
+     bottom, which is where the chat widget's fixed midpoint sits. A
+     syncRailToWidget() used to re-derive that alignment at runtime by
+     measuring both and nudging `bottom` by the difference. It is gone, and
+     must not come back in that shape: it compared the rail (document
+     coordinates — it scrolls away with the hero) against the widget
+     (viewport coordinates — position:fixed), so any pass that ran while
+     the page was scrolled read the scroll offset as a layout error and
+     wrote it into `bottom`, tearing the rail out of the hero and pinning
+     it over whatever section was on screen. Every trigger it had could
+     fire while scrolled: `load` lands seconds in on this image-heavy
+     page, and resize fires on desktop window drags and every mobile
+     URL-bar collapse. Its first bug (the 18px entry-transform misread,
+     see c5f3b30) came from the same root: measuring a live page and
+     writing the reading into layout.
 
-     The hero spans the full viewport, so at scroll top its bottom edge and
-     the viewport's coincide: the rail's offset from the hero's bottom that
-     puts the two midpoints on one line is
-       (viewportHeight - widgetMidpoint) - railHeight / 2.
-     Falls back to the CSS value when the widget is absent. */
-  /* Vertical translation currently applied to an element, in px, so a
-     measurement can be reduced to layout position. Handles both matrix()
-     (2D, ty at index 5) and matrix3d() (ty at index 13). */
-  function translateY(el) {
-    var m = getComputedStyle(el).transform;
-    if (!m || m === 'none') return 0;
-    var p = m.replace(/^matrix3d\(/, '').replace(/^matrix\(/, '').replace(/\)$/, '').split(',');
-    return parseFloat(p.length === 16 ? p[13] : p[5]) || 0;
-  }
+     If the widget's offset ever changes, change bottom:34px in hero.css.
+     tools/hero-check.js asserts the alignment at rest AND that nothing
+     writes an inline `bottom` — including after a resize while scrolled —
+     so a stale CSS value or a reintroduced sync both fail the harness. */
 
-  function syncRailToWidget() {
-    var rail = hero.querySelector('.hero-clients');
-    var widget = document.getElementById('glass-ai-widget-host');
-    if (!rail || !widget) return;
-    var wr = widget.getBoundingClientRect();
-    var rr = rail.getBoundingClientRect();
-    if (!wr.height || !rr.height) return;
-
-    /* Measure the error and correct it, rather than computing an offset
-       from the viewport. Nudging by the observed delta is correct whatever
-       the containing block turns out to be, and converges in one pass
-       because the relationship is linear. Increasing `bottom` moves the
-       rail up.
-
-       The rail's transform MUST come out of the measurement first.
-       getBoundingClientRect() includes transforms, and .hero-clients
-       carries hero-fade-up - whose animation-fill-mode: both pins it at
-       translateY(18px) through the entry delay. A pass that lands in that
-       window reads the animation as an 18px layout error and writes it
-       into `bottom`; once the animation ends and the transform returns to
-       0, the next pass measures -18 and undoes it. That round trip was
-       visible on load as the rail sitting high and then dropping into
-       place - and it is also where the "the containing block is ~18px out"
-       theory came from. There is no 18px containing-block error. The CSS
-       bottom:34px is exact: it puts the rail's midpoint 56px above the
-       viewport bottom, which is where the widget's midpoint sits. */
-    var widgetMid = wr.top + wr.height / 2;
-    var railMid = rr.top - translateY(rail) + rr.height / 2;
-    var delta = railMid - widgetMid;
-    if (Math.abs(delta) < 0.5) return;
-
-    var current = parseFloat(getComputedStyle(rail).bottom);
-    if (isNaN(current)) return;
-    rail.style.bottom = (current + delta) + 'px';
-  }
-
-  function syncLayout() {
-    syncHeaderHeight();
-    syncRailToWidget();
-  }
-
-  syncLayout();
-  /* The widget script may inject after us, so re-run once it settles. */
-  window.addEventListener('load', syncLayout);
-  setTimeout(syncLayout, 600);
-  setTimeout(syncLayout, 1800);
+  syncHeaderHeight();
+  /* Fonts and the nav settle late, and the header's height moves with
+     them, so re-measure at the same points the rail sync used to. */
+  window.addEventListener('load', syncHeaderHeight);
+  setTimeout(syncHeaderHeight, 600);
+  setTimeout(syncHeaderHeight, 1800);
 
   var resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(syncLayout, 120);
+    resizeTimer = setTimeout(syncHeaderHeight, 120);
   }, { passive: true });
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;

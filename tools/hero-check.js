@@ -1,6 +1,7 @@
 /* UGCC hero layout checks. Dependency-free.
    Usage: paste into the browser console on the homepage, or evaluate via
-   automation. Returns {passed, failed, results}. Resize to 1280x720 first.
+   automation. Returns a Promise of {passed, failed, results} — the scrolled
+   sync-pass check is async. Resize to 1280x720 first, at scroll top.
 
    NOT covered by this script (manual verification required):
      - inner-page nav appearance on light backgrounds
@@ -460,13 +461,83 @@
     };
   });
 
-  var passed = results.filter(function (r) { return r.ok; }).length;
-  var failed = results.length - passed;
+  function record(name, ok, detail) {
+    results.push({ name: name, ok: ok, detail: detail || '' });
+  }
 
-  results.forEach(function (r) {
-    console.log((r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.detail ? '  [' + r.detail + ']' : ''));
-  });
-  console.log('\n' + passed + ' passed, ' + failed + ' failed');
+  /* ---------- async section ---------- */
 
-  return { passed: passed, failed: failed, results: results };
+  /* The check above catches a script-written `bottom` only if one has
+     already been written by the time the harness runs. This one provokes
+     the write: it scrolls the hero fully off-screen, fires the resize the
+     sync path listens for, and asserts the rail is still positioned by
+     CSS afterwards.
+
+     This is the exact sequence behind the rail appearing over other
+     sections: a sync pass at scrollY=S compared the rail (document
+     coordinates — it scrolls away with the hero) against the fixed chat
+     widget (viewport coordinates), read the difference as a layout error
+     of exactly -S, and wrote it into `bottom`. One resize at 4000px put
+     the rail 3966px below the hero — over the PROJECTS block — and it
+     stayed there for the rest of the visit. A mistimed pass is the same
+     failure without any window resize: this page loads ~30 images and
+     streams video, so the `load`-event pass can land seconds in, after
+     the user has already scrolled. */
+  return Promise.resolve()
+    .then(function () {
+      var rail = document.querySelector('#aCqA2TkE7 .hero-clients');
+      var widget = document.getElementById('glass-ai-widget-host');
+      if (!rail) {
+        record('rail survives a sync pass while scrolled', false, 'no .hero-clients');
+        return;
+      }
+      if (!widget) {
+        /* Without the widget the sync path returns before measuring, so
+           this scenario cannot fail — but nor has it been exercised. Flag
+           it rather than pass it. */
+        record('rail survives a sync pass while scrolled', false,
+          'chat widget absent — the scrolled-sync scenario did not run');
+        return;
+      }
+
+      var root = document.documentElement;
+      var prevBehavior = root.style.scrollBehavior;
+      var prevScroll = window.scrollY;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, Math.min(4000, root.scrollHeight - window.innerHeight - 100));
+      window.dispatchEvent(new Event('resize'));
+
+      /* The resize handler debounces at 120ms; 400ms covers it plus a
+         frame or two of layout. */
+      return new Promise(function (res) { setTimeout(res, 400); })
+        .then(function () {
+          var inline = rail.style.bottom;
+          var hr = document.getElementById('aCqA2TkE7').getBoundingClientRect();
+          var rr = rail.getBoundingClientRect();
+          var inHero = rr.top >= hr.top - 1 && rr.bottom <= hr.bottom + 1;
+          record('rail survives a sync pass while scrolled',
+            !inline && inHero,
+            (inline ? 'inline bottom=' + inline + ' written at scrollY=' + window.scrollY
+                    : 'no inline bottom') +
+            (inHero ? '; rail still inside the hero' : '; rail has LEFT the hero (top=' +
+              Math.round(rr.top - hr.top) + 'px into the section below)'));
+
+          window.scrollTo(0, prevScroll);
+          root.style.scrollBehavior = prevBehavior;
+        });
+    })
+    .catch(function (e) {
+      record('harness', false, 'threw: ' + e.message);
+    })
+    .then(function () {
+      var passed = results.filter(function (r) { return r.ok; }).length;
+      var failed = results.length - passed;
+
+      results.forEach(function (r) {
+        console.log((r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.detail ? '  [' + r.detail + ']' : ''));
+      });
+      console.log('\n' + passed + ' passed, ' + failed + ' failed');
+
+      return { passed: passed, failed: failed, results: results };
+    });
 })();
