@@ -763,6 +763,13 @@ Add to the end of `assets/css/sections.css`:
 
 #u7vIc0iRh .wr-title {
   margin: 14px 0 0;
+  /* Same reason as .hero-title and .about-statement: this h2 sits outside
+     .text-box, so it never picks up the builder's
+     `.text-box h2 { font-family: var(--h2-font-family) }` and would fall
+     back to the body face at bold. Hammersmith One ships a single weight.
+     tools/home-check.js asserts this on both new sections. */
+  font-family: 'Hammersmith One', sans-serif;
+  font-weight: 400;
   font-size: clamp(22px, 2.2vw, 32px);
   line-height: 1.25;
   color: var(--v2-navy);
@@ -995,6 +1002,12 @@ the row dividers misaligned with the header rule."
 ```
 
 - [ ] **Step 2: Append the reveal rules to `assets/css/sections.css`**
+
+These go in ONE `Motion / reveal` banner at the end of the file, covering both
+sections together — not as per-section fragments inside each section's block.
+This matches how `hero.css` keeps its motion separate from its layout, and it
+keeps the reveal readable as a single sequence rather than something you have
+to reconstruct from two places.
 
 ```css
 /* ==========================================================================
