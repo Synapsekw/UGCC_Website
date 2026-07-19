@@ -60,6 +60,17 @@ Note the shape you are copying: a top block comment stating usage and what is *n
 
 - [ ] **Step 2: Write the complete harness**
 
+> **Superseded — read before using the source below.** The harness as first
+> written here had 11 checks and was landed as commit `c2c1cf8`. A code quality
+> review found it too weak to gate Tasks 2–4: contact details were asserted as a
+> flat set (so Kuwait's card could carry Oman's number and still pass — the same
+> defect commit `b3de78b` fixed for the credentials ledger), the map's
+> `role="img"` / `aria-labelledby` wiring was unasserted, and there was no check
+> for the presence list, the legend, or leftover builder nodes. Commit `e951bb8`
+> revised it to **15 checks** (1, 2, 3, 4, 5, 6, 7, 7b, 8, 9, 9b, 10, 11, 12, 13).
+> **The committed file is authoritative; the block below is the superseded first
+> draft, kept for the record.** Green is now `15 passed, 0 failed`.
+
 Create `tools/offices-check.js` with exactly this content:
 
 ```javascript
@@ -1122,13 +1133,13 @@ asymmetry reads as a category rather than missing data."
 
 Serve the site, open `http://localhost:8747/index.html`, set the viewport to 1280x800, hard-reload, paste `tools/offices-check.js` into the console.
 
-Expected: `11 passed, 0 failed  (viewport 1280px)`
+Expected: `15 passed, 0 failed  (viewport 1280px)`
 
 - [ ] **Step 2: Run at 920px**
 
 Resize to 920px wide, hard-reload, paste again.
 
-Expected: `11 passed, 0 failed  (viewport 920px)`
+Expected: `15 passed, 0 failed  (viewport 920px)`
 
 This is the boundary where the old block disappeared. Check 1 passing here is the headline fix.
 
@@ -1136,7 +1147,13 @@ This is the boundary where the old block disappeared. Check 1 passing here is th
 
 Resize to 375px wide, hard-reload, paste again.
 
-Expected: `11 passed, 0 failed  (viewport 375px)`
+Expected: `15 passed, 0 failed  (viewport 375px)`
+
+**Check 9 proved nothing at this width before Task 4.** It short-circuits on
+`r.width > 0`, and a `display:none` block yields all-zero rects — so it reported
+a vacuous pass at 375px throughout Tasks 1–3. It only becomes a real assertion
+once check 1 is green. Do not treat a green check 9 here as evidence unless
+check 1 is also green in the same run.
 
 Check 9 is the one most likely to fail here. If it reports an overflowing node, the usual causes are the long Saudi street address not wrapping, or the SVG being given an intrinsic width. Fix in `offices.css` — add `overflow-wrap: anywhere` to `.off__addr`, or confirm `.off__map { width: 100%; height: auto; }` is applying — never by hiding anything.
 
@@ -1206,7 +1223,7 @@ Implemented 2026-07-20 on `hero-recompose`.
 
 - Block height: <N>px at 1280x720 (was 624px), <N>% of the page.
 - Inline SVG: <N> bytes raw.
-- `tools/offices-check.js`: 11 passed, 0 failed at 375px, 920px and 1280px.
+- `tools/offices-check.js`: 15 passed, 0 failed at 375px, 920px and 1280px.
 - Verified rendering with JavaScript disabled.
 
 The six map screenshot variants remain on disk, unreferenced, per "Old assets".
@@ -1223,7 +1240,7 @@ git commit -m "docs(offices): record the implemented result"
 
 ## Definition of done
 
-- [ ] `tools/offices-check.js` reports 11 passed, 0 failed at 375px, 920px and 1280px.
+- [ ] `tools/offices-check.js` reports 15 passed, 0 failed at 375px, 920px and 1280px.
 - [ ] The block renders with JavaScript disabled.
 - [ ] `git grep -c 'block--mobile-hidden' index.html` does not match inside `#zrby1M`.
 - [ ] No `<img>` inside `#zrby1M`.
