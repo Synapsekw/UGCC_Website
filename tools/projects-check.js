@@ -136,6 +136,38 @@
     };
   });
 
+  check('each card is named by its own project title', function () {
+    /* The img carries a real alt, so without an explicit aria-label the accname
+       algorithm concatenates the photo description first and every card
+       announces a ~30-word name that only disambiguates halfway through.
+       The label must also START with the visible <h4> — that is SC 2.5.3
+       Label in Name, and it is the half that silently rots when someone
+       renames a project without touching the label. */
+    var list = cards();
+    if (list.length !== CARD_COUNT) {
+      return { ok: false, detail: 'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length };
+    }
+    var norm = function (s) { return (s || '').replace(/\s+/g, ' ').trim(); };
+    var bad = [];
+    list.forEach(function (li, i) {
+      var a = li.querySelector('a[href]');
+      var h4 = li.querySelector('.v2-proj__name');
+      if (!a) { bad.push('#' + i + ' no anchor'); return; }
+      if (!h4) { bad.push('#' + i + ' no .v2-proj__name'); return; }
+      var label = norm(a.getAttribute('aria-label'));
+      var title = norm(h4.textContent);
+      if (!label) { bad.push('#' + i + ' (' + title + ') has no aria-label'); return; }
+      if (label.indexOf(title) !== 0) {
+        bad.push('#' + i + ' label ' + JSON.stringify(label) +
+                 ' does not start with its title ' + JSON.stringify(title));
+      }
+    });
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' named by their title'
+    };
+  });
+
   check('every card image is lazy, described and intrinsically sized', function () {
     var list = cards();
     if (list.length !== CARD_COUNT) {
