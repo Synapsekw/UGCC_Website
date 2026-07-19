@@ -71,8 +71,15 @@
   });
 
   check('every card has alt text, intrinsic size and lazy loading', function () {
+    /* The count guard is load-bearing: without it this check passes vacuously
+       on a page with no cards at all, because the loop body never runs. A green
+       line in a red harness is worse than a red one. */
+    var list = cards();
+    if (list.length !== 15) {
+      return { ok: false, detail: 'expected 15 cards to inspect, found ' + list.length };
+    }
     var bad = [];
-    cards().forEach(function (li, i) {
+    list.forEach(function (li, i) {
       var img = li.querySelector('img');
       if (!img) { bad.push('#' + i + ' no img'); return; }
       if (!img.getAttribute('alt')) bad.push('#' + i + ' empty alt');

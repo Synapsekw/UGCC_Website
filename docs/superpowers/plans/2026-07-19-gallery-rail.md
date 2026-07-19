@@ -211,8 +211,15 @@ Create `tools/rail-check.js`:
   });
 
   check('every card has alt text, intrinsic size and lazy loading', function () {
+    /* The count guard is load-bearing: without it this check passes vacuously
+       on a page with no cards at all, because the loop body never runs. A green
+       line in a red harness is worse than a red one. */
+    var list = cards();
+    if (list.length !== 15) {
+      return { ok: false, detail: 'expected 15 cards to inspect, found ' + list.length };
+    }
     var bad = [];
-    cards().forEach(function (li, i) {
+    list.forEach(function (li, i) {
       var img = li.querySelector('img');
       if (!img) { bad.push('#' + i + ' no img'); return; }
       if (!img.getAttribute('alt')) bad.push('#' + i + ' empty alt');
@@ -356,12 +363,19 @@ Create `tools/rail-check.js`:
 
 Serve the site, open `http://localhost:8747/`, resize the window to 1280x720, paste the script into the console.
 
-Expected: **10 checks, most failing**, and specifically:
+Expected: **10 checks, 1 passed, 9 failed.** Specifically:
 - `section is under 500px tall` → FAIL, detail `1029px (was 1029px)`
-- `old slideshow is gone` → FAIL, detail `31 legacy slideshow nodes remain`
+- `old slideshow is gone` → FAIL, detail `17 legacy slideshow nodes remain`
 - `track holds exactly 15 items and no aria-hidden` → FAIL, detail `0 items, 0 aria-hidden nodes (want 15 / 0)`
+- `every card has alt text, intrinsic size and lazy loading` → FAIL, detail `expected 15 cards to inspect, found 0`
 - `viewport is genuinely horizontally scrollable` → FAIL, detail `rail not implemented`
+- `cards produce exactly the 5 expected hrefs` → FAIL, all five listed as missing
+- `every href resolves` → FAIL, detail `0/0 ok`
 - `page scroll drives the rail` → FAIL, detail `rail not implemented`
+- `user interaction takes the rail over` → FAIL, detail `rail not implemented`
+
+The single PASS is `no horizontal page overflow`, which is legitimately true of the
+unmodified page — the old slideshow does not overflow horizontally either.
 
 If `old slideshow is gone` PASSES at this point, stop — you are not looking at the unmodified homepage.
 
