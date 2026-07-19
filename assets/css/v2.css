@@ -35,17 +35,27 @@
 }
 
 /* ---------- sticky header: solid state after scrolling ---------- */
+/* Condensing was attempted and reverted (see plan Task 4's documented
+   fallback): on inner pages the header sits in flow above
+   .page__blocks, and shrinking its padding shifted that content up by
+   30px on every inner page tested (about-contractor-kuwait, contact-us,
+   construction-projects-kuwait), well past the 2px tolerance. On the
+   homepage the header overlays the hero so the jump is invisible there,
+   but it is real on every page where the header actually participates
+   in layout. Frost-only, per plan. */
 .block-header {
   transition:
     background-color .35s var(--v2-ease-out-quart),
-    box-shadow .35s var(--v2-ease-out-quart);
+    box-shadow .35s var(--v2-ease-out-quart),
+    backdrop-filter .35s var(--v2-ease-out-quart);
 }
 
 .v2-scrolled .block-header {
-  background-color: var(--v2-navy-92);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  backdrop-filter: blur(14px) saturate(1.15);
+  background-color: var(--v2-navy-70);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
   box-shadow: var(--v2-shadow-header);
+  border-bottom: .5px solid rgba(255, 255, 255, .14);
 }
 
 /* ---------- nav links: red underline grows from the left ---------- */
