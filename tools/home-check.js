@@ -110,13 +110,32 @@
     };
   });
 
-  check('section buttons match the hero button', function () {
+  /* The invariant is that EVERY .v2-btn on the page renders as the hero's
+     button does — not that there is some particular number of them. An
+     earlier version asserted exactly 2, which was true on the day the
+     component had exactly two call sites and became a false alarm the
+     moment other sections adopted it. A count is a snapshot; the geometry
+     match is the actual contract, and it gets stricter as adoption grows
+     rather than breaking. The two homepage buttons are asserted by name
+     separately, so this cannot pass vacuously on a page with none. */
+  check('every .v2-btn matches the hero button', function () {
     var hero = document.querySelector('#aCqA2TkE7 .hero-btn--primary');
     if (!hero) return { ok: false, detail: 'hero primary button not found' };
     var btns = document.querySelectorAll('.v2-btn');
-    if (btns.length !== 2) {
-      return { ok: false, detail: 'expected 2 .v2-btn, found ' + btns.length };
+    if (!btns.length) return { ok: false, detail: 'no .v2-btn on the page' };
+
+    var required = [
+      [ABOUT + ' .v2-btn', 'About'],
+      [WHO + ' .v2-btn', 'Who-are-we']
+    ];
+    var missing = [];
+    required.forEach(function (r) {
+      if (!document.querySelector(r[0])) missing.push(r[1]);
+    });
+    if (missing.length) {
+      return { ok: false, detail: 'section button missing: ' + missing.join(', ') };
     }
+
     var h = getComputedStyle(hero);
     var props = ['borderTopLeftRadius', 'paddingTop', 'paddingLeft', 'fontSize', 'fontWeight'];
     var bad = [];
@@ -126,7 +145,10 @@
         if (s[p] !== h[p]) bad.push('btn' + i + '.' + p + '=' + s[p] + ' vs hero ' + h[p]);
       });
     });
-    return { ok: bad.length === 0, detail: bad.join('; ') || 'geometry matches on both' };
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || btns.length + ' .v2-btn, all matching the hero'
+    };
   });
 
   /* The keyboard state must be the designed state, not a browser default.
