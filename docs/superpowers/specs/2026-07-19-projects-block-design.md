@@ -120,8 +120,8 @@ its four `.layout-element` children are replaced entirely.
             <img src="/assets/img/v2/proj/ra-259-440.jpg"
                  srcset="/assets/img/v2/proj/ra-259-440.jpg 440w,
                          /assets/img/v2/proj/ra-259-880.jpg 880w"
-                 sizes="(max-width: 639px) calc(100vw - 32px),
-                        (max-width: 1023px) calc(50vw - 36px), 392px"
+                 sizes="(max-width: 599px) calc(100vw - 32px),
+                        (max-width: 1024px) calc(50vw - 36px), 376px"
                  loading="lazy" width="440" height="275"
                  alt="Stacked flyover ramps of a completed desert interchange seen from the air">
             <span class="v2-proj__tag">Roads &amp; Bridges</span>
@@ -223,8 +223,9 @@ The Slug column is the derivative filename stem, not the URL path. It matches th
 project directory in every case except Duqm, which is shortened to `c502015` so
 the derivative is not named after a 74-character directory.
 
-`392px` in `sizes` is the three-column card width: the builder's 1224px content
-container less two 24px gaps, divided by three.
+`376px` in `sizes` is the three-column card width, derived from the rail's own
+container: `max-width: 1224px` with `padding: 0 24px` gives a 1176px content box,
+less two 24px grid gaps, divided by three.
 
 All six images are `loading="lazy"` with explicit `width`/`height`. This replaces
 eight eager 1208w-capable images with six lazy ones and retires the broken
@@ -244,9 +245,12 @@ the link text, and repeating it would make every card announce itself twice:
 
 ## Layout and responsive behaviour
 
-- **>= 1024px** — three columns.
-- **640-1023px** — two columns.
-- **< 640px** — one column.
+- **> 1024px** — three columns.
+- **601-1024px** — two columns.
+- **<= 600px** — one column.
+
+Breakpoints are the rail's own (`1024px` and `600px`) rather than new ones, so
+the two blocks reflow at the same widths.
 
 Cards keep their 16:10 crop at every width. The block's own vertical padding
 follows the gallery rail's, so the two read as a pair rather than as two
@@ -309,7 +313,8 @@ Checks:
 6. Every image's `naturalWidth` is greater than zero once scrolled into view, so
    a missing derivative fails loudly rather than rendering an empty box.
 7. No image resolves to a source narrower than its rendered CSS width.
-8. Three columns at 1280, two at 800, one at 375.
+8. Three columns at 1280, two at 800, one at 375 — matching the rail's 1024px
+   and 600px breakpoints.
 9. No horizontal document overflow at 375px.
 10. Cumulative layout shift contributed by the block is zero after images load,
     verified by comparing the block's height before and after image load.
