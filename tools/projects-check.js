@@ -201,14 +201,30 @@
 
   return Promise.resolve()
     .then(function () {
-      /* Scroll the LAST card into view, not the section: at 375px the six
-         cards stack and the lower ones sit well outside any lazy-load margin,
-         which would otherwise read as "failed to load" on the mobile re-run. */
       var list = cards();
-      var target = list.length ? list[list.length - 1] : block();
-      if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
       var imgs = list.map(function (li) { return li.querySelector('img'); })
                      .filter(Boolean);
+
+      /* Belt and braces only — the forced fetch below is the mechanism. Sweep
+         every card rather than just the last: at 375px the six stack across
+         ~2000px, so centring only the last one strands the first ones exactly
+         as centring only the section stranded the last ones. */
+      list.forEach(function (li) {
+        li.scrollIntoView({ behavior: 'auto', block: 'center' });
+      });
+
+      /* Some environments (this browser pane among them) never fire
+         loading="lazy" fetches and ignore programmatic scrolling, so relying
+         on scroll position to trigger the fetch makes the two checks below
+         report failures that say nothing about the markup. Force the fetch.
+         Safe: the loading="lazy" attribute assertion is a separate,
+         synchronous check that has already run against the unmodified DOM. */
+      imgs.forEach(function (img) {
+        if (img.complete) return;
+        img.loading = 'eager';
+        img.src = img.src;          /* re-assign to kick a fetch that never started */
+      });
+
       return imagesSettled(imgs, 5000);
     })
     .then(function () {
@@ -222,7 +238,12 @@
       list.forEach(function (li, i) {
         var img = li.querySelector('img');
         if (!img) { bad.push('#' + i + ' no img'); return; }
-        if (!img.naturalWidth) bad.push('#' + i + ' ' + img.currentSrc.split('/').pop() + ' failed to load');
+        if (!img.naturalWidth) {
+          /* currentSrc is '' for an image that never began fetching, which
+             would print a nameless "#0  failed to load". */
+          var who = (img.currentSrc || img.getAttribute('src') || '').split('/').pop();
+          bad.push('#' + i + ' ' + (who || '(no currentSrc)') + ' failed to load');
+        }
       });
       record('every card image actually loaded', bad.length === 0,
         bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' decoded');
