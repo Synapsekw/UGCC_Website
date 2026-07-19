@@ -41,6 +41,18 @@
   flex-direction: column;
   align-items: center;
   padding-block: 40px;
+  /* Localised scrim behind the centred stack only. The page-wide scrim is
+     deliberately light through the middle so the footage reads, but the
+     video pans across bright concrete where the eyebrow in --v2-red-text
+     (a mid-tone salmon) drops to near-illegible. Darkening the whole scrim
+     would undo Task 5; this darkens just the area behind the text and
+     fades out well before the edges of the frame. */
+  background: radial-gradient(
+    ellipse 68% 62% at 50% 50%,
+    rgba(0, 17, 28, .52) 0%,
+    rgba(0, 17, 28, .34) 48%,
+    rgba(0, 17, 28, 0) 74%
+  );
 }
 
 #aCqA2TkE7 .hero-eyebrow {
@@ -179,4 +191,40 @@
 
   /* Descriptions were hidden on mobile in the original layout. Keep that. */
   #aCqA2TkE7 .hero-service__desc { display: none; }
+}
+
+/* ==========================================================================
+   Two fixes found by looking at the rendered page, not by assertion.
+   ========================================================================== */
+
+/* 1. Legibility over a moving background.
+   The scrim is deliberately light through the middle (32%) so the aerial
+   footage reads, but the video pans across bright concrete and sand where
+   the eyebrow in --v2-red-text washes out badly. Darkening the scrim would
+   undo the whole point of Task 5, so carry the legibility on the text
+   instead: a soft shadow guarantees contrast on ANY frame of the video
+   without muddying the footage. */
+#aCqA2TkE7 .hero-eyebrow,
+#aCqA2TkE7 .hero-title,
+#aCqA2TkE7 .hero-sub,
+#aCqA2TkE7 .hero-service__name,
+#aCqA2TkE7 .hero-service__desc {
+  text-shadow:
+    0 1px 3px rgba(0, 17, 28, .45),
+    0 2px 14px rgba(0, 17, 28, .55);
+}
+
+/* 2. Don't run the last service column under the chat widget.
+   #glass-ai-widget-host is fixed bottom-right at z-index 2147483647. Before
+   this redesign the service strip sat below the fold so they never met;
+   pinning the strip to the hero's bottom edge puts the third column's text
+   directly under the button.
+
+   Only needed below ~1400px. Above that the centred 1224px layout leaves a
+   gutter wider than the widget, so the columns stay evenly padded on large
+   screens. Below it, the layout is 100% - 64px and always collides. */
+@media (max-width: 1400px) {
+  #aCqA2TkE7 .hero-service:last-child {
+    padding-right: 76px;
+  }
 }
