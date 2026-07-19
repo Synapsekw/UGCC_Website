@@ -272,8 +272,7 @@
    ========================================================================== */
 
 .v2-subnav {
-  background: #fff;
-  border-bottom: 1px solid rgba(0, 42, 65, .1);
+  background: var(--v2-navy);
   padding: 0 16px;
 }
 
@@ -281,7 +280,8 @@
   max-width: 1224px;
   margin: 0 auto;
   display: flex;
-  gap: 8px;
+  justify-content: center;
+  gap: 12px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -291,7 +291,7 @@
   font-size: 15px;
   font-weight: 600;
   letter-spacing: .02em;
-  color: rgba(0, 42, 65, .65);
+  color: rgba(255, 255, 255, .75);
   text-decoration: none;
   padding: 18px 14px 16px;
   border-bottom: 2px solid transparent;
@@ -299,10 +299,10 @@
   transition: color .22s var(--v2-ease-out-quart), border-color .22s var(--v2-ease-out-quart);
 }
 
-.v2-subnav a:hover { color: var(--v2-navy); }
+.v2-subnav a:hover { color: #fff; }
 
 .v2-subnav a.is-active {
-  color: var(--v2-navy);
+  color: #fff;
   border-bottom-color: var(--v2-red);
 }
 
