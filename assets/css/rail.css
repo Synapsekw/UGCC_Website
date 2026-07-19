@@ -55,6 +55,10 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x proximity;
+  /* Must match .v2-rail__track's inline padding. Without it the first card's
+     snap position is 24px in, so the rail rests at scrollLeft 24 instead of 0
+     and can never return to a true start. */
+  scroll-padding-left: 24px;
   scrollbar-width: none;          /* the rail is its own affordance */
 }
 
@@ -141,4 +145,5 @@
   .v2-rail__title { font-size: 22px; }
   .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
   .v2-rail__track { padding: 0 16px; }
+  .v2-rail__viewport { scroll-padding-left: 16px; }
 }
