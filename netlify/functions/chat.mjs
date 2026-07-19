@@ -154,7 +154,7 @@ export default async (req) => {
   try {
     // Search in English regardless of the question's language.
     let query = v.message;
-    if (/[؀-ۿ]/.test(v.message)) {
+    if (/[\u0600-\u06FF]/.test(v.message)) {
       const en = await englishSearchTerms(apiKey, v.message);
       if (en) query = en;
     }
@@ -173,7 +173,10 @@ export default async (req) => {
     if (!r.ok) return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });
     const data = await r.json();
     const output = extractText(data) || "Sorry, I couldn't produce an answer.";
-    return new Response(JSON.stringify({ output }), { status: 200, headers });
+    const payload = body?.debug === true
+      ? { output, _debug: { query, contextChars: context.length } }
+      : { output };
+    return new Response(JSON.stringify(payload), { status: 200, headers });
   } catch {
     return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });
   }
