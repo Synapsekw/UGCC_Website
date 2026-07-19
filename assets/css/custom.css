@@ -1,0 +1,16 @@
+/* Replica interactivity styles — replaces Hostinger builder hydration.
+   Reuses the original builder class names so all existing CSS still applies. */
+
+/* Slideshow: slides are stacked absolutely by the builder CSS; fade between them. */
+.slideshow.js-init .slide {
+  opacity: 0;
+  transition: opacity .9s ease;
+  z-index: 0;
+}
+.slideshow.js-init .slide.slide--active {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* Map pin is hidden until the iframe has a src (builder shows it after load). */
+.grid-map__pin { pointer-events: none; }
