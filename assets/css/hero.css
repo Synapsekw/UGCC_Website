@@ -3,16 +3,40 @@
    Loaded only by index.html, after v2.css.
    ========================================================================== */
 
-/* Gradient scrim replaces the flat 70% black, which flattened the aerial
-   footage into grey. Heavy at the edges, light through the middle. */
+/* Darkening the hero footage, in two layers.
+
+   1. The video is dropped to 82% opacity over a black backdrop, so it
+      composites DOWN onto black rather than being covered by more scrim.
+      That darkens the whole frame evenly and, unlike piling on more overlay,
+      it pulls the highlights down without also lifting a haze over the
+      shadows - the bright concrete and sand the camera pans across were what
+      washed out, not the dark areas.
+   2. The gradient scrim keeps its vignette shape but is re-tinted from
+      rgba(0, 17, 28) - a dark navy - to true black, which is what was asked
+      for, and its mid alphas come down slightly so the two layers do not
+      double up.
+
+   Net effect at 1280x720: the middle of the frame goes from 32% darkened to
+   about 41%, while the top and bottom edges land within 2 points of where
+   they already were. The darkening is concentrated where the footage was
+   actually failing. */
+#aCqA2TkE7 .block-background {
+  background-color: #000 !important;
+}
+
+#aCqA2TkE7 .block-background__image,
+#aCqA2TkE7 .block-background__video--fixed {
+  opacity: .82;
+}
+
 #aCqA2TkE7 .block-background__overlay {
   opacity: 1 !important;
   background: linear-gradient(
     to bottom,
-    rgba(0, 17, 28, .82) 0%,
-    rgba(0, 17, 28, .38) 30%,
-    rgba(0, 17, 28, .32) 56%,
-    rgba(0, 17, 28, .88) 100%
+    rgba(0, 0, 0, .76) 0%,
+    rgba(0, 0, 0, .34) 30%,
+    rgba(0, 0, 0, .28) 56%,
+    rgba(0, 0, 0, .84) 100%
   ) !important;
 }
 
@@ -81,11 +105,14 @@
      near-illegible. Darkening the whole scrim would undo Task 5, so this
      darkens just the area behind the text and fades out well before the
      edges of the frame. */
+  /* Re-tinted to true black to match the scrim above. Alphas come down
+     because the video is now at 82% over black and this no longer has to
+     carry the legibility on its own. */
   background: radial-gradient(
     ellipse 68% 62% at 50% 50%,
-    rgba(0, 17, 28, .52) 0%,
-    rgba(0, 17, 28, .34) 48%,
-    rgba(0, 17, 28, 0) 74%
+    rgba(0, 0, 0, .42) 0%,
+    rgba(0, 0, 0, .26) 48%,
+    rgba(0, 0, 0, 0) 74%
   );
 }
 
@@ -161,87 +188,6 @@
   transform: translateY(0);
 }
 
-/* ---------- service strip, pinned to the hero's bottom edge ---------- */
-/* Readability treatment (Task 6), revised after client feedback that the
-   first pass (a bordered, rounded, fairly opaque panel with a hard
-   border-top) read as a block pasted onto the page. Two layers now, both
-   soft:
-
-   1. #aCqA2TkE7::after — a wide, tall cinematic gradient that rises from
-      the hero's bottom edge, full-bleed (not scoped to the content
-      column). This is the same device used at the top of the hero
-      (block-background__overlay) and reads as part of the footage's
-      natural vignette rather than a UI element. z-index:13 sits it above
-      the video (also 13, but painted first in DOM order) and below the
-      text (hero-layout is 14).
-   2. .hero-services itself — a much lower-opacity wash plus a lighter
-      blur directly behind the text, no border, no border-radius. This is
-      what the harness's "readability treatment" check inspects; it is
-      deliberately subtle now that layer 1 is doing most of the
-      legibility work, so the footage still reads as video through it. */
-#aCqA2TkE7::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 300px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 17, 28, 0) 0%,
-    rgba(0, 17, 28, .3) 55%,
-    rgba(0, 17, 28, .6) 100%
-  );
-  pointer-events: none;
-  z-index: 13;
-}
-
-#aCqA2TkE7 .hero-services {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 40px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding-top: 28px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 17, 28, 0) 0%,
-    rgba(0, 17, 28, .22) 45%,
-    rgba(0, 17, 28, .4) 100%
-  );
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-#aCqA2TkE7 .hero-service {
-  /* More room than the first pass: the longest description (building
-     construction) now sits with generous clearance above and below
-     instead of filling every pixel of the card. Grid's default
-     align-items:stretch already equalises all three card heights to the
-     tallest one, so the row reads as one strip rather than ragged. */
-  padding: 10px 28px 30px;
-  border-right: 1px solid rgba(255, 255, 255, .1);
-}
-
-#aCqA2TkE7 .hero-service:first-child { padding-left: 0; }
-#aCqA2TkE7 .hero-service:last-child { border-right: 0; padding-right: 0; }
-
-#aCqA2TkE7 .hero-service__name {
-  margin: 0 0 8px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: #fff;
-}
-
-#aCqA2TkE7 .hero-service__desc {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, .66);
-}
-
 /* ---------- mobile ----------
    920px, not 768px: this is the builder's own breakpoint and where the
    header swaps to its mobile layout. A different number would leave a dead
@@ -257,57 +203,9 @@
 
   #aCqA2TkE7 .hero-cta { flex-direction: column; align-self: stretch; }
   #aCqA2TkE7 .hero-btn { text-align: center; }
-
-  #aCqA2TkE7 .hero-services {
-    grid-template-columns: minmax(0, 1fr);
-    bottom: 28px;
-  }
-
-  #aCqA2TkE7 .hero-service {
-    padding: 14px 0;
-    border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, .14);
-  }
-
-  #aCqA2TkE7 .hero-service:last-child { border-bottom: 0; }
-
-  /* Descriptions were hidden on mobile in the original layout. Keep that. */
-  #aCqA2TkE7 .hero-service__desc { display: none; }
 }
 
-/* ==========================================================================
-   Legibility fix found by looking at the rendered page, not by assertion.
-   ========================================================================== */
 
-/* The scrim is deliberately light through the middle (32%) so the aerial
-   footage reads, but the video pans across bright concrete and sand where
-   plain white text can lose contrast. Darkening the scrim would undo the
-   whole point of Task 5, so carry the legibility on the text instead: a
-   soft shadow guarantees contrast on ANY frame of the video without
-   muddying the footage. (The service strip additionally gets its own
-   surface above — see Task 6 — since text-shadow alone wasn't enough
-   there.) */
-#aCqA2TkE7 .hero-title,
-#aCqA2TkE7 .hero-service__name,
-#aCqA2TkE7 .hero-service__desc {
-  text-shadow:
-    0 1px 3px rgba(0, 17, 28, .45),
-    0 2px 14px rgba(0, 17, 28, .55);
-}
-
-/* Don't run the last service column under the chat widget.
-   #glass-ai-widget-host is fixed bottom-right at z-index 2147483647. The
-   service strip is pinned to the hero's bottom edge, which puts the third
-   column's text directly under the button.
-
-   Only needed below ~1400px. Above that the centred 1224px layout leaves a
-   gutter wider than the widget, so the columns stay evenly padded on large
-   screens. Below it, the layout is 100% - 64px and always collides. */
-@media (max-width: 1400px) {
-  #aCqA2TkE7 .hero-service:last-child {
-    padding-right: 76px;
-  }
-}
 
 /* ==========================================================================
    Motion — vanilla ports of the React Bits effects (Split Text, Blur Text).
@@ -324,8 +222,11 @@
   animation: hero-word-in .75s var(--v2-ease-out-expo) both;
 }
 
+/* .hero-service used to share this selector; removing the cards took the
+   whole rule with it, which silently dropped the CTAs' entrance too. The
+   logo rail replaces the cards here and fades in as one band. */
 .hero-motion #aCqA2TkE7 .hero-cta,
-.hero-motion #aCqA2TkE7 .hero-service {
+.hero-motion #aCqA2TkE7 .hero-clients {
   animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
 }
 
@@ -371,4 +272,80 @@
 @keyframes hero-shine {
   from { left: -60%; }
   to   { left: 120%; }
+}
+
+/* ==========================================================================
+   Client logo rail — replaces the three service cards.
+   ========================================================================== */
+
+#aCqA2TkE7 .hero-clients {
+  position: absolute;
+  /* Full-bleed out of the 1224px content column, so the rail reads as a
+     band across the page rather than a boxed widget. calc(50% - 50vw)
+     rather than width:100vw, which overflows by the scrollbar width. */
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  /* Vertically centred on the chat widget. That widget is fixed with its
+     midpoint ~56px above the viewport bottom, so a 44px rail sitting 34px
+     up puts both midpoints on the same line at any viewport height. */
+  bottom: 34px;
+  height: 44px;
+  overflow: hidden;
+  /* Fade both ends so logos travel in and out instead of being chopped
+     off at a hard edge. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+}
+
+#aCqA2TkE7 .hero-clients__track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+}
+
+#aCqA2TkE7 .hero-clients__set {
+  display: flex;
+  align-items: center;
+  gap: clamp(44px, 5vw, 90px);
+  padding-right: clamp(44px, 5vw, 90px);
+  flex: none;
+}
+
+#aCqA2TkE7 .hero-clients img {
+  height: 34px;
+  width: auto;
+  flex: none;
+  /* Whitened at render time by the SVG filter defined in index.html:
+     alpha = 1 - luminance, RGB forced white, then composited "in" the
+     source alpha. Six of the nine source logos have SOLID WHITE
+     backgrounds, so a plain invert() would render those as white blocks;
+     this drops the background out instead, and the composite keeps the
+     three already-transparent PNGs transparent. Doing it in a filter means
+     no generated assets and no second copy of the logos in the repo. */
+  filter: url(#ugcc-whiten);
+  /* .62 rather than .5: the footage pans across bright concrete mid-frame,
+     where .5 dropped the logos crossing that band well below the ones at
+     the darker edges. Still clearly semi-transparent, just evenly so. */
+  opacity: .62;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #aCqA2TkE7 .hero-clients__track {
+    animation: hero-clients-roll 48s linear infinite;
+  }
+}
+
+/* Exactly two identical sets in the DOM, so translating -50% lands copy 2
+   precisely where copy 1 started and the loop has no visible seam. */
+@keyframes hero-clients-roll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (max-width: 920px) {
+  #aCqA2TkE7 .hero-clients {
+    bottom: 26px;
+    height: 34px;
+  }
+  #aCqA2TkE7 .hero-clients img { height: 24px; }
 }

@@ -36,12 +36,57 @@
     hero.style.setProperty(prop, h + 'px', 'important');
   }
 
-  syncHeaderHeight();
+  /* ---------- line the logo rail up with the chat widget ----------
+     The brief is that the rail sits "in line with the chat icon". That
+     widget is injected by a third-party script, is position:fixed against
+     the viewport bottom, and owns its own offset - so hardcoding a matching
+     value in CSS would go stale the moment the widget changes.
+
+     The hero spans the full viewport, so at scroll top its bottom edge and
+     the viewport's coincide: the rail's offset from the hero's bottom that
+     puts the two midpoints on one line is
+       (viewportHeight - widgetMidpoint) - railHeight / 2.
+     Falls back to the CSS value when the widget is absent. */
+  function syncRailToWidget() {
+    var rail = hero.querySelector('.hero-clients');
+    var widget = document.getElementById('glass-ai-widget-host');
+    if (!rail || !widget) return;
+    var wr = widget.getBoundingClientRect();
+    var rr = rail.getBoundingClientRect();
+    if (!wr.height || !rr.height) return;
+
+    /* Measure the error and correct it, rather than computing an offset
+       from the viewport. The rail's containing block is the builder's
+       .block-layout, whose padding box does NOT coincide with the section
+       box - an analytically derived `bottom` lands ~18px out. Nudging by
+       the observed delta is correct whatever the containing block turns
+       out to be, and converges in one pass because the relationship is
+       linear. Increasing `bottom` moves the rail up. */
+    var widgetMid = wr.top + wr.height / 2;
+    var railMid = rr.top + rr.height / 2;
+    var delta = railMid - widgetMid;
+    if (Math.abs(delta) < 0.5) return;
+
+    var current = parseFloat(getComputedStyle(rail).bottom);
+    if (isNaN(current)) return;
+    rail.style.bottom = (current + delta) + 'px';
+  }
+
+  function syncLayout() {
+    syncHeaderHeight();
+    syncRailToWidget();
+  }
+
+  syncLayout();
+  /* The widget script may inject after us, so re-run once it settles. */
+  window.addEventListener('load', syncLayout);
+  setTimeout(syncLayout, 600);
+  setTimeout(syncLayout, 1800);
 
   var resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(syncHeaderHeight, 120);
+    resizeTimer = setTimeout(syncLayout, 120);
   }, { passive: true });
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -82,10 +127,11 @@
   var afterWords = 80 + words.length * 60;
   delay(hero.querySelector('.hero-cta'), afterWords + 120);
 
-  var services = hero.querySelectorAll('.hero-service');
-  Array.prototype.forEach.call(services, function (s, i) {
-    delay(s, afterWords + 240 + i * 110);
-  });
+  /* The three service cards were replaced by the client logo rail, which
+     fades in as one band rather than as staggered items - the rail has its
+     own continuous marquee, so staggering its contents on entry would read
+     as two competing motions. */
+  delay(hero.querySelector('.hero-clients'), afterWords + 240);
 
   document.documentElement.classList.add('hero-motion');
 })();
