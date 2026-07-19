@@ -104,7 +104,7 @@ properties and its `.block-background` (flat `rgb(0, 42, 65)`) are untouched.
 ```html
 <div class="block-layout block-layout--layout about-layout">
   <div class="about-stack">
-    <p class="about-eyebrow"><span class="about-rule"></span>ABOUT UGCC</p>
+    <span class="about-rule" aria-hidden="true"></span>
     <h2 class="about-statement">A multidisciplinary contractor delivering
       engineering projects across the Middle East.</h2>
     <p class="about-sub">Quality control, planning and project management held to
@@ -123,9 +123,14 @@ Layout:
   left edge of the statement aligns with the left edge of the hero's service
   strip.
 - `.about-stack` `max-width: 720px`, left-aligned.
-- `.about-eyebrow` — 12px, weight 600, `letter-spacing: .16em`,
-  `color: var(--v2-red-text)`, preceded by a 26px × 1px red rule with 10px gap.
-  Deliberately identical to `.hero-eyebrow` so the two sections rhyme.
+- `.about-rule` — a bare 48px × 2px bar in `--v2-red-text`, 24px above the
+  statement. **No eyebrow text.** An earlier draft opened this section with a
+  letterspaced `ABOUT UGCC` label mirroring `.hero-eyebrow`; the client
+  subsequently had the hero's eyebrow and supporting line removed
+  (commit `44db460`, headline-only composition), so reintroducing one section
+  lower would undo that call. The rule alone marks the section start and
+  carries the brand colour. It is `aria-hidden` — it is decoration, and the
+  `<h2>` is the section's real name.
 - `.about-statement` — `clamp(28px, 3.4vw, 46px)`, `line-height: 1.15`,
   `color: #fff`, `max-width: 16ch` per line target. It is an `<h2>`: the page
   currently jumps from the hero `<h1>` to `<h3>`, which this fixes.

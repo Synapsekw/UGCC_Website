@@ -494,7 +494,7 @@ The three existing `.layout-element` wrappers carry inline `--grid-row` / `--gri
 Inside `<section id="BCClZ9bf3">`, replace the entire `<div class="block-layout block-layout--layout" style="...">` element — opening tag, all three `.layout-element` children, closing tag — with:
 
 ```html
-<div class="block-layout block-layout--layout about-layout"><div class="about-stack"><p class="about-eyebrow"><span class="about-rule"></span>ABOUT UGCC</p><h2 class="about-statement">A multidisciplinary contractor delivering engineering projects across the Middle East.</h2><p class="about-sub">Quality control, planning and project management held to one standard &mdash; in Kuwait, the GCC and internationally.</p><a class="v2-btn v2-btn--primary" href="/about-contractor-kuwait">Read More</a></div></div>
+<div class="block-layout block-layout--layout about-layout"><div class="about-stack"><span class="about-rule" aria-hidden="true"></span><h2 class="about-statement">A multidisciplinary contractor delivering engineering projects across the Middle East.</h2><p class="about-sub">Quality control, planning and project management held to one standard &mdash; in Kuwait, the GCC and internationally.</p><a class="v2-btn v2-btn--primary" href="/about-contractor-kuwait">Read More</a></div></div>
 ```
 
 Notes:
@@ -559,24 +559,18 @@ Add to the end of `assets/css/sections.css`:
   max-width: 720px;
 }
 
-/* Deliberately the same treatment as .hero-eyebrow, so the two sections
-   rhyme. --v2-red-text is the lightened salmon: correct here because the
-   ground is navy. */
-#BCClZ9bf3 .about-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 20px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .16em;
-  color: var(--v2-red-text);
-}
-
+/* A bare rule, no eyebrow text. An earlier draft opened this section with a
+   letterspaced ABOUT UGCC label mirroring .hero-eyebrow; the client then had
+   the hero's eyebrow and supporting line removed (44db460, headline-only
+   composition), so reintroducing one a section lower would undo that call.
+   --v2-red-text is the lightened salmon: correct here because the ground is
+   navy. Wider and thicker than the old inline rule because it now stands on
+   its own rather than sitting beside text. */
 #BCClZ9bf3 .about-rule {
-  flex: none;
-  width: 26px;
-  height: 1px;
+  display: block;
+  width: 48px;
+  height: 2px;
+  margin: 0 0 24px;
   background: var(--v2-red-text);
 }
 
