@@ -143,8 +143,14 @@ its four `.layout-element` children are replaced entirely.
 
 `<h3>` matches the gallery rail's own heading level and the sibling section
 headings (`THE POWER OF EXPERIENCE`, `Our offices and Branches`), so the page's
-heading order is unchanged. Card titles are `<h4>`, which is also the level
-Who-are-we uses for its numbered services.
+heading order is unchanged. Card titles are `<h4>`, one level below the block's
+own `<h3>`.
+
+The original rationale here — that `<h4>` "is also the level Who-are-we uses for
+its numbered services" — went stale during implementation: the concurrent
+Who-are-we work replaced its seven `<h4>` service headings with a single `<h2>`,
+so that block now contributes no `<h4>` at all. The chosen level is still correct
+on its own terms, and the shipped outline was verified to introduce no skip.
 
 Each card is a **single anchor** wrapping image, title and metadata, so its
 accessible name is the project title and there is one tab stop per project — not
