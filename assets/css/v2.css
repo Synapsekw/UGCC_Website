@@ -548,25 +548,14 @@
   }
 }
 
-/* Animated underline, wiping in from the left. */
-.block-header .item-content::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -6px;
-  height: 2px;
-  background: var(--v2-red);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform .3s var(--v2-ease-out-quart);
-}
-
-.block-header .item-content:hover::after,
-.block-header .item-content:focus-visible::after,
-.block-header .item-content-wrapper--active .item-content::after {
-  transform: scaleX(1);
-}
+/* No underline rules here on purpose. This file ALREADY implements the
+   wipe-in underline further up, under "nav links: red underline grows from
+   the left". That version is the better one - it triggers from
+   .item-content-wrapper:hover, which is a larger hit area than the inline
+   <a> itself, and uses :focus-within rather than :focus-visible on the
+   anchor. It already draws in var(--v2-red), so Task 2's colour correction
+   flows through it automatically. Task 3 originally appended a duplicate
+   here; it was removed. Do not re-add one. */
 
 /* Last nav item ("Contact us") promoted to an outlined pill.
    Targeted structurally so it needs no markup change on any page. */
