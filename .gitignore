@@ -5,3 +5,9 @@ UGCC Comments/
 assets/img/GalleryPicturesHighQualitytobeUsed/
 assets/img/KP3_GallerytobeUpdated/
 assets/img/MEW-6085-2024_2025_GalleryTobeupdated/
+
+# chatbot / secrets
+.env
+.netlify/
+__pycache__/
+.pytest_cache/
