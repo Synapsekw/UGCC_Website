@@ -36,10 +36,27 @@
     '/zorepc0059'
   ];
   var ALL_HREF = '/construction-projects-kuwait';
+  var CARD_COUNT = EXPECTED_HREFS.length;
 
   function block() { return document.getElementById(SECTION); }
   function cards() {
     return Array.prototype.slice.call(document.querySelectorAll('.v2-proj__item'));
+  }
+
+  /* html { scroll-behavior: smooth } is set globally in main.css and v2.css,
+     so a bare scrollIntoView() animates and the lazy images do not begin
+     fetching until the animation lands. Scroll instantly instead, then poll
+     img.complete — which turns true for loaded AND errored images, so this
+     converges either way and the naturalWidth assertions below still tell the
+     two apart. Bounded, so a hung request costs capMs, not the whole run. */
+  function imagesSettled(imgs, capMs) {
+    var deadline = Date.now() + capMs;
+    return new Promise(function (res) {
+      (function poll() {
+        if (imgs.every(function (i) { return i.complete; }) || Date.now() > deadline) return res();
+        setTimeout(poll, 50);
+      })();
+    });
   }
 
   check('block is under 1300px tall', function () {
@@ -53,40 +70,53 @@
   check('builder gallery is gone', function () {
     var s = block();
     if (!s) return { ok: false, detail: 'section missing' };
-    var n = s.querySelectorAll('.grid-gallery, .grid-gallery-grid, .layout-element').length;
-    return { ok: n === 0, detail: n + ' legacy builder nodes remain' };
+    var found = Array.prototype.map.call(
+      s.querySelectorAll('.grid-gallery, .grid-gallery-grid, .layout-element'),
+      function (el) { return el.classList[0] || el.tagName.toLowerCase(); });
+    return {
+      ok: found.length === 0,
+      detail: found.length + ' legacy builder nodes remain' +
+              (found.length ? ': ' + found.join(', ') : '')
+    };
   });
 
-  check('block holds exactly 6 cards', function () {
+  check('block holds exactly ' + CARD_COUNT + ' cards', function () {
     var n = cards().length;
-    return { ok: n === 6, detail: n + ' cards (want 6)' };
+    return { ok: n === CARD_COUNT, detail: n + ' cards (want ' + CARD_COUNT + ')' };
   });
 
-  check('block holds exactly 7 links', function () {
+  check('block holds exactly ' + (CARD_COUNT + 1) + ' links', function () {
     var s = block();
     if (!s) return { ok: false, detail: 'section missing' };
     var n = s.querySelectorAll('a[href]').length;
-    return { ok: n === 7, detail: n + ' links (want 7: 6 cards + all-projects; was 1)' };
+    return {
+      ok: n === CARD_COUNT + 1,
+      detail: n + ' links (want ' + (CARD_COUNT + 1) + ': ' + CARD_COUNT +
+              ' cards + all-projects; was 1)'
+    };
   });
 
   check('each card is a single anchor', function () {
     /* Guard first: without it this passes vacuously when no cards exist. */
     var list = cards();
-    if (list.length !== 6) {
-      return { ok: false, detail: 'expected 6 cards to inspect, found ' + list.length };
+    if (list.length !== CARD_COUNT) {
+      return { ok: false, detail: 'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length };
     }
     var bad = [];
     list.forEach(function (li, i) {
       var n = li.querySelectorAll('a[href]').length;
       if (n !== 1) bad.push('#' + i + ' has ' + n + ' anchors');
     });
-    return { ok: bad.length === 0, detail: bad.join('; ') || '6/6 single-anchor' };
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' single-anchor'
+    };
   });
 
   check('every card image is lazy, described and intrinsically sized', function () {
     var list = cards();
-    if (list.length !== 6) {
-      return { ok: false, detail: 'expected 6 cards to inspect, found ' + list.length };
+    if (list.length !== CARD_COUNT) {
+      return { ok: false, detail: 'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length };
     }
     var bad = [];
     list.forEach(function (li, i) {
@@ -96,25 +126,31 @@
       if (!img.getAttribute('width') || !img.getAttribute('height')) bad.push('#' + i + ' no width/height');
       if (img.getAttribute('loading') !== 'lazy') bad.push('#' + i + ' not lazy');
     });
-    return { ok: bad.length === 0, detail: bad.join('; ') || '6/6 ok' };
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' ok'
+    };
   });
 
   check('image frames reserve a 16:10 box', function () {
     /* This is the mechanism that keeps layout shift at zero as lazy images
        arrive. Assert the mechanism, not a timing-dependent measurement. */
     var list = document.querySelectorAll('.v2-proj__shot');
-    if (list.length !== 6) {
-      return { ok: false, detail: 'expected 6 frames, found ' + list.length };
+    if (list.length !== CARD_COUNT) {
+      return { ok: false, detail: 'expected ' + CARD_COUNT + ' frames, found ' + list.length };
     }
     var bad = [];
     Array.prototype.forEach.call(list, function (el, i) {
       var ar = getComputedStyle(el).aspectRatio.replace(/\s/g, '');
       if (ar !== '16/10') bad.push('#' + i + ' aspect-ratio=' + ar);
     });
-    return { ok: bad.length === 0, detail: bad.join('; ') || '6/6 at 16/10' };
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' at 16/10'
+    };
   });
 
-  check('cards produce exactly the 6 expected hrefs', function () {
+  check('cards produce exactly the ' + CARD_COUNT + ' expected hrefs', function () {
     var hrefs = cards().map(function (li) {
       var a = li.querySelector('a[href]');
       return a ? a.getAttribute('href') : null;
@@ -141,35 +177,45 @@
     if (!grid) return { ok: false, detail: 'grid missing' };
     var cols = getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length;
     var w = window.innerWidth;
+    /* These two thresholds mirror the max-width media queries in
+       assets/css/projects.css (1024px and 600px) — change both together.
+       The strict > at exactly 1024px is deliberate: a max-width: 1024px query
+       matches AT 1024, so 1024 itself belongs to the two-column band. */
     var want = w > 1024 ? 3 : (w > 600 ? 2 : 1);
     return { ok: cols === want, detail: cols + ' columns at ' + w + 'px (want ' + want + ')' };
   });
 
   check('no horizontal page overflow', function () {
-    var over = document.body.scrollWidth - window.innerWidth;
+    /* Compare the documentElement against itself. body.scrollWidth excludes
+       the vertical scrollbar while window.innerWidth includes it, so that
+       pairing cannot see an overflow narrower than the scrollbar. */
+    var de = document.documentElement;
     return {
-      ok: over <= 0,
-      detail: 'body.scrollWidth ' + document.body.scrollWidth +
-              ' vs innerWidth ' + window.innerWidth + ' @ ' + window.innerWidth + 'px'
+      ok: de.scrollWidth <= de.clientWidth,
+      detail: 'documentElement scrollWidth ' + de.scrollWidth +
+              ' vs clientWidth ' + de.clientWidth + ' @ ' + window.innerWidth + 'px'
     };
   });
 
   /* ---------- async section ---------- */
 
-  var list = cards();
-
   return Promise.resolve()
     .then(function () {
-      /* Scroll the block into view so the lazy images actually fetch, then
-         give the decode a moment. */
-      var s = block();
-      if (s) s.scrollIntoView();
-      return new Promise(function (res) { setTimeout(res, 1200); });
+      /* Scroll the LAST card into view, not the section: at 375px the six
+         cards stack and the lower ones sit well outside any lazy-load margin,
+         which would otherwise read as "failed to load" on the mobile re-run. */
+      var list = cards();
+      var target = list.length ? list[list.length - 1] : block();
+      if (target) target.scrollIntoView({ behavior: 'auto', block: 'center' });
+      var imgs = list.map(function (li) { return li.querySelector('img'); })
+                     .filter(Boolean);
+      return imagesSettled(imgs, 5000);
     })
     .then(function () {
-      if (list.length !== 6) {
+      var list = cards();
+      if (list.length !== CARD_COUNT) {
         record('every card image actually loaded', false,
-          'expected 6 cards to inspect, found ' + list.length);
+          'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length);
         return;
       }
       var bad = [];
@@ -179,39 +225,55 @@
         if (!img.naturalWidth) bad.push('#' + i + ' ' + img.currentSrc.split('/').pop() + ' failed to load');
       });
       record('every card image actually loaded', bad.length === 0,
-        bad.join('; ') || '6/6 decoded');
+        bad.join('; ') || CARD_COUNT + '/' + CARD_COUNT + ' decoded');
     })
     .then(function () {
-      if (list.length !== 6) {
+      var list = cards();
+      if (list.length !== CARD_COUNT) {
         record('no image is upscaled in its slot', false,
-          'expected 6 cards to inspect, found ' + list.length);
+          'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length);
         return;
       }
+      /* Count what was actually measured. Skipping broken images without
+         counting lets this report "all sources >= their rendered width" on a
+         page where every image 404'd — a green line asserting something it
+         never looked at. */
       var bad = [];
+      var measured = 0;
       list.forEach(function (li, i) {
         var img = li.querySelector('img');
         if (!img || !img.naturalWidth) return;
+        measured++;
         var css = Math.round(img.getBoundingClientRect().width);
         if (img.naturalWidth < css) {
           bad.push('#' + i + ' ' + img.naturalWidth + 'w source in a ' + css + 'px slot');
         }
       });
-      record('no image is upscaled in its slot', bad.length === 0,
-        bad.join('; ') || 'all sources >= their rendered width');
+      record('no image is upscaled in its slot',
+        bad.length === 0 && measured === CARD_COUNT,
+        bad.join('; ') || measured + '/' + CARD_COUNT + ' sources >= their rendered width');
     })
     .then(function () {
       var hrefs = EXPECTED_HREFS.concat([ALL_HREF]);
+      /* GET, like rail-check.js: plenty of static servers answer HEAD with
+         405/501, which would redden all of these for reasons unrelated to the
+         markup. Judge on r.ok so a 304 from a warm cache is not a failure. */
       return Promise.all(hrefs.map(function (h) {
-        return fetch(h, { method: 'HEAD' })
-          .then(function (r) { return { h: h, s: r.status }; })
-          .catch(function () { return { h: h, s: 0 }; });
+        return fetch(h, { method: 'GET' })
+          .then(function (r) { return { h: h, s: r.status, ok: r.ok }; })
+          .catch(function (e) { return { h: h, s: 0, ok: false, why: e.message }; });
       })).then(function (rs) {
-        var bad = rs.filter(function (r) { return r.s !== 200; });
-        record('all 7 destinations return 200',
+        var bad = rs.filter(function (r) { return !r.ok; });
+        record('all ' + hrefs.length + ' destinations are reachable',
           bad.length === 0,
-          bad.map(function (r) { return r.h + ' -> ' + r.s; }).join('; ') ||
-            '7/7 reachable');
+          bad.map(function (r) { return r.h + ' -> ' + (r.s || r.why); }).join('; ') ||
+            hrefs.length + '/' + hrefs.length + ' reachable');
       });
+    })
+    /* Terminal catch, before the reporting block: one unexpected throw would
+       otherwise discard every result collected so far and print a bare stack. */
+    .catch(function (e) {
+      record('harness', false, 'threw: ' + e.message);
     })
     .then(function () {
       var passed = results.filter(function (r) { return r.ok; }).length;
