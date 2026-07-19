@@ -2,13 +2,15 @@
    UGCC V2.0 — modernization layer
    Loaded after main.css/custom.css. Pure enhancement: no layout changes,
    only motion, hover states and surface polish on top of the V1 replica.
-   Brand: navy rgb(0,42,65), signal red #d31225, white.
+   Brand: navy rgb(0,42,65), signal red #d41c22 (logo-matched), white.
    ========================================================================== */
 
 :root {
   --v2-navy: rgb(0, 42, 65);
   --v2-navy-92: rgba(0, 42, 65, .92);
-  --v2-red: #d31225;
+  --v2-navy-70: rgba(0, 42, 65, .70);
+  --v2-red: #d41c22;
+  --v2-red-text: #e8635e;
   --v2-shadow-header: 0 10px 30px -12px rgba(0, 21, 33, .45);
   --v2-shadow-lift: 0 14px 28px -12px rgba(0, 21, 33, .35);
   --v2-ease-out-quart: cubic-bezier(.25, 1, .5, 1);
