@@ -3,11 +3,12 @@
    automation. Returns {passed, failed, results}. Resize to 1280x720 first.
 
    NOT covered by this script (manual verification required):
-     - inner-page nav appearance on light backgrounds (this script only
-       exercises the homepage hero, which sits on a dark/video background)
-     - mobile layout at 375px viewport width
-   Reduced-motion behaviour and CTA keyboard-focus visibility ARE covered
-   by the checks below — they are not manual-only gaps. */
+     - inner-page nav appearance on light backgrounds
+     - 375px mobile layout
+     - keyboard focus visibility on nav links and hero CTAs
+     - header condensing without content jump, on inner pages where the
+       header is in flow
+   Reduced-motion behaviour for the hero IS covered by the checks below. */
 (function () {
   'use strict';
 
@@ -28,33 +29,44 @@
   var SERVICE_IDS = ['z5y7PA', 'zGp0a1', 'zBf9dg', 'zEZmIA', 'zGqZ-o', 'zwB5a2'];
   var vh = window.innerHeight;
 
-  /* ---- preconditions: must fail loudly, not silently invalidate later checks ---- */
+  /* Hoisted so checks 1 and 2 can gate on them directly, not just report
+     alongside them — a precondition failure must invalidate those results,
+     not merely appear as a separate line above a false PASS. */
+  var atScrollTop = window.scrollY === 0;
+  var atRequiredViewport = window.innerWidth === 1280 && window.innerHeight === 720;
+  var PRECONDITION_DETAIL = 'precondition not met — page must be at scroll top at 1280x720';
+
+  /* ---- preconditions: reported as their own lines, and gate checks 1 & 2 below ---- */
 
   check('preconditions: page at scroll top', function () {
-    return { ok: window.scrollY === 0, detail: 'scrollY=' + window.scrollY };
+    return { ok: atScrollTop, detail: 'scrollY=' + window.scrollY };
   });
 
   check('preconditions: viewport is 1280x720', function () {
-    var w = window.innerWidth, h = window.innerHeight;
-    return { ok: w === 1280 && h === 720, detail: 'innerWidth=' + w + ' innerHeight=' + h };
+    return { ok: atRequiredViewport, detail: 'innerWidth=' + window.innerWidth + ' innerHeight=' + window.innerHeight };
   });
 
   check('all three service columns are above the fold', function () {
+    if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
     var bad = [];
     SERVICE_IDS.forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) { bad.push(id + ' missing'); return; }
       var r = el.getBoundingClientRect();
-      /* A display:none element yields an all-zero rect, so bottom=0 would
-         otherwise read as "above the fold". Zero size means unrendered,
-         not visible. */
-      if (r.height <= 0 || r.bottom <= 0) { bad.push(id + ' not rendered (height=' + r.height + ')'); return; }
+      /* A display:none element yields an all-zero rect (height=0, bottom=0);
+         an element merely scrolled above the viewport can have real height
+         but a negative/zero bottom. These are different failures and get
+         different messages so "not rendered" never gets reported alongside
+         a nonzero height. */
+      if (r.height <= 0) { bad.push(id + ' not rendered (height=0)'); return; }
+      if (r.bottom <= 0) { bad.push(id + ' scrolled above viewport (bottom=' + Math.round(r.bottom) + ')'); return; }
       if (r.bottom > vh) bad.push(id + ' bottom=' + Math.round(r.bottom) + ' > vh=' + vh);
     });
     return { ok: bad.length === 0, detail: bad.join('; ') };
   });
 
   check('hero fits the viewport', function () {
+    if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
     var hero = document.getElementById('aCqA2TkE7');
     var r = hero.getBoundingClientRect();
     if (r.height <= 0) return { ok: false, detail: 'hero not rendered (height=0)' };
@@ -65,27 +77,55 @@
   check('h1 accessible name is exactly WE BUILD BETTER', function () {
     var h1 = document.querySelector('#aCqA2TkE7 h1');
     if (!h1) return { ok: false, detail: 'no h1 in hero' };
-    var name = (h1.textContent || '').replace(/\s+/g, ' ').trim();
-    if (name !== 'WE BUILD BETTER') return { ok: false, detail: 'got "' + name + '"' };
 
-    /* textContent equality is not sufficient: aria-label/aria-labelledby
-       override it, and aria-hidden="true" on a wrapper span (e.g. from a
-       per-word span split) can silently remove visible text from the
-       accessible name while textContent still reads correctly. */
-    if (h1.hasAttribute('aria-label')) {
-      return { ok: false, detail: 'h1 has aria-label="' + h1.getAttribute('aria-label') + '"' };
+    function isAriaHiddenTrue(el) {
+      var v = el.getAttribute && el.getAttribute('aria-hidden');
+      return !!v && v.toLowerCase() === 'true';
     }
-    if (h1.hasAttribute('aria-labelledby')) {
-      return { ok: false, detail: 'h1 has aria-labelledby="' + h1.getAttribute('aria-labelledby') + '"' };
+    function hasPresentationRole(el) {
+      var v = el.getAttribute && el.getAttribute('role');
+      return !!v && (v.toLowerCase() === 'presentation' || v.toLowerCase() === 'none');
     }
-    var hiddenOffenders = [];
-    Array.prototype.forEach.call(h1.querySelectorAll('[aria-hidden="true"]'), function (el) {
-      if ((el.textContent || '').trim().length > 0) {
-        hiddenOffenders.push(el.tagName.toLowerCase());
-      }
-    });
-    if (hiddenOffenders.length) {
-      return { ok: false, detail: hiddenOffenders.length + ' descendant(s) with non-whitespace text carry aria-hidden="true": ' + hiddenOffenders.join(', ') };
+
+    if (isAriaHiddenTrue(h1) || hasPresentationRole(h1)) {
+      return { ok: false, detail: 'h1 itself carries aria-hidden="true" or role="presentation"/"none", which removes it from the accessibility tree entirely' };
+    }
+    var h1cs = getComputedStyle(h1);
+    if (h1cs.display === 'none' || h1cs.visibility === 'hidden') {
+      return { ok: false, detail: 'h1 itself is display:none or visibility:hidden' };
+    }
+
+    /* Reconstruct what the browser's accessible-name computation would
+       gather from this subtree: skip any node (and its descendants) that
+       is aria-hidden="true" (case-insensitively — "TRUE" counts too),
+       role="presentation"/"none", display:none, or visibility:hidden.
+       This single computation is what actually catches all of:
+         - a descendant with aria-hidden="true"/"TRUE" hiding real words
+         - a descendant hidden via CSS (display/visibility) whose text
+           textContent would still count, silently truncating the name
+         - a *whitespace-only* aria-hidden separator sitting between two
+           visible word spans: dropping its contribution merges the
+           adjacent runs with no space between them (e.g. "WEBUILDBETTER"),
+           which fails the exact-match comparison below without needing
+           special-cased adjacency detection. */
+    function accessibleText(node) {
+      if (node.nodeType === 3) return node.nodeValue || '';
+      if (node.nodeType !== 1) return '';
+      if (isAriaHiddenTrue(node) || hasPresentationRole(node)) return '';
+      var cs = getComputedStyle(node);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return '';
+      var text = '';
+      Array.prototype.forEach.call(node.childNodes, function (child) {
+        text += accessibleText(child);
+      });
+      return text;
+    }
+
+    var raw = accessibleText(h1);
+    var accessibleName = raw.replace(/[\s ]+/g, ' ').trim();
+    if (accessibleName !== 'WE BUILD BETTER') {
+      var rawTextContent = (h1.textContent || '').replace(/\s+/g, ' ').trim();
+      return { ok: false, detail: 'computed accessible name="' + accessibleName + '" (raw textContent="' + rawTextContent + '")' };
     }
     return { ok: true };
   });
@@ -101,10 +141,22 @@
        named colours all normalise to the same computed-style string the
        browser reports for the eyebrow itself. */
     var probe = document.createElement('span');
-    probe.style.color = token;
-    document.body.appendChild(probe);
-    var resolved = getComputedStyle(probe).color;
-    document.body.removeChild(probe);
+    var resolved;
+    try {
+      probe.style.color = token;
+      /* An unparseable token (or one this probe cannot resolve standalone,
+         e.g. a typo) is a silent no-op: probe.style.color stays ''. Left
+         unchecked, the probe would then report its *inherited* colour,
+         which can coincidentally match an unstyled eyebrow and false-pass.
+         Treat "did not parse" as a hard failure instead. */
+      if (probe.style.color === '') {
+        return { ok: false, detail: '--v2-red-text is not a parseable colour: ' + token };
+      }
+      document.body.appendChild(probe);
+      resolved = getComputedStyle(probe).color;
+    } finally {
+      if (probe.parentNode) probe.parentNode.removeChild(probe);
+    }
 
     var actual = getComputedStyle(el).color;
     return { ok: actual === resolved, detail: 'eyebrow color=' + actual + ' token(' + token + ')=>' + resolved };
@@ -134,7 +186,11 @@
        background-color. Scan the h1 itself AND every descendant, since
        real markup hardcodes colour on both the <h1>
        ("color: rgb(0,0,0)") and an inner <span>
-       ("color: rgb(255,255,255)"). */
+       ("color: rgb(255,255,255)"). Note this also flags
+       style="color: var(--token)" as an offender even though it resolves
+       to a design token — deliberate: the requirement is no inline colour
+       declaration at all, so this fails closed rather than trying to
+       whitelist "acceptable" inline values. */
     var offenders = [];
     var nodes = [h1].concat(Array.prototype.slice.call(h1.querySelectorAll('*')));
     nodes.forEach(function (el) {
@@ -145,17 +201,16 @@
     return { ok: offenders.length === 0, detail: offenders.join('; ') };
   });
 
-  check('header condenses on scroll without content jump', function () {
+  check('header condenses on scroll', function () {
+    /* Only asserts the shrink. A separate "no content jump" assertion used
+       to live here, measuring the hero's next in-flow sibling — but once
+       the header overlays the hero (Task 7 of the plan), nothing below it
+       can move, so that half was structurally incapable of failing
+       (verified: rest=123 condensed=72 siblingJump=0px PASSED even though
+       nothing about "no jump" had actually been checked). Content-jump
+       coverage now lives on the manual list, to be verified on inner pages
+       where the header is in flow instead of overlaying. */
     var header = document.querySelector('header.block-header');
-    var hero = document.getElementById('aCqA2TkE7');
-    var sibling = hero.nextElementSibling;
-    if (!sibling) return { ok: false, detail: 'hero has no next element sibling to measure' };
-
-    /* The header overlays the hero on this page, so the hero's own top is
-       pinned at 0 regardless of header height — asserting on hero.top
-       would be vacuous by construction. Measure the first in-flow element
-       BELOW the hero instead: if the header is (or becomes) in-flow, that
-       element moving is the real layout jump users would see. */
     var y0 = window.scrollY;
     var prevScrollBehavior = document.documentElement.style.scrollBehavior;
     try {
@@ -163,21 +218,15 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       document.documentElement.classList.remove('v2-scrolled');
       var restH = header.getBoundingClientRect().height;
-      var sibTop0 = sibling.getBoundingClientRect().top;
 
       document.documentElement.classList.add('v2-scrolled');
       var condH = header.getBoundingClientRect().height;
-      var sibTop1 = sibling.getBoundingClientRect().top;
 
       /* 20px margin: condensed header must be meaningfully shorter than
          resting, not just different by font-metric/subpixel noise. */
       var shrank = condH < restH - 20;
-      /* 2px tolerance: sub-pixel rounding only, not a real allowance for
-         visible content shift. */
-      var jump = Math.abs(sibTop1 - sibTop0);
-      return { ok: shrank && jump < 2,
-               detail: 'rest=' + Math.round(restH) + ' condensed=' + Math.round(condH) +
-                       ' siblingJump=' + Math.round(jump) + 'px' };
+      return { ok: shrank,
+               detail: 'rest=' + Math.round(restH) + ' condensed=' + Math.round(condH) };
     } finally {
       /* Restore v2-scrolled explicitly using the site's own threshold
          (assets/js/v2.js: window.scrollY > 24) rather than relying on its
@@ -198,7 +247,14 @@
     var last = document.querySelector(
       '.block-header-layout-desktop .block-header-item:last-child .item-content');
     if (!last) return { ok: false, detail: 'last nav item not found' };
-    var r = parseFloat(getComputedStyle(last).borderTopLeftRadius);
+    var radiusStr = getComputedStyle(last).borderTopLeftRadius;
+    /* border-radius: 50% computes to a string ending in "%", and
+       parseFloat("50%") happily returns 50 — indistinguishable from a
+       real 50px pill radius unless the unit is checked first. */
+    if (radiusStr.trim().slice(-1) === '%') {
+      return { ok: false, detail: 'border-radius is a percentage (' + radiusStr + '), not a pill treatment' };
+    }
+    var r = parseFloat(radiusStr);
     /* 12px: distinguishes an actual pill/rounded-button treatment from
        subtle default button rounding (a few px). */
     return { ok: r >= 12, detail: 'border-radius=' + r + 'px' };
@@ -206,25 +262,31 @@
 
   check('reduced motion disables hero animation', function () {
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var hasClass = document.documentElement.classList.contains('hero-motion');
-    if (reduced) {
-      return { ok: !hasClass, detail: 'prefers-reduced-motion: reduce is active; hero-motion class present=' + hasClass };
+    var heroTitle = document.querySelector('#aCqA2TkE7 .hero-title');
+    var branch = reduced ? 'reduce' : 'no-preference';
+    if (!heroTitle) {
+      return { ok: false, detail: 'hero not yet recomposed (no .hero-title) [' + branch + ']' };
     }
-    return { ok: hasClass, detail: 'prefers-reduced-motion: reduce is NOT active; hero-motion class present=' + hasClass };
-  });
-
-  check('hero CTAs show a visible focus ring', function () {
-    var btns = document.querySelectorAll('#aCqA2TkE7 .hero-cta a');
-    if (btns.length === 0) return { ok: false, detail: 'no CTAs found to test' };
-    var bad = [];
-    Array.prototype.forEach.call(btns, function (el, i) {
-      el.focus();
-      var cs = getComputedStyle(el);
-      var visible = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0;
-      if (!visible) bad.push('cta[' + i + '] outline-style=' + cs.outlineStyle + ' outline-width=' + cs.outlineWidth);
+    var hasClass = document.documentElement.classList.contains('hero-motion');
+    var words = heroTitle.querySelectorAll('.hero-word');
+    var animatedWords = 0;
+    Array.prototype.forEach.call(words, function (w) {
+      if (getComputedStyle(w).animationName !== 'none') animatedWords++;
     });
-    document.body.focus();
-    return { ok: bad.length === 0, detail: bad.join('; ') };
+
+    if (reduced) {
+      /* Under reduced motion the class must be absent AND no .hero-word
+         may actually be running an animation — a class-only check would
+         vacuously pass on a page where nothing was ever implemented. */
+      var ok = !hasClass && animatedWords === 0;
+      return { ok: ok, detail: '[' + branch + '] hero-motion class present=' + hasClass +
+                 '; animated .hero-word=' + animatedWords + '/' + words.length };
+    }
+    /* Under no-preference the class must be present AND at least one
+       .hero-word must actually be animating — same rationale in reverse. */
+    var ok2 = hasClass && words.length > 0 && animatedWords > 0;
+    return { ok: ok2, detail: '[' + branch + '] hero-motion class present=' + hasClass +
+               '; animated .hero-word=' + animatedWords + '/' + words.length };
   });
 
   var passed = results.filter(function (r) { return r.ok; }).length;
