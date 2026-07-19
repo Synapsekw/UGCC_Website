@@ -44,10 +44,18 @@
    but it is real on every page where the header actually participates
    in layout. Frost-only, per plan. */
 .block-header {
+  /* border-bottom is reserved at rest (transparent, same width the
+     scrolled state uses) so toggling .v2-scrolled only ever changes its
+     colour, never the header's box height — a border that appears out of
+     nowhere on scroll shifts .page__blocks by its own width, which is
+     exactly the class of content-jump this frost-only approach exists to
+     avoid. */
+  border-bottom: .5px solid transparent;
   transition:
     background-color .35s var(--v2-ease-out-quart),
     box-shadow .35s var(--v2-ease-out-quart),
-    backdrop-filter .35s var(--v2-ease-out-quart);
+    backdrop-filter .35s var(--v2-ease-out-quart),
+    border-color .35s var(--v2-ease-out-quart);
 }
 
 .v2-scrolled .block-header {
@@ -55,7 +63,7 @@
   -webkit-backdrop-filter: blur(22px) saturate(1.4);
   backdrop-filter: blur(22px) saturate(1.4);
   box-shadow: var(--v2-shadow-header);
-  border-bottom: .5px solid rgba(255, 255, 255, .14);
+  border-bottom-color: rgba(255, 255, 255, .14);
 }
 
 /* ---------- nav links: red underline grows from the left ---------- */
