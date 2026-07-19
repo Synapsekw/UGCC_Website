@@ -38,3 +38,19 @@ much faster than uploading 1,000+ files individually.
 Canonical/OG URLs were rewritten to root-relative paths. For best SEO, search for
 `og:url` and the JSON-LD `"url"` fields in each `index.html` and set them to the
 final absolute domain. Optionally add a `sitemap.xml`.
+
+## V2.0 (this branch)
+
+Modernization layer on top of the pixel-perfect replica, in `assets/css/v2.css`
+and `assets/js/v2.js` (injected into every page, no other changes):
+
+- Sticky header gains a translucent navy + blur + shadow state once scrolled
+- Nav links: brand-red underline animates in from the left; active page underlined
+- Buttons lift with a soft shadow on hover, press down on click
+- Linked images zoom 5% with a slight brightness lift on hover
+- Hero slideshow: slower crossfade + Ken Burns drift; dots become animated pills
+- Scroll reveals cascade with staggered delays and an exponential ease
+- Red selection color, red focus rings, smooth anchor scrolling
+- `prefers-reduced-motion` fully respected
+
+To ship V1 instead, `git checkout master`.
