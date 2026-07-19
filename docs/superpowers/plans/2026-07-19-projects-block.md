@@ -814,13 +814,13 @@ h = io.open(path, encoding='utf-8').read()
 start = h.index('<section id="zd_fdi"')
 end = h.index('<section id="zZFMdo"')   # the block immediately after
 
-new = '''<section id="zd_fdi" class="block v2-proj-block" data-v-3ffce944><div class="block-background block-background--fixed" data-v-3ffce944 style="--v4cfc8878:rgb(0, 42, 65);--v5abb0200:85%;--v5c6fda9f:85%;--v47c095f9:15%;--v000e51f2:center;--v79d8fbfe:calc(-20svh * 50 / 100);--v3f9ca25a:false;"></div><div class="v2-proj"><div class="v2-proj__head"><p class="v2-proj__eyebrow">Selected projects</p><h3 class="v2-proj__title">Named contracts, from the 6th Ring Road to Duqm Port</h3><p class="v2-proj__intro">Six of thirty contracts on record, spanning roads, buildings, industrial infrastructure and oil and gas.</p><a class="v2-proj__all" href="/construction-projects-kuwait">All 30 projects</a></div><ul class="v2-proj__grid">
-<li class="v2-proj__item"><a class="v2-proj__card" href="/kp3cns301"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/kp3cns301-440.jpg" srcset="/assets/img/v2/proj/kp3cns301-440.jpg 440w,/assets/img/v2/proj/kp3cns301-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Aerial view of the new Kuwait airport terminal, its wing-shaped roof under construction"><span class="v2-proj__tag">Building Construction</span></span><h4 class="v2-proj__name">Apron and taxiways, new passenger terminal, Kuwait Airport</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Ministry of Public Works</dd></div><div><dt>Value</dt><dd>509.0M USD</dd></div><div><dt>Status</dt><dd>In progress</dd></div><div><dt>Contract</dt><dd>KP3-CNS-301</dd></div></dl></a></li>
-<li class="v2-proj__item"><a class="v2-proj__card" href="/ra-259"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/ra-259-440.jpg" srcset="/assets/img/v2/proj/ra-259-440.jpg 440w,/assets/img/v2/proj/ra-259-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Stacked flyover ramps of a completed desert interchange seen from the air"><span class="v2-proj__tag">Roads &amp; Bridges</span></span><h4 class="v2-proj__name">6th Ring Road to Interchange 82, Salmi Road</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Ministry of Public Works</dd></div><div><dt>Value</dt><dd>487.2M USD</dd></div><div><dt>Status</dt><dd>Completed 2022</dd></div><div><dt>Contract</dt><dd>RA-259</dd></div></dl></a></li>
-<li class="v2-proj__item"><a class="v2-proj__card" href="/pahwc1151"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/pahwc1151-440.jpg" srcset="/assets/img/v2/proj/pahwc1151-440.jpg 440w,/assets/img/v2/proj/pahwc1151-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Rows of completed low-rise villas and surfaced streets in a desert housing city"><span class="v2-proj__tag">Building Construction</span></span><h4 class="v2-proj__name">Sabah Al Ahmad Residential City</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Public Authority for Housing Welfare</dd></div><div><dt>Value</dt><dd>422.2M USD</dd></div><div><dt>Status</dt><dd>Completed 2014</dd></div><div><dt>Contract</dt><dd>PAHW-C-1151</dd></div></dl></a></li>
-<li class="v2-proj__item"><a class="v2-proj__card" href="/pai18pa"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/pai18pa-440.jpg" srcset="/assets/img/v2/proj/pai18pa-440.jpg 440w,/assets/img/v2/proj/pai18pa-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Graded industrial plots and a new road grid laid out across open desert"><span class="v2-proj__tag">Civil Infrastructure</span></span><h4 class="v2-proj__name">Al Shadadiya Industrial Zone infrastructure</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Public Authority for Industry</dd></div><div><dt>Value</dt><dd>315.0M USD</dd></div><div><dt>Status</dt><dd>In progress</dd></div><div><dt>Contract</dt><dd>PAI-18P-A</dd></div></dl></a></li>
-<li class="v2-proj__item"><a class="v2-proj__card" href="/c502015-infrastructure-works-for-the-commercial-berth-at-duqm-port-ip3-oman"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/c502015-440.jpg" srcset="/assets/img/v2/proj/c502015-440.jpg 440w,/assets/img/v2/proj/c502015-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Port gate canopy and marked vehicle lanes at a newly built commercial berth"><span class="v2-proj__tag">Civil Infrastructure</span></span><h4 class="v2-proj__name">Commercial berth infrastructure, Duqm Port</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>SEZAD, Oman</dd></div><div><dt>Value</dt><dd>200.6M USD</dd></div><div><dt>Status</dt><dd>Completed 2020</dd></div><div><dt>Contract</dt><dd>C50-2015</dd></div></dl></a></li>
-<li class="v2-proj__item"><a class="v2-proj__card" href="/zorepc0059"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/zorepc0059-440.jpg" srcset="/assets/img/v2/proj/zorepc0059-440.jpg 440w,/assets/img/v2/proj/zorepc0059-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" loading="lazy" width="440" height="275" alt="Refinery pipe racks and a blue-clad process building at ground level"><span class="v2-proj__tag">Oil &amp; Gas</span></span><h4 class="v2-proj__name">Civil and tankage works, Al-Zour Refinery</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>KNPC / KIPIC</dd></div><div><dt>Value</dt><dd>114.2M USD</dd></div><div><dt>Status</dt><dd>Completed</dd></div><div><dt>Contract</dt><dd>ZOR-EPC-0059</dd></div></dl></a></li>
+new = '''<section id="zd_fdi" class="block v2-proj-block" data-v-3ffce944><div class="block-background block-background--fixed" data-v-3ffce944 style="--v4cfc8878:rgb(0, 42, 65);--v5abb0200:85%;--v5c6fda9f:85%;--v47c095f9:15%;--v000e51f2:center;--v79d8fbfe:calc(-20svh * 50 / 100);--v3f9ca25a:false;"></div><div class="v2-proj"><div class="v2-proj__head"><p class="v2-proj__eyebrow">Selected projects</p><h3 class="v2-proj__title">Named contracts, from the 6th Ring Road to Duqm Port</h3><p class="v2-proj__intro">Six of thirty contracts on record, spanning roads, buildings, industrial infrastructure and oil and gas.</p><a class="v2-proj__all" href="/construction-projects-kuwait">All projects</a></div><ul class="v2-proj__grid">
+<li class="v2-proj__item"><a class="v2-proj__card" href="/kp3cns301" aria-label="Apron and taxiways, new passenger terminal, Kuwait Airport — Building Construction, 509.0M USD, in progress"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/kp3cns301-440.jpg" srcset="/assets/img/v2/proj/kp3cns301-440.jpg 440w,/assets/img/v2/proj/kp3cns301-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Aerial view of the new Kuwait airport terminal, its wing-shaped roof under construction"><span class="v2-proj__tag">Building Construction</span></span><h4 class="v2-proj__name">Apron and taxiways, new passenger terminal, Kuwait Airport</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Ministry of Public Works</dd></div><div><dt>Value</dt><dd>509.0M USD</dd></div><div><dt>Status</dt><dd>In progress</dd></div><div><dt>Contract</dt><dd>KP3-CNS-301</dd></div></dl></a></li>
+<li class="v2-proj__item"><a class="v2-proj__card" href="/ra-259" aria-label="6th Ring Road to Interchange 82, Salmi Road — Roads and Bridges, 487.2M USD, completed 2022"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/ra-259-440.jpg" srcset="/assets/img/v2/proj/ra-259-440.jpg 440w,/assets/img/v2/proj/ra-259-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Stacked flyover ramps of a completed desert interchange seen from the air"><span class="v2-proj__tag">Roads &amp; Bridges</span></span><h4 class="v2-proj__name">6th Ring Road to Interchange 82, Salmi Road</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Ministry of Public Works</dd></div><div><dt>Value</dt><dd>487.2M USD</dd></div><div><dt>Status</dt><dd>Completed 2022</dd></div><div><dt>Contract</dt><dd>RA-259</dd></div></dl></a></li>
+<li class="v2-proj__item"><a class="v2-proj__card" href="/pahwc1151" aria-label="Sabah Al Ahmad Residential City — Building Construction, 422.2M USD, completed 2014"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/pahwc1151-440.jpg" srcset="/assets/img/v2/proj/pahwc1151-440.jpg 440w,/assets/img/v2/proj/pahwc1151-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Rows of completed low-rise villas and surfaced streets in a desert housing city"><span class="v2-proj__tag">Building Construction</span></span><h4 class="v2-proj__name">Sabah Al Ahmad Residential City</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Public Authority for Housing Welfare</dd></div><div><dt>Value</dt><dd>422.2M USD</dd></div><div><dt>Status</dt><dd>Completed 2014</dd></div><div><dt>Contract</dt><dd>PAHW-C-1151</dd></div></dl></a></li>
+<li class="v2-proj__item"><a class="v2-proj__card" href="/pai18pa" aria-label="Al Shadadiya Industrial Zone infrastructure — Civil Infrastructure, 315.0M USD, in progress"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/pai18pa-440.jpg" srcset="/assets/img/v2/proj/pai18pa-440.jpg 440w,/assets/img/v2/proj/pai18pa-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Graded industrial plots and a new road grid laid out across open desert"><span class="v2-proj__tag">Civil Infrastructure</span></span><h4 class="v2-proj__name">Al Shadadiya Industrial Zone infrastructure</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>Public Authority for Industry</dd></div><div><dt>Value</dt><dd>315.0M USD</dd></div><div><dt>Status</dt><dd>In progress</dd></div><div><dt>Contract</dt><dd>PAI-18P-A</dd></div></dl></a></li>
+<li class="v2-proj__item"><a class="v2-proj__card" href="/c502015-infrastructure-works-for-the-commercial-berth-at-duqm-port-ip3-oman" aria-label="Commercial berth infrastructure, Duqm Port — Civil Infrastructure, 200.6M USD, completed 2020"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/c502015-440.jpg" srcset="/assets/img/v2/proj/c502015-440.jpg 440w,/assets/img/v2/proj/c502015-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Port gate canopy and marked vehicle lanes at a newly built commercial berth"><span class="v2-proj__tag">Civil Infrastructure</span></span><h4 class="v2-proj__name">Commercial berth infrastructure, Duqm Port</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>SEZAD, Oman</dd></div><div><dt>Value</dt><dd>200.6M USD</dd></div><div><dt>Status</dt><dd>Completed 2020</dd></div><div><dt>Contract</dt><dd>C50-2015</dd></div></dl></a></li>
+<li class="v2-proj__item"><a class="v2-proj__card" href="/zorepc0059" aria-label="Civil and tankage works, Al-Zour Refinery — Oil and Gas, 114.2M USD, completed"><span class="v2-proj__shot"><img src="/assets/img/v2/proj/zorepc0059-440.jpg" srcset="/assets/img/v2/proj/zorepc0059-440.jpg 440w,/assets/img/v2/proj/zorepc0059-880.jpg 880w" sizes="(max-width: 600px) calc(100vw - 32px),(max-width: 1024px) calc(50vw - 36px), 376px" decoding="async" loading="lazy" width="440" height="275" alt="Refinery pipe racks and a blue-clad process building seen from above"><span class="v2-proj__tag">Oil &amp; Gas</span></span><h4 class="v2-proj__name">Civil and tankage works, Al-Zour Refinery</h4><dl class="v2-proj__meta"><div><dt>Client</dt><dd>KNPC / KIPIC</dd></div><div><dt>Value</dt><dd>114.2M USD</dd></div><div><dt>Status</dt><dd>Completed</dd></div><div><dt>Contract</dt><dd>ZOR-EPC-0059</dd></div></dl></a></li>
 </ul></div></section>'''
 
 h = h[:start] + new + h[end:]
@@ -857,7 +857,7 @@ section order still ending
 Reload `http://localhost:8747/` at 1280x720 and paste `tools/projects-check.js`
 into the console.
 
-Expected: `14 passed, 0 failed`. In particular `block is under 1300px tall`
+Expected: `16 passed, 0 failed`. In particular `block is under 1300px tall`
 should report roughly 1000–1200px, down from 3026px.
 
 If `all 7 destinations return 200` fails on `/c502015-...-oman`, check the slug
@@ -890,9 +890,16 @@ Re-run `tools/projects-check.js` at each width, reloading between runs:
 |---|---|---|
 | 1280x720 | 3 columns | pass |
 | 800x900 | 2 columns | pass |
+| 600x900 | 1 column | pass |
 | 375x812 | 1 column | pass |
 
-Expected: `0 failed` at all three widths.
+Expected: `0 failed` at all four widths.
+
+600 is on the list because the height cap has a third band at `<= 600px` and 600
+is that band's worst case, not its easy end: image height scales with card
+width, so the widest single-column card is also the tallest. 600 measures ~3342px
+against a 3800px cap — the tightest headroom of the four. Checking only 375 would
+leave the band's boundary untested.
 
 - [ ] **Step 2: Confirm the block did not simply move its bulk elsewhere**
 
@@ -901,10 +908,20 @@ JSON.stringify([...document.querySelectorAll('section.block')]
   .map(s => ({ id: s.id, h: Math.round(s.getBoundingClientRect().height) })))
 ```
 
-Expected at 1280x720: `zd_fdi` around 1000–1200px (was 3026), and every other
-section within a few pixels of its previous height — `zOl98u` ~419, `zZFMdo`
-~1779, `zrby1M` ~624. If a neighbouring block changed materially, the replacement
-leaked outside `#zd_fdi`.
+Expected at 1280x720: `zd_fdi` around 1000–1200px (was 3026).
+
+For the neighbours, the test is **that no neighbour changed because of this
+edit** — not that any neighbour matches a number written here. Run the snippet
+once before the Task 4 edit and once after, and compare the two readings against
+each other. Every id other than `zd_fdi` should be within a few pixels across
+that pair. If one moved, the replacement leaked outside `#zd_fdi`.
+
+Do not compare against absolute figures from an earlier session. Five other
+sessions are rebuilding the neighbouring blocks concurrently, and their heights
+move under this plan without anything here being wrong: `zOl98u` and `zZFMdo`
+have both roughly halved since this plan was written. An engineer checking
+against a remembered number would read someone else's improvement as this
+block's leak.
 
 - [ ] **Step 3: Look at all six crops**
 
@@ -919,7 +936,7 @@ would leave the derivative wrong for every other consumer.
 - [ ] **Step 4: Check the keyboard path**
 
 Tab through the block. Expected: exactly seven stops (six cards, then
-`All 30 projects`), each showing the red focus ring around the **whole card**,
+`All projects`), each showing the red focus ring around the **whole card**,
 not just its image.
 
 - [ ] **Step 5: Check reduced motion**
@@ -941,7 +958,7 @@ git commit -m "fix(projects): <what the visual check caught>"
 
 ## Definition of done
 
-- [ ] `tools/projects-check.js` reports `0 failed` at 1280, 800 and 375.
+- [ ] `tools/projects-check.js` reports `0 failed` at 1280, 800, 600 and 375.
 - [ ] `#zd_fdi` is under 1300px, down from 3026px.
 - [ ] Seven links where there was one; all seven return 200.
 - [ ] Six lazy images, each with alt text and intrinsic dimensions.

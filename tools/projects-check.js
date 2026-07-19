@@ -3,7 +3,10 @@
    Returns a Promise of {passed, failed, results} — the link checks are async.
 
    Resize to 1280x720 before running: the height and column-count checks are
-   viewport-dependent. Re-run at 800 and 375 for the responsive checks.
+   viewport-dependent. Re-run at 800, 600 and 375 for the responsive checks.
+   600 is not optional padding on that list: the height cap has a third band at
+   <= 600px, and 600 is its worst case (3342px against a 3800px cap — the
+   tightest headroom of the four widths).
 
    NOT covered (manual verification required):
      - whether each 16:10 centre crop keeps its subject legible
@@ -15,10 +18,15 @@
        prove only that the files exist and decode. That the browser WOULD
        have deferred them is covered only indirectly, by the synchronous
        loading="lazy" attribute check. Confirm it once in a normal browser.
-     - whether the block's aspect-ratio boxes actually hold layout steady.
-       "image frames reserve a 16:10 box" asserts the CSS declaration, not
-       a measured shift; getComputedStyle reports the declared value even
-       where it has no effect. */
+   Layout shift IS covered, by two checks that say different things:
+     - "image frames reserve a 16:10 box" asserts the CSS declaration — the
+       mechanism. getComputedStyle reports the declared value even where it has
+       no effect, so on its own it cannot catch a later rule that overrides the
+       frame's sizing.
+     - "the block reserves image space before the images arrive" measures the
+       outcome: it blanks the six sources, measures #zd_fdi, restores them and
+       measures again. Equal heights mean nothing moved when the images landed.
+   Keep both — the first names the cause, the second proves the effect. */
 (function () {
   'use strict';
 
@@ -274,10 +282,18 @@
          report failures that say nothing about the markup. Force the fetch.
          Safe: the loading="lazy" attribute assertion is a separate,
          synchronous check that has already run against the unmodified DOM. */
+      /* Restore loading= after kicking the fetch. Overwriting it permanently
+         mutates the DOM the synchronous checks inspect, so a second run in the
+         same document — resize and re-run without reloading — would see six
+         eager images and fail "every card image is lazy, described and
+         intrinsically sized" on a block with no defect. */
       imgs.forEach(function (img) {
         if (img.complete) return;
+        var was = img.getAttribute('loading');
         img.loading = 'eager';
         img.src = img.src;          /* re-assign to kick a fetch that never started */
+        if (was === null) { img.removeAttribute('loading'); }
+        else { img.setAttribute('loading', was); }
       });
 
       return imagesSettled(imgs, 5000);
@@ -328,6 +344,58 @@
       record('no image is upscaled in its slot',
         bad.length === 0 && measured === CARD_COUNT,
         bad.join('; ') || measured + '/' + CARD_COUNT + ' sources >= their rendered width');
+    })
+    .then(function () {
+      /* The real layout-shift measurement the aspect-ratio check cannot make.
+         Blank every card image's source, measure the block, restore, measure
+         again: if the frames reserve their box the two heights are identical,
+         and a future rule that breaks the reservation shows up here as a
+         difference in pixels rather than as a still-green declaration.
+
+         Every attribute blanked is restored before the next check runs —
+         leaving them blank would poison everything after this. */
+      var list = cards();
+      if (list.length !== CARD_COUNT) {
+        record('the block reserves image space before the images arrive', false,
+          'expected ' + CARD_COUNT + ' cards to inspect, found ' + list.length);
+        return;
+      }
+      var s = block();
+      if (!s) {
+        record('the block reserves image space before the images arrive', false,
+          'section #' + SECTION + ' missing');
+        return;
+      }
+      var imgs = list.map(function (li) { return li.querySelector('img'); });
+      if (imgs.some(function (i) { return !i; })) {
+        record('the block reserves image space before the images arrive', false,
+          'a card has no img');
+        return;
+      }
+      var saved = imgs.map(function (img) {
+        return { src: img.getAttribute('src'), srcset: img.getAttribute('srcset') };
+      });
+      var blank, loaded;
+      try {
+        imgs.forEach(function (img) {
+          img.removeAttribute('srcset');
+          img.removeAttribute('src');
+        });
+        blank = s.getBoundingClientRect().height;
+      } finally {
+        imgs.forEach(function (img, i) {
+          if (saved[i].srcset === null) { img.removeAttribute('srcset'); }
+          else { img.setAttribute('srcset', saved[i].srcset); }
+          if (saved[i].src === null) { img.removeAttribute('src'); }
+          else { img.setAttribute('src', saved[i].src); }
+        });
+        loaded = s.getBoundingClientRect().height;
+      }
+      var delta = Math.abs(loaded - blank);
+      record('the block reserves image space before the images arrive',
+        delta <= 1,
+        'blank ' + blank.toFixed(1) + 'px vs loaded ' + loaded.toFixed(1) +
+        'px (delta ' + delta.toFixed(1) + 'px, tolerance 1px)');
     })
     .then(function () {
       var hrefs = EXPECTED_HREFS.concat([ALL_HREF]);

@@ -110,17 +110,18 @@ its four `.layout-element` children are replaced entirely.
       <h3 class="v2-proj__title">Named contracts, from the 6th Ring Road to Duqm Port</h3>
       <p class="v2-proj__intro">Six of thirty contracts on record, spanning roads,
          buildings, industrial infrastructure and oil and gas.</p>
-      <a class="v2-proj__all" href="/construction-projects-kuwait">All 30 projects</a>
+      <a class="v2-proj__all" href="/construction-projects-kuwait">All projects</a>
     </div>
 
     <ul class="v2-proj__grid">
       <li class="v2-proj__item">
-        <a class="v2-proj__card" href="/ra-259">
+        <a class="v2-proj__card" href="/ra-259"
+           aria-label="6th Ring Road to Interchange 82, Salmi Road — Roads and Bridges, 487.2M USD, completed 2022">
           <span class="v2-proj__shot">
             <img src="/assets/img/v2/proj/ra-259-440.jpg"
                  srcset="/assets/img/v2/proj/ra-259-440.jpg 440w,
                          /assets/img/v2/proj/ra-259-880.jpg 880w"
-                 sizes="(max-width: 599px) calc(100vw - 32px),
+                 sizes="(max-width: 600px) calc(100vw - 32px),
                         (max-width: 1024px) calc(50vw - 36px), 376px"
                  loading="lazy" width="440" height="275"
                  alt="Stacked flyover ramps of a completed desert interchange seen from the air">
@@ -152,9 +153,12 @@ Who-are-we work replaced its seven `<h4>` service headings with a single `<h2>`,
 so that block now contributes no `<h4>` at all. The chosen level is still correct
 on its own terms, and the shipped outline was verified to introduce no skip.
 
-Each card is a **single anchor** wrapping image, title and metadata, so its
-accessible name is the project title and there is one tab stop per project — not
-four. The `<dl>` is used for what it actually is: four label/value pairs.
+Each card is a **single anchor** wrapping image, title and metadata, so there is
+one tab stop per project — not four. The `<dl>` is used for what it actually is:
+four label/value pairs.
+
+The anchor carries an explicit `aria-label`; see Accessibility for what it holds
+and why it is not simply the title.
 
 ## The six projects
 
@@ -198,9 +202,17 @@ innovation, enduring landmarks — is replaced by 25 words that say what the blo
 is showing. The removed claims are asserted far better by six named contracts
 with clients and values attached than by adjectives.
 
-The `All Projects` button becomes a text link reading `All 30 projects`, so the
-exit states its own size. Thirty is the count of project detail pages in the
-repository and must be updated if pages are added.
+The `All Projects` button becomes a plain text link reading `All projects`.
+
+It was first written as `All 30 projects`, so the exit would state its own size.
+That was dropped: thirty is a correct count of project detail directories, but
+`/construction-projects-kuwait` — the page the link goes to, and the right
+destination — links only 18 of them directly, with the rest behind sector
+sub-pages. The only page that lists all thirty is `/all-projects-new`, whose
+`<title>` is literally "All Projects New": an unfinished builder page, not
+somewhere to send a visitor. A number in the link text would have promised a
+count the destination does not deliver, and would need maintaining as pages are
+added. `All projects` promises only what is there.
 
 ## Images
 
@@ -247,7 +259,7 @@ the link text, and repeating it would make every card announce itself twice:
 | `pahwc1151` | Rows of completed low-rise villas and surfaced streets in a desert housing city |
 | `pai18pa` | Graded industrial plots and a new road grid laid out across open desert |
 | `c502015` | Port gate canopy and marked vehicle lanes at a newly built commercial berth |
-| `zorepc0059` | Refinery pipe racks and a blue-clad process building at ground level |
+| `zorepc0059` | Refinery pipe racks and a blue-clad process building seen from above |
 
 ## Layout and responsive behaviour
 
@@ -258,14 +270,29 @@ the link text, and repeating it would make every card announce itself twice:
 Breakpoints are the rail's own (`1024px` and `600px`) rather than new ones, so
 the two blocks reflow at the same widths.
 
-Cards keep their 16:10 crop at every width. The block's own vertical padding
-follows the gallery rail's, so the two read as a pair rather than as two
-unrelated treatments sharing a colour.
+Cards keep their 16:10 crop at every width. The block's own vertical padding was
+taken from the gallery rail's so the two would read as a pair rather than as two
+unrelated treatments sharing a colour. They are close but no longer identical:
+later rail commits moved the rail on, so `projects.css` is at `48px 0 56px` /
+`34px 0 38px` against `rail.css`'s `52px 0 57px` / `39px 0 44px`. The difference
+is four to six pixels and is not visible as a seam; matching them exactly would
+mean chasing a file another session owns.
 
 ## Accessibility
 
-- One anchor per card, so one tab stop per project and an accessible name equal
-  to the project title.
+- One anchor per card, so one tab stop per project.
+- **Each anchor carries an explicit `aria-label` holding title, sector, value and
+  status** — e.g. `6th Ring Road to Interchange 82, Salmi Road — Roads and
+  Bridges, 487.2M USD, completed 2022`. This is a deliberate change from the
+  original "accessible name equal to the project title". Without an explicit
+  label the accname algorithm concatenates the image's alt text first, so every
+  card announces a ~30-word name that only disambiguates halfway through. But a
+  name of *just* the title is also wrong: in a screen reader's links list the
+  cards lose the sector and value that make them scannable sighted, and the
+  links list is exactly where that comparison happens. The label opens with the
+  visible `<h4>` text, so SC 2.5.3 Label in Name still holds — and the harness
+  asserts that prefix, which is the half that silently rots when someone renames
+  a project without touching the label.
 - Status is carried by words (`Completed 2022`, `In progress`), never by colour
   alone. If a status dot is used it is decorative and additional.
 - `alt` describes the photograph; decorative wrappers carry no alt text.
@@ -311,7 +338,7 @@ returns `{passed, failed, results}`.
 Checks:
 
 1. `#zd_fdi` height is under 1300px at 1280x720 (from 3026px).
-2. The block contains exactly seven links: six cards plus `All 30 projects`.
+2. The block contains exactly seven links: six cards plus `All projects`.
 3. All seven `href`s return HTTP 200.
 4. Each card exposes exactly one anchor — no nested or sibling links inside a card.
 5. Every image has `loading="lazy"`, a non-empty `alt`, and explicit
@@ -322,8 +349,20 @@ Checks:
 8. Three columns at 1280, two at 800, one at 375 — matching the rail's 1024px
    and 600px breakpoints.
 9. No horizontal document overflow at 375px.
-10. Cumulative layout shift contributed by the block is zero after images load,
-    verified by comparing the block's height before and after image load.
+10. Cumulative layout shift contributed by the block is zero after images load.
+    Two checks, because one of them alone would be a claim rather than a
+    measurement:
+    - `image frames reserve a 16:10 box` asserts the **mechanism** — every
+      `.v2-proj__shot` computes to `aspect-ratio: 16/10`. Cheap and it names the
+      cause, but `getComputedStyle` reports a declared value even where it has
+      no effect, so on its own it would stay green under a later rule that
+      overrode the frame's sizing.
+    - `the block reserves image space before the images arrive` measures the
+      **outcome**: blank all six images' `src`/`srcset`, measure `#zd_fdi`,
+      restore them, measure again, and require the two heights to agree within
+      1px. The measured pair is reported in the detail string, so the check
+      shows its working rather than just a colour. Every blanked attribute is
+      restored before the next check runs.
 
 The check must be written to fail when the block is absent or empty, rather than
 passing vacuously — the same defect that was fixed for the rail check in
@@ -354,9 +393,17 @@ Not covered, manual verification required:
 
 | | Before | After |
 |---|---|---|
-| Block height | 3026px | ~1100px |
-| Share of homepage | 31% | ~13% |
+| Block height | 3026px | 1049px (target was ~1100px) |
+| Share of homepage | 31% | ~19% |
 | Links | 1 | 7 |
 | Images | 8, eager | 6, lazy |
 | Named projects | 0 | 6 |
 | Contract values shown | 0 | 6 |
+
+The share figure is the one line here that is not this block's to hit. `~13%` was
+predicted against the 9773px homepage measured when this spec was written; the
+five concurrent sessions have since cut the page to roughly 5600px, so the same
+block against a smaller denominator reads as ~19% (1053px of 5603px measured at
+1280). The block beat its own absolute target — 1049px against ~1100px — and
+then the page shrank underneath it. Read the height row, not the share row, when
+judging whether this block did its job.
