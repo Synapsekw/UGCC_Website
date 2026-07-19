@@ -32,12 +32,22 @@
     return Array.prototype.slice.call(document.querySelectorAll('#' + SECTION + ' .cred__row'));
   }
 
-  check('section is under 700px tall', function () {
+  check('section is under its height budget', function () {
     var s = section();
     if (!s) return { ok: false, detail: 'section #' + SECTION + ' missing' };
     var h = Math.round(s.getBoundingClientRect().height);
     if (h === 0) return { ok: false, detail: 'section has zero height — not rendered' };
-    return { ok: h < 700, detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide' };
+    /* The bound is per-breakpoint because one column is legitimately taller
+       than two, and a check that goes red on a correct block teaches the
+       reader to ignore red. Both numbers are measured, not guessed: this
+       markup and CSS render 591px at 1280 wide and 974px at 390. The desktop
+       bound is the entire point of the work; the narrow bound is the measured
+       974 plus headroom for longer text or a larger default font. */
+    var bound = window.innerWidth < 769 ? 1100 : 700;
+    return {
+      ok: h < bound,
+      detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound
+    };
   });
 
   check('all six decorative SVGs are gone', function () {
@@ -77,29 +87,54 @@
     return { ok: have === want, detail: 'got [' + have + '] want [' + want + ']' };
   });
 
-  check('exactly four dated rows, chronological, Grade 1 undated', function () {
+  check('each dated row pairs its own year with its own credential', function () {
     /* This is the check that stops the original bug from returning. The old
        block drew a timeline whose DOM order was 2004, (none), 2012, 2007,
-       2019 — a chronology that was not chronological. */
-    var s = section();
-    if (!s) return { ok: false, detail: 'section missing' };
-    var times = Array.prototype.slice.call(s.querySelectorAll('.cred__ledger time'));
-    if (times.length !== 4) {
-      return { ok: false, detail: times.length + ' <time> elements (want exactly 4)' };
+       2019 — a chronology that was not chronological.
+
+       Bind year to row POSITIONALLY. Gathering every <time> in the ledger
+       into one flat list and comparing that list to the expected years is not
+       enough: a block with two <time> elements in row 1 and none in row 2
+       still yields four datetimes in the right order, so it passes while
+       rendering ISO 45001 with no year at all — the exact mispairing this
+       check exists to catch. */
+    var list = rows();
+    if (list.length !== 5) {
+      return { ok: false, detail: 'expected 5 rows to inspect, found ' + list.length };
     }
-    var got = times.map(function (t) { return t.getAttribute('datetime'); });
-    var ordered = got.join(',') === EXPECTED_YEARS.join(',');
-    var labelled = times.every(function (t) {
-      return t.textContent.trim() === t.getAttribute('datetime');
+    var bad = [];
+    EXPECTED_YEARS.forEach(function (year, i) {
+      var name = list[i].querySelector('.cred__name');
+      var label = name ? name.textContent.trim().toUpperCase() : '(none)';
+      if (label !== EXPECTED_CODES[i]) {
+        bad.push('row ' + i + ' is ' + label + ', want ' + EXPECTED_CODES[i]);
+      }
+      var times = list[i].querySelectorAll('time');
+      if (times.length !== 1) {
+        bad.push('row ' + i + ' (' + label + ') has ' + times.length + ' <time>, want 1');
+        return;
+      }
+      var dt = times[0].getAttribute('datetime');
+      var txt = times[0].textContent.trim();
+      if (dt !== year) bad.push('row ' + i + ' (' + label + ') datetime=' + dt + ', want ' + year);
+      if (txt !== year) bad.push('row ' + i + ' (' + label + ') text=' + txt + ', want ' + year);
     });
-    var last = rows()[4];
-    var lastName = last && last.querySelector('.cred__name');
-    var gradeUndated = !!last && last.querySelectorAll('time').length === 0 &&
-      !!lastName && lastName.textContent.trim().toUpperCase() === 'GRADE 1';
+
+    /* Grade 1 has no year in any source. The dash standing in for one must be
+       hidden from assistive technology — an announced "em dash" in the year
+       column is worse than an empty cell. Asserting only the absence of
+       <time> would let an announced dash through. */
+    var last = list[4];
+    var lastName = last.querySelector('.cred__name');
+    if (!lastName || lastName.textContent.trim().toUpperCase() !== 'GRADE 1') {
+      bad.push('last row is not GRADE 1');
+    }
+    if (last.querySelectorAll('time').length !== 0) bad.push('GRADE 1 row carries a <time>');
+    if (!last.querySelector('[aria-hidden="true"]')) bad.push('GRADE 1 dash is not aria-hidden');
+
     return {
-      ok: ordered && labelled && gradeUndated,
-      detail: 'datetime[' + got.join(',') + '] ordered=' + ordered +
-              ' labelled=' + labelled + ' gradeUndated=' + gradeUndated
+      ok: bad.length === 0,
+      detail: bad.join('; ') || '4 rows correctly paired; GRADE 1 undated and hidden'
     };
   });
 
@@ -172,12 +207,25 @@
        render. See "Behaviour" in the spec. */
     var s = section();
     if (!s) return { ok: false, detail: 'section missing' };
-    var hidden = s.querySelectorAll('.transition').length;
+    /* closest() as well as querySelectorAll(): the former excludes the section
+       itself and every ancestor, so a .transition landing on #zZFMdo would
+       hide the whole block while this check stayed green. */
+    var hidden = s.querySelectorAll('.transition').length + (s.closest('.transition') ? 1 : 0);
     var title = s.querySelector('.cred__title');
-    var op = title ? getComputedStyle(title).opacity : '0';
+    if (!title) return { ok: false, detail: 'no .cred__title to measure' };
+    /* Walk the ancestors too. getComputedStyle(title).opacity reports the
+       title's own value, which stays "1" underneath a faded parent. */
+    var faded = '';
+    for (var el = title; el && el !== document.body; el = el.parentElement) {
+      if (parseFloat(getComputedStyle(el).opacity) < 1) {
+        faded = el.id || el.className || el.tagName;
+        break;
+      }
+    }
     return {
-      ok: hidden === 0 && parseFloat(op) === 1,
-      detail: hidden + ' .transition nodes, title opacity ' + op
+      ok: hidden === 0 && faded === '',
+      detail: hidden + ' .transition nodes; ' +
+              (faded ? 'faded ancestor: ' + faded : 'nothing faded')
     };
   });
 
