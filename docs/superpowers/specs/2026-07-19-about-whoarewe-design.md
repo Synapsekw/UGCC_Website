@@ -88,10 +88,13 @@ rules:
 (`::after`, `hero-shine` keyframes) gated behind
 `@media (prefers-reduced-motion: no-preference)`.
 
-The hero keeps its markup. `hero.css` gains one alias block so
-`#aCqA2TkE7 .hero-btn` resolves to the same declarations rather than duplicating
-them; `.hero-btn--primary` maps to `--primary` and `.hero-btn--secondary` to
-`--ghost`. The hero's computed styles must be byte-identical before and after.
+The hero keeps its markup. Its button rules **move out of** `hero.css` into
+`sections.css`, where `#aCqA2TkE7 .hero-btn` is listed as an additional selector
+on each `.v2-btn` rule — `.hero-btn--primary` alongside `--primary`,
+`.hero-btn--secondary` alongside `--ghost`. One source, no cross-file
+specificity race. `#aCqA2TkE7 .hero-cta` is layout, not button treatment, and
+stays in `hero.css`. The hero's computed styles must be identical before and
+after, proven by `tools/hero-check.js`.
 
 Call sites: hero `Get in Touch` + `View Projects`, About `Read More`,
 Who-are-we `Explore More`.

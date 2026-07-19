@@ -1,0 +1,107 @@
+/* ==========================================================================
+   UGCC homepage — shared button, About, Who-are-we.
+   Loaded only by index.html, after hero.css.
+   ========================================================================== */
+
+/* ---------- button ----------
+   One definition for all three homepage sections. The hero's own selectors
+   are listed here rather than left in hero.css so the treatment has a single
+   source; the hero markup keeps its .hero-btn class names, so
+   tools/hero-check.js and any external references are unaffected. */
+.v2-btn,
+#aCqA2TkE7 .hero-btn {
+  display: inline-block;
+  padding: 15px 32px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    transform .25s var(--v2-ease-out-quart),
+    background-color .25s var(--v2-ease-out-quart),
+    box-shadow .25s var(--v2-ease-out-quart),
+    color .25s var(--v2-ease-out-quart);
+}
+
+/* White pill — for dark grounds (hero video, About navy). */
+.v2-btn--primary,
+#aCqA2TkE7 .hero-btn--primary {
+  background: #fff;
+  color: #101010;
+}
+
+/* Navy pill — for light grounds (Who-are-we). */
+.v2-btn--dark {
+  background: var(--v2-navy);
+  color: #fff;
+}
+
+.v2-btn--dark:hover {
+  background: #063a56;
+}
+
+/* Outlined — for dark grounds only; the border colour is white. */
+.v2-btn--ghost,
+#aCqA2TkE7 .hero-btn--secondary {
+  border-color: rgba(255, 255, 255, .5);
+  color: #fff;
+}
+
+.v2-btn--ghost:hover,
+#aCqA2TkE7 .hero-btn--secondary:hover {
+  background: rgba(255, 255, 255, .12);
+  border-color: #fff;
+}
+
+.v2-btn:hover,
+#aCqA2TkE7 .hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--v2-shadow-lift);
+}
+
+.v2-btn:active,
+#aCqA2TkE7 .hero-btn:active {
+  transform: translateY(0);
+}
+
+/* Shine sweep. Moved here from hero.css with the rest of the button, and
+   renamed from hero-shine since it is no longer hero-specific. */
+.v2-btn--primary,
+.v2-btn--dark,
+#aCqA2TkE7 .hero-btn--primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.v2-btn--primary::after,
+.v2-btn--dark::after,
+#aCqA2TkE7 .hero-btn--primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, .85) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .v2-btn--primary:hover::after,
+  .v2-btn--dark:hover::after,
+  #aCqA2TkE7 .hero-btn--primary:hover::after {
+    animation: v2-shine .8s var(--v2-ease-out-quart);
+  }
+}
+
+@keyframes v2-shine {
+  from { left: -60%; }
+  to   { left: 120%; }
+}

@@ -149,45 +149,6 @@
   margin-top: 40px;
 }
 
-#aCqA2TkE7 .hero-btn {
-  display: inline-block;
-  padding: 15px 32px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  border: 1px solid transparent;
-  transition:
-    transform .25s var(--v2-ease-out-quart),
-    background-color .25s var(--v2-ease-out-quart),
-    box-shadow .25s var(--v2-ease-out-quart),
-    color .25s var(--v2-ease-out-quart);
-}
-
-#aCqA2TkE7 .hero-btn--primary {
-  background: #fff;
-  color: #101010;
-}
-
-#aCqA2TkE7 .hero-btn--secondary {
-  border-color: rgba(255, 255, 255, .5);
-  color: #fff;
-}
-
-#aCqA2TkE7 .hero-btn--secondary:hover {
-  background: rgba(255, 255, 255, .12);
-  border-color: #fff;
-}
-
-#aCqA2TkE7 .hero-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--v2-shadow-lift);
-}
-
-#aCqA2TkE7 .hero-btn:active {
-  transform: translateY(0);
-}
-
 /* ---------- mobile ----------
    920px, not 768px: this is the builder's own breakpoint and where the
    header swaps to its mobile layout. A different number would leave a dead
@@ -238,40 +199,6 @@
 @keyframes hero-fade-up {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Shine sweep on the primary CTA. */
-#aCqA2TkE7 .hero-btn--primary {
-  position: relative;
-  overflow: hidden;
-}
-
-#aCqA2TkE7 .hero-btn--primary::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -60%;
-  width: 40%;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgba(255, 255, 255, .85) 50%,
-    transparent 100%
-  );
-  transform: skewX(-18deg);
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  #aCqA2TkE7 .hero-btn--primary:hover::after {
-    animation: hero-shine .8s var(--v2-ease-out-quart);
-  }
-}
-
-@keyframes hero-shine {
-  from { left: -60%; }
-  to   { left: 120%; }
 }
 
 /* ==========================================================================
