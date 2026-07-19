@@ -11,3 +11,5 @@ assets/img/MEW-6085-2024_2025_GalleryTobeupdated/
 .netlify/
 __pycache__/
 .pytest_cache/
+node_modules/
+package-lock.json
