@@ -46,23 +46,91 @@
     return { ok: atRequiredViewport, detail: 'innerWidth=' + window.innerWidth + ' innerHeight=' + window.innerHeight };
   });
 
-  check('all three service columns are above the fold', function () {
+  check('the three service cards are gone', function () {
+    /* Replaced at the client's request by a rolling client-logo rail.
+       Regression guard: an earlier revision of this file asserted these
+       columns were present and above the fold, so a stale revert would
+       otherwise silently reinstate them. */
+    var left = SERVICE_IDS.filter(function (id) { return !!document.getElementById(id); });
+    if (document.querySelector('#aCqA2TkE7 .hero-services')) left.push('.hero-services');
+    return { ok: left.length === 0,
+             detail: left.length ? 'still present: ' + left.join(', ') : 'removed' };
+  });
+
+  check('client logo rail is present, above the fold, and rolling', function () {
     if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
-    var bad = [];
-    SERVICE_IDS.forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) { bad.push(id + ' missing'); return; }
-      var r = el.getBoundingClientRect();
-      /* A display:none element yields an all-zero rect (height=0, bottom=0);
-         an element merely scrolled above the viewport can have real height
-         but a negative/zero bottom. These are different failures and get
-         different messages so "not rendered" never gets reported alongside
-         a nonzero height. */
-      if (r.height <= 0) { bad.push(id + ' not rendered (height=0)'); return; }
-      if (r.bottom <= 0) { bad.push(id + ' scrolled above viewport (bottom=' + Math.round(r.bottom) + ')'); return; }
-      if (r.bottom > vh) bad.push(id + ' bottom=' + Math.round(r.bottom) + ' > vh=' + vh);
-    });
-    return { ok: bad.length === 0, detail: bad.join('; ') };
+    var rail = document.querySelector('#aCqA2TkE7 .hero-clients');
+    if (!rail) return { ok: false, detail: 'no .hero-clients rail' };
+
+    var imgs = rail.querySelectorAll('img');
+    var problems = [];
+    /* 6 is a floor, not a target: there are 9 client logos available and
+       a marquee needs enough of them to fill the width without obvious
+       repetition. */
+    if (imgs.length < 6) problems.push('only ' + imgs.length + ' logos (expected at least 6)');
+
+    var r = rail.getBoundingClientRect();
+    if (r.height <= 0) problems.push('rail not rendered');
+    else if (r.bottom > vh + 1) problems.push('rail bottom=' + Math.round(r.bottom) + ' > vh=' + vh);
+
+    /* The rail must actually roll. Accept a CSS animation on the track or
+       a running Web Animation - not a static row of logos. */
+    var track = rail.querySelector('.hero-clients__track') || rail.firstElementChild;
+    var animated = false;
+    if (track) {
+      var an = getComputedStyle(track).animationName;
+      if (an && an !== 'none') animated = true;
+      if (!animated && typeof track.getAnimations === 'function' && track.getAnimations().length) animated = true;
+    }
+    if (!animated) problems.push('rail track has no animation - it is not rolling');
+
+    return { ok: problems.length === 0,
+             detail: problems.length ? problems.join('; ')
+                                     : imgs.length + ' logos, bottom=' + Math.round(r.bottom) + ', rolling' };
+  });
+
+  check('logos are white and semi-transparent', function () {
+    var img = document.querySelector('#aCqA2TkE7 .hero-clients img');
+    if (!img) return { ok: false, detail: 'no logo images' };
+    var cs = getComputedStyle(img);
+    /* Effective opacity can come from the image, the track or the rail, so
+       walk up and multiply rather than reading a single node. */
+    var eff = 1, el = img;
+    while (el && el.id !== 'aCqA2TkE7') {
+      eff *= parseFloat(getComputedStyle(el).opacity);
+      el = el.parentElement;
+    }
+    var problems = [];
+    if (!(eff < 0.95)) problems.push('effective opacity ' + eff.toFixed(2) + ' - not semi-transparent');
+    /* Whiteness comes either from a filter (brightness/invert on a source
+       image) or from the asset itself already being a white silhouette.
+       Accept either; only flag when neither is true AND no filter is set. */
+    var hasFilter = cs.filter && cs.filter !== 'none';
+    var src = img.getAttribute('src') || '';
+    var whiteAsset = src.indexOf('/clients/') >= 0;
+    if (!hasFilter && !whiteAsset) {
+      problems.push('logos are neither filtered white nor drawn from prebuilt white assets');
+    }
+    return { ok: problems.length === 0,
+             detail: problems.length ? problems.join('; ')
+                                     : 'effective opacity ' + eff.toFixed(2) + ', ' + (whiteAsset ? 'white assets' : 'filter: ' + cs.filter) };
+  });
+
+  check('logo rail lines up with the chat widget', function () {
+    if (!atScrollTop || !atRequiredViewport) return { ok: false, detail: PRECONDITION_DETAIL };
+    var rail = document.querySelector('#aCqA2TkE7 .hero-clients');
+    var widget = document.getElementById('glass-ai-widget-host');
+    if (!rail) return { ok: false, detail: 'no rail' };
+    if (!widget) return { ok: true, detail: 'chat widget not present on this load - nothing to align to' };
+    var rr = rail.getBoundingClientRect(), wr = widget.getBoundingClientRect();
+    var railMid = rr.top + rr.height / 2, widgetMid = wr.top + wr.height / 2;
+    var off = railMid - widgetMid;
+    /* 16px: the client asked for the rail to sit "in line with the chat
+       icon". Tight enough to read as deliberately aligned, loose enough to
+       absorb the widget's own internal padding. */
+    return { ok: Math.abs(off) <= 16,
+             detail: 'rail mid=' + Math.round(railMid) + ' widget mid=' + Math.round(widgetMid) +
+                     ' off by ' + Math.round(off) + 'px' };
   });
 
   check('hero exactly fills the viewport, nothing below it shows', function () {
@@ -178,32 +246,6 @@
     if (document.querySelector('#aCqA2TkE7 .hero-sub')) problems.push('.hero-sub still present');
     return { ok: problems.length === 0,
              detail: problems.length ? problems.join('; ') : 'both removed' };
-  });
-
-  check('service strip has a readability treatment behind it', function () {
-    /* The three columns sit directly on moving video and were reported
-       unreadable. Text-shadow alone is not enough over footage that pans
-       across bright concrete - the strip needs its own surface. Accepts
-       any of: a non-transparent background on the strip or its columns, or
-       a backdrop-filter. Deliberately does not mandate WHICH, so the
-       treatment can be tuned without rewriting this check. */
-    var strip = document.querySelector('#aCqA2TkE7 .hero-services');
-    if (!strip) return { ok: false, detail: 'no .hero-services' };
-    var col = strip.querySelector('.hero-service');
-    var candidates = col ? [strip, col] : [strip];
-    var found = [];
-    for (var i = 0; i < candidates.length; i++) {
-      var cs = getComputedStyle(candidates[i]);
-      var bf = cs.backdropFilter || cs.webkitBackdropFilter || 'none';
-      var bg = cs.backgroundColor;
-      var bgImg = cs.backgroundImage;
-      if (bf !== 'none' && bf !== '') found.push('backdrop-filter:' + bf);
-      if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') found.push('background:' + bg);
-      if (bgImg && bgImg !== 'none') found.push('background-image present');
-    }
-    return { ok: found.length > 0,
-             detail: found.length ? found.join('; ')
-                                  : 'text sits directly on the video with no surface behind it' };
   });
 
   check('headline is the dominant element on the page', function () {
