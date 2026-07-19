@@ -121,3 +121,86 @@
   from { left: -60%; }
   to   { left: 120%; }
 }
+
+/* ==========================================================================
+   About — #BCClZ9bf3
+   ========================================================================== */
+
+#BCClZ9bf3 {
+  min-height: clamp(480px, 62svh, 600px);
+  display: flex;
+  padding: 0 !important;
+}
+
+/* The builder sets display:grid plus an inline --block-min-height of 726px
+   on .block-layout. Both have to go, or the section cannot shrink. */
+#BCClZ9bf3 .about-layout {
+  display: flex !important;
+  align-items: center;
+  min-height: 0 !important;
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+}
+
+#BCClZ9bf3 .about-stack {
+  max-width: 720px;
+}
+
+/* A bare rule, no eyebrow text. An earlier draft opened this section with a
+   letterspaced ABOUT UGCC label mirroring .hero-eyebrow; the client then had
+   the hero's eyebrow and supporting line removed (44db460, headline-only
+   composition), so reintroducing one a section lower would undo that call.
+   --v2-red-text is the lightened salmon: correct here because the ground is
+   navy. Wider and thicker than the old inline rule because it now stands on
+   its own rather than sitting beside text. */
+#BCClZ9bf3 .about-rule {
+  display: block;
+  width: 48px;
+  height: 2px;
+  margin: 0 0 24px;
+  background: var(--v2-red-text);
+}
+
+#BCClZ9bf3 .about-statement {
+  margin: 0;
+  font-size: clamp(28px, 3.4vw, 46px);
+  line-height: 1.15;
+  color: #fff;
+}
+
+#BCClZ9bf3 .about-sub {
+  margin: 20px 0 0;
+  max-width: 46ch;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, .66);
+}
+
+#BCClZ9bf3 .v2-btn {
+  margin-top: 30px;
+}
+
+/* 920px, not 768px: the builder's own breakpoint, and where the header swaps
+   to its mobile layout. Matching it avoids a dead band. */
+@media (max-width: 920px) {
+  #BCClZ9bf3 {
+    min-height: clamp(400px, 70svh, 520px);
+  }
+
+  #BCClZ9bf3 .about-layout {
+    width: calc(100% - 32px);
+  }
+
+  #BCClZ9bf3 .about-statement {
+    font-size: clamp(26px, 7vw, 34px);
+  }
+
+  #BCClZ9bf3 .about-sub {
+    font-size: 15px;
+  }
+
+  #BCClZ9bf3 .v2-btn {
+    display: block;
+    text-align: center;
+  }
+}
