@@ -39,6 +39,18 @@ Canonical/OG URLs were rewritten to root-relative paths. For best SEO, search fo
 `og:url` and the JSON-LD `"url"` fields in each `index.html` and set them to the
 final absolute domain. Optionally add a `sitemap.xml`.
 
+## Source-material folders (do NOT upload to hosting)
+
+These live under `assets/img/` for convenience but are working material,
+not part of the live site — exclude them when uploading to Hostinger:
+
+- `assets/img/Original Assets/` — local reference copy of all runtime images
+  (gitignored; the runtime copies the site actually uses sit directly in
+  `assets/img/`, so this folder can be deleted without breaking anything)
+- `assets/img/GalleryPicturesHighQualitytobeUsed/`
+- `assets/img/KP3_GallerytobeUpdated/`
+- `assets/img/MEW-6085-2024_2025_GalleryTobeupdated/`
+
 ## V2.0 (this branch)
 
 Modernization layer on top of the pixel-perfect replica, in `assets/css/v2.css`
