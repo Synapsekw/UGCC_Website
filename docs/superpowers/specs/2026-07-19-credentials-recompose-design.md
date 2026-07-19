@@ -115,13 +115,19 @@ section#zZFMdo
       .cred__rule         34x2px, --v2-red
       p.cred__lede        the existing kicker sentence, verbatim
       ul.cred__stats      1975 / SINCE · 6 / COUNTRIES · 7 / SECTORS
-      a.v2-btn.v2-btn--dark  href="/credentials/"  View credentials
+      a.v2-btn.v2-btn--on-light  href="/credentials/"  View credentials
     dl.cred__ledger
       div.cred__row x5
-        dt.cred__code     ISO 9001 … GRADE 1
-        time.cred__year   datetime="2004" … (absent for Grade 1)
-        dd.cred__desc     one line
+        dt.cred__code
+          time.cred__year   datetime="2004" … (an inert dash for Grade 1)
+          span.cred__name   ISO 9001 … GRADE 1
+        dd.cred__desc       one line
 ```
+
+The `<time>` sits **inside** the `<dt>`, not beside it. A `div` inside a `dl`
+may contain only `dt` and `dd` elements, so a `time` as their sibling would be
+invalid. Year and code still align in columns across rows because the `dt` has
+a fixed width and is itself a two-column grid.
 
 Decisions inside that structure:
 
@@ -176,7 +182,7 @@ codebase already reserves `--v2-red-text` for the cases where red must be read.
 source order, with each row's year moving up onto the same line as its code so
 the description keeps full width.
 
-**The CTA reuses `.v2-btn.v2-btn--dark`** from `sections.css` exactly as-is.
+**The CTA reuses `.v2-btn.v2-btn--on-light`** from `sections.css` exactly as-is.
 This block adds no button CSS.
 
 ## Files
@@ -202,8 +208,21 @@ session landed its `rail.css` link.
 
 The rules that follow from that:
 
-1. **Never `Write` `index.html`.** Only exact-string `Edit` calls. A whole-file
-   write would silently clobber whatever landed since the last read.
+1. **Every `index.html` change is an exact-string replacement that fails loudly
+   when its anchor is absent.** Never a blind whole-file write, which would
+   silently clobber whatever landed since the last read.
+
+   The `<link>` tag meets this with a normal `Edit` call. The block replacement
+   cannot: deleting the section's contents means matching ~20 KB of
+   builder-generated markup, which is impractical to carry in a plan and stale
+   the moment another session commits. It is therefore done by a single-process
+   script that reads, asserts its anchors are present and unique, splices, and
+   writes — the same contract, in one atomic run of a few milliseconds, with
+   `git diff --stat` afterwards to confirm the delta is only this section.
+
+   The replacement string must contain **no newlines**. The page body is one
+   ~100 KB line; splitting it would turn every other session's edit to that
+   line into a conflicting hunk.
 2. **Anchor on unique strings, never on byte offsets or line numbers.** Offsets
    are invalidated by any edit above; `id="zZFMdo"` is not.
 3. **The `<link>` is anchored on `</head>`**, the convention commit `980946e`

@@ -1153,11 +1153,25 @@ Tab from the hero through both new sections. Confirm: About's `Read More` shows 
 
 Reload with the console open. Expected: no JS errors, no 404s for `sections.css` or `sections.js`.
 
-- [ ] **Step 7: Commit any fixes**
+- [ ] **Step 7: Bump the cache-busters**
+
+`sections.css` was created at `?v=1` in Task 2 and rewritten by Tasks 4, 6 and 7;
+`sections.js` was created in Task 7. The repo's convention is an explicit query
+bump (`v2.css?v=4`, `hero.css?v=2`), and without one a returning visitor holds
+the Task 2 version of a file that has changed four times — the About and
+Who-are-we layouts would simply not apply for them.
+
+In `index.html`, bump `sections.css?v=1` to `?v=2`. Leave `sections.js?v=1`
+alone if Task 7 was its first and only version.
+
+Reload with a hard refresh and re-run both harnesses to confirm nothing depended
+on the old URL.
+
+- [ ] **Step 8: Commit any fixes**
 
 If Steps 1-6 surface defects, fix and commit each individually with a message naming the defect. If everything passes, no commit is needed.
 
-- [ ] **Step 8: Report to the user**
+- [ ] **Step 9: Report to the user**
 
 Summarise: what changed, what both check scripts report, the measured heights of both sections before and after, and anything deferred or amended. Do **not** push and do **not** merge to `master`.
 

@@ -311,6 +311,15 @@ Create `tools/rail-check.js`:
     var after = secTop + sec.offsetHeight + 50;
     var max = vp.scrollWidth - vp.clientWidth;
 
+    /* The driver traverses only a fraction of the rail per viewport transit, and
+       publishes that fraction on .v2-rail so this check asserts the real target
+       instead of duplicating the constant. Absent (reduced motion, or no JS at
+       all) it defaults to 1 — which is also the correct expectation for the
+       no-JS case, where nothing should move at all. */
+    var rail = document.querySelector('.v2-rail');
+    var ratio = parseFloat((rail && rail.getAttribute('data-travel-ratio')) || '1');
+    var want = max * ratio;
+
     return scrollPageTo(before)
       .then(function () {
         var atStart = vp.scrollLeft;
@@ -322,10 +331,14 @@ Create `tools/rail-check.js`:
               atStart === 0 && atEnd === 0,
               '[reduce] scrollLeft stayed ' + atStart + ' -> ' + atEnd + ' (want 0 -> 0)');
           } else {
+            /* Both bounds matter. A lower bound alone would pass a rail that
+               overshot to max, silently losing the tuning; an upper bound alone
+               would pass a rail that never moved. */
             record('page scroll drives the rail',
-              atStart <= 2 && atEnd >= max - 2 && max > 0,
+              atStart <= 2 && Math.abs(atEnd - want) <= 3 && want > 0,
               '[no-preference] scrollLeft ' + Math.round(atStart) + ' -> ' +
-                Math.round(atEnd) + ' (want 0 -> ' + max + ')');
+                Math.round(atEnd) + ' (want 0 -> ' + Math.round(want) +
+                ', ratio ' + ratio + ' of ' + max + ')');
           }
         });
       })
@@ -340,9 +353,9 @@ Create `tools/rail-check.js`:
         return scrollPageTo(before).then(function () {
           var held = vp.scrollLeft;
           record('user interaction takes the rail over',
-            held >= max - 2,
+            Math.abs(held - want) <= 3,
             'after pointerdown, scrollLeft held at ' + Math.round(held) +
-              ' (want ~' + max + ', i.e. page scroll ignored)');
+              ' (want ~' + Math.round(want) + ', i.e. page scroll ignored)');
         });
       })
       .then(function () { return scrollPageTo(startY); });
@@ -696,6 +709,18 @@ Create `assets/js/rail.js`:
 (function () {
   'use strict';
 
+  /* Fraction of the rail's full scrollable width traversed across one viewport
+     transit of the section.
+
+     At 1.0 all fifteen cards pass in ~1.5 screenfuls of page scroll — 8 to 10
+     cards per screenful, fast enough that no individual photograph registers.
+     0.75 walks the visitor past roughly eleven of the fifteen at a legible
+     pace; the remainder are one drag away, which costs nothing because the rail
+     is a real scrollable region.
+
+     Coverage vs legibility. Lower is calmer and shows fewer. */
+  var TRAVEL_RATIO = 0.75;
+
   function init() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -703,6 +728,10 @@ Create `assets/js/rail.js`:
     Array.prototype.forEach.call(rails, function (rail) {
       var vp = rail.querySelector('.v2-rail__viewport');
       if (!vp) return;
+
+      /* Published on the element so tools/rail-check.js asserts against this
+         value rather than duplicating it. One source of truth. */
+      rail.setAttribute('data-travel-ratio', String(TRAVEL_RATIO));
 
       var taken = false;    /* the user has taken hold; stop driving, for good */
       var ticking = false;
@@ -737,7 +766,7 @@ Create `assets/js/rail.js`:
         if (p < 0) p = 0;
         if (p > 1) p = 1;
 
-        vp.scrollLeft = p * max;
+        vp.scrollLeft = p * max * TRAVEL_RATIO;
       }
 
       function onScroll() {
