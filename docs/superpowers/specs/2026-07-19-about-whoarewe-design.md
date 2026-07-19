@@ -254,8 +254,12 @@ viewport, with the seven rows staggered by 60ms via an inline
 `--i` custom property. Animation is the existing `hero-fade-up` keyframe —
 declared once in `hero.css`, referenced from `sections.css`.
 
-If `.hero-motion` is absent, `sections.js` does not observe at all and every
-element is at its final state from first paint.
+The hiding rules are gated on `.hero-motion` **and** `.v2-reveal`, the latter set
+by `sections.js` itself once it has targets to observe. So the reveal is opt-in:
+if `.hero-motion` is absent, or `sections.js` fails to load, or
+`IntersectionObserver` is missing, nothing is ever set to `opacity: 0` and every
+element is at its final state from first paint. Hiding in CSS and revealing in JS
+would fail to a blank section instead.
 
 ## Files
 
@@ -280,7 +284,8 @@ element is at its final state from first paint.
 7. Every `.v2-btn` computes the same `border-radius`, `padding` and
    `font-weight` as `#aCqA2TkE7 .hero-btn`.
 8. `.wr-row:focus-visible` computes the same `box-shadow` as `.wr-row:hover`.
-9. With `.hero-motion` absent, every `.wr-row` computes `opacity: 1`.
+9. With `.v2-reveal` removed from `<html>`, every `.wr-row` computes
+   `opacity: 1` — the reveal must be opt-in.
 10. `.wr-eyebrow` and the hovered `.wr-num` compute `--v2-red` (`#d41c22`), not
     `--v2-red-text` — the light-ground section must not inherit the hero's
     dark-ground salmon.

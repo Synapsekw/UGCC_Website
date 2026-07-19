@@ -424,3 +424,28 @@
   #u7vIc0iRh .wr-desc { grid-column: 2; }
   #u7vIc0iRh .wr-arrow { display: none; }
 }
+
+/* ==========================================================================
+   Motion / reveal — both sections.
+   Doubly gated: .hero-motion (set by hero.js when reduced motion is NOT
+   requested) AND .v2-reveal (set by sections.js once it has targets). If
+   either is missing nothing is hidden, so a script that fails to load
+   degrades to static content rather than a blank section.
+   hero-fade-up is defined in hero.css; both files always load together.
+   ========================================================================== */
+
+.hero-motion.v2-reveal #BCClZ9bf3 .about-stack,
+.hero-motion.v2-reveal #u7vIc0iRh .wr-head,
+.hero-motion.v2-reveal #u7vIc0iRh .wr-row {
+  opacity: 0;
+}
+
+.hero-motion.v2-reveal #BCClZ9bf3 .about-stack.is-in,
+.hero-motion.v2-reveal #u7vIc0iRh .wr-head.is-in,
+.hero-motion.v2-reveal #u7vIc0iRh .wr-row.is-in {
+  animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
+}
+
+.hero-motion.v2-reveal #u7vIc0iRh .wr-row.is-in {
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
