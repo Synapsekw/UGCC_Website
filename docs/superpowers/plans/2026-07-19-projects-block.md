@@ -60,10 +60,11 @@ http://localhost:8747/` first. If it answers 200, use it. If not, start one with
 - Create: `assets/img/v2/proj/{kp3cns301,ra-259,pahwc1151,pai18pa,c502015,zorepc0059}-{440,880}.jpg`
 
 Sources were verified during planning: all six are landscape and at least 1024px
-wide, so both derivatives are always downscales. Three sources are PNG or WebP,
-which is why `-s format jpeg` appears in the resample call — the rail's script
-omits it because its sources are all already JPEG, and without it `sips` would
-write PNG/WebP bytes into a `.jpg` filename.
+wide, so both derivatives are always downscales. Two of the six carry `.png` and
+`.webp` extensions, which is why `-s format jpeg` appears in the resample call.
+It is belt-and-braces rather than strictly required: `sips` picks its output
+format from the `.jpg` output extension regardless of the input. It is kept so
+the script stays correct if a source is ever swapped for a genuine PNG or WebP.
 
 - [ ] **Step 1: Write the script**
 
@@ -103,7 +104,9 @@ make_one() {
 
   # Resample along whichever axis leaves both dimensions >= the target, then
   # centre-crop. Cropping without this can letterbox instead of crop.
-  # -s format jpeg is required: three sources are PNG/WebP.
+  # -s format jpeg: two sources carry .png/.webp extensions. sips picks the
+  # output format from the .jpg extension anyway, so this is belt-and-braces
+  # for the day a source is swapped for a genuine PNG or WebP.
   if [ $(( w * th )) -gt $(( h * tw )) ]; then
     sips -s format jpeg --resampleHeight "$th" "$src" --out "$out" >/dev/null
   else

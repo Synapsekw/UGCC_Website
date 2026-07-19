@@ -31,7 +31,9 @@ make_one() {
 
   # Resample along whichever axis leaves both dimensions >= the target, then
   # centre-crop. Cropping without this can letterbox instead of crop.
-  # -s format jpeg is required: three sources are PNG/WebP.
+  # -s format jpeg: two sources carry .png/.webp extensions. sips picks the
+  # output format from the .jpg extension anyway, so this is belt-and-braces
+  # for the day a source is swapped for a genuine PNG or WebP.
   if [ $(( w * th )) -gt $(( h * tw )) ]; then
     sips -s format jpeg --resampleHeight "$th" "$src" --out "$out" >/dev/null
   else
