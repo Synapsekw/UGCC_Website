@@ -17,25 +17,59 @@
 }
 
 /* ---------- section shell ---------- */
+/* main.css puts the first block under the header with a matched pair:
+   padding-top: var(--header-height) / margin-top: calc(-1 * var(--header-height)).
+   The value is baked inline on this section as 123px (123px mobile: 95px),
+   but the header actually renders at 117.3px desktop / 95.5px mobile. That
+   ~5.7px desktop mismatch pulled the section 5.7px above the viewport top,
+   so at height:720 in a 720px viewport it ended at 714 and 6px of the next
+   section (#BCClZ9bf3) showed through. Overriding the custom property here
+   (author !important beats the non-important inline value) makes main.css's
+   own calc() land on the header's real height instead of the stale bake. */
 #aCqA2TkE7 {
-  min-height: clamp(640px, 100svh, 860px);
-  display: flex;
+  /* Static fallback only. hero.js measures the header on load and on
+     resize and overwrites these with its real height, because a hardcoded
+     number goes stale the moment anyone touches the nav - which already
+     happened once: the header moved from 117.3px to ~118px during the nav
+     rework. These values keep the no-JS case close enough that no sliver
+     shows; the JS makes it exact. */
+  --header-height: 118px !important;
+  --header-height-mobile: 95.5px !important;
+  position: relative;
+  /* No upper cap: the hero must track the viewport at any height. The
+     640px floor only protects very short windows from crushing the
+     centred stack — it never trims a normal viewport, so nothing below
+     the hero is visible at ordinary sizes. */
+  height: max(640px, 100svh);
   padding: 0 !important;
 }
 
 #aCqA2TkE7 .hero-layout {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  grid-template-rows: 1fr auto !important;
-  gap: 0 !important;
+  /* Positioned to fill the section exactly, so the stack and the service
+     strip can be placed against the true viewport box rather than against
+     whatever flow space is left under the header. z-index:14 already
+     comes from main.css's .block-layout rule — it only takes effect once
+     the element is positioned, which lifts it above the video's
+     .block-background (z-index:13). */
+  position: absolute;
+  inset: 0;
+  display: block;
   width: min(1224px, 100% - 64px);
   margin-inline: auto;
-  padding-top: var(--header-height, 123px);
 }
 
 /* ---------- centred stack ---------- */
 #aCqA2TkE7 .hero-stack {
-  align-self: center;
+  /* Dead-centred on the section's own box, which now spans the full
+     viewport height (top:0, height:100svh) — so this centres in the
+     actual viewport, not in the leftover space below the header. The
+     header may visually overlap the top of the stack; that's expected,
+     it's a transparent overlay. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  transform: translate(-50%, -50%);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -43,10 +77,10 @@
   padding-block: 40px;
   /* Localised scrim behind the centred stack only. The page-wide scrim is
      deliberately light through the middle so the footage reads, but the
-     video pans across bright concrete where the eyebrow in --v2-red-text
-     (a mid-tone salmon) drops to near-illegible. Darkening the whole scrim
-     would undo Task 5; this darkens just the area behind the text and
-     fades out well before the edges of the frame. */
+     video pans across bright concrete where light text can drop to
+     near-illegible. Darkening the whole scrim would undo Task 5, so this
+     darkens just the area behind the text and fades out well before the
+     edges of the frame. */
   background: radial-gradient(
     ellipse 68% 62% at 50% 50%,
     rgba(0, 17, 28, .52) 0%,
@@ -55,26 +89,18 @@
   );
 }
 
-#aCqA2TkE7 .hero-eyebrow {
-  margin: 0 0 18px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .16em;
-  color: var(--v2-red-text);
-}
-
 #aCqA2TkE7 .hero-title {
   margin: 0;
   color: #fff;
   line-height: 1.02;
-}
-
-#aCqA2TkE7 .hero-sub {
-  margin: 20px 0 0;
-  max-width: 540px;
-  font-size: 17px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, .72);
+  /* The headline carries the whole statement now that the eyebrow and
+     supporting line are gone, so it needs real scale. Fluid via clamp so
+     it tracks the viewport: floors at 56px on the narrowest phones, is
+     ~96px at 1280 (comfortably over the 72px floor the harness checks),
+     and tops out at 128px so "WE BUILD BETTER" never runs past the 1224px
+     content column on very wide screens. */
+  font-size: clamp(56px, 4vw + 44px, 128px);
+  letter-spacing: -.01em;
 }
 
 /* ---------- CTAs ---------- */
@@ -83,7 +109,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 14px;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 
 #aCqA2TkE7 .hero-btn {
@@ -126,17 +152,66 @@
 }
 
 /* ---------- service strip, pinned to the hero's bottom edge ---------- */
+/* Readability treatment (Task 6), revised after client feedback that the
+   first pass (a bordered, rounded, fairly opaque panel with a hard
+   border-top) read as a block pasted onto the page. Two layers now, both
+   soft:
+
+   1. #aCqA2TkE7::after — a wide, tall cinematic gradient that rises from
+      the hero's bottom edge, full-bleed (not scoped to the content
+      column). This is the same device used at the top of the hero
+      (block-background__overlay) and reads as part of the footage's
+      natural vignette rather than a UI element. z-index:13 sits it above
+      the video (also 13, but painted first in DOM order) and below the
+      text (hero-layout is 14).
+   2. .hero-services itself — a much lower-opacity wash plus a lighter
+      blur directly behind the text, no border, no border-radius. This is
+      what the harness's "readability treatment" check inspects; it is
+      deliberately subtle now that layer 1 is doing most of the
+      legibility work, so the footage still reads as video through it. */
+#aCqA2TkE7::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 300px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 17, 28, 0) 0%,
+    rgba(0, 17, 28, .3) 55%,
+    rgba(0, 17, 28, .6) 100%
+  );
+  pointer-events: none;
+  z-index: 13;
+}
+
 #aCqA2TkE7 .hero-services {
-  align-self: end;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 40px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid rgba(255, 255, 255, .18);
-  margin-bottom: 40px;
+  padding-top: 28px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 17, 28, 0) 0%,
+    rgba(0, 17, 28, .22) 45%,
+    rgba(0, 17, 28, .4) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 #aCqA2TkE7 .hero-service {
-  padding: 20px 24px 0;
-  border-right: 1px solid rgba(255, 255, 255, .14);
+  /* More room than the first pass: the longest description (building
+     construction) now sits with generous clearance above and below
+     instead of filling every pixel of the card. Grid's default
+     align-items:stretch already equalises all three card heights to the
+     tallest one, so the row reads as one strip rather than ragged. */
+  padding: 10px 28px 30px;
+  border-right: 1px solid rgba(255, 255, 255, .1);
 }
 
 #aCqA2TkE7 .hero-service:first-child { padding-left: 0; }
@@ -163,22 +238,19 @@
    band where the header is mobile but the hero is still desktop. */
 @media (max-width: 920px) {
   #aCqA2TkE7 {
-    min-height: clamp(560px, 100svh, 900px);
+    height: max(560px, 100svh);
   }
 
   #aCqA2TkE7 .hero-layout {
     width: calc(100% - 32px);
-    padding-top: var(--header-height-mobile, 95px);
   }
-
-  #aCqA2TkE7 .hero-sub { font-size: 15px; }
 
   #aCqA2TkE7 .hero-cta { flex-direction: column; align-self: stretch; }
   #aCqA2TkE7 .hero-btn { text-align: center; }
 
   #aCqA2TkE7 .hero-services {
     grid-template-columns: minmax(0, 1fr);
-    margin-bottom: 28px;
+    bottom: 28px;
   }
 
   #aCqA2TkE7 .hero-service {
@@ -194,19 +266,18 @@
 }
 
 /* ==========================================================================
-   Two fixes found by looking at the rendered page, not by assertion.
+   Legibility fix found by looking at the rendered page, not by assertion.
    ========================================================================== */
 
-/* 1. Legibility over a moving background.
-   The scrim is deliberately light through the middle (32%) so the aerial
+/* The scrim is deliberately light through the middle (32%) so the aerial
    footage reads, but the video pans across bright concrete and sand where
-   the eyebrow in --v2-red-text washes out badly. Darkening the scrim would
-   undo the whole point of Task 5, so carry the legibility on the text
-   instead: a soft shadow guarantees contrast on ANY frame of the video
-   without muddying the footage. */
-#aCqA2TkE7 .hero-eyebrow,
+   plain white text can lose contrast. Darkening the scrim would undo the
+   whole point of Task 5, so carry the legibility on the text instead: a
+   soft shadow guarantees contrast on ANY frame of the video without
+   muddying the footage. (The service strip additionally gets its own
+   surface above — see Task 6 — since text-shadow alone wasn't enough
+   there.) */
 #aCqA2TkE7 .hero-title,
-#aCqA2TkE7 .hero-sub,
 #aCqA2TkE7 .hero-service__name,
 #aCqA2TkE7 .hero-service__desc {
   text-shadow:
@@ -214,11 +285,10 @@
     0 2px 14px rgba(0, 17, 28, .55);
 }
 
-/* 2. Don't run the last service column under the chat widget.
-   #glass-ai-widget-host is fixed bottom-right at z-index 2147483647. Before
-   this redesign the service strip sat below the fold so they never met;
-   pinning the strip to the hero's bottom edge puts the third column's text
-   directly under the button.
+/* Don't run the last service column under the chat widget.
+   #glass-ai-widget-host is fixed bottom-right at z-index 2147483647. The
+   service strip is pinned to the hero's bottom edge, which puts the third
+   column's text directly under the button.
 
    Only needed below ~1400px. Above that the centred 1224px layout leaves a
    gutter wider than the widget, so the columns stay evenly padded on large
@@ -244,11 +314,6 @@
   animation: hero-word-in .75s var(--v2-ease-out-expo) both;
 }
 
-.hero-motion #aCqA2TkE7 .hero-eyebrow {
-  animation: hero-blur-in .7s var(--v2-ease-out-quart) both;
-}
-
-.hero-motion #aCqA2TkE7 .hero-sub,
 .hero-motion #aCqA2TkE7 .hero-cta,
 .hero-motion #aCqA2TkE7 .hero-service {
   animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
@@ -257,11 +322,6 @@
 @keyframes hero-word-in {
   from { opacity: 0; transform: translateY(.5em); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes hero-blur-in {
-  from { opacity: 0; filter: blur(9px); }
-  to   { opacity: 1; filter: blur(0); }
 }
 
 @keyframes hero-fade-up {

@@ -11,6 +11,39 @@
   var hero = document.getElementById('aCqA2TkE7');
   if (!hero) return;
 
+  /* ---------- keep --header-height honest ----------
+     main.css seats the first block under the header with a matched pair:
+       padding-top: var(--header-height)
+       margin-top:  calc(-1 * var(--header-height))
+     The builder bakes 123px into the section inline, but the header does
+     not actually render at 123px - and its real height moves whenever the
+     nav changes (it is currently ~118px after the nav rework, and was
+     117.3px before it). Any mismatch offsets the hero vertically, which is
+     what let a 6px sliver of the next section show under it.
+
+     hero.css carries a static fallback, but a hardcoded number goes stale
+     the moment anyone touches the header. Measure the real thing instead.
+     This runs BEFORE the reduced-motion guard on purpose: it is layout
+     correctness, not motion, and must apply either way. */
+  function syncHeaderHeight() {
+    var header = document.querySelector('header.block-header');
+    if (!header) return;
+    var h = header.getBoundingClientRect().height;
+    if (!h) return;
+    var prop = window.matchMedia('(max-width: 920px)').matches
+      ? '--header-height-mobile'
+      : '--header-height';
+    hero.style.setProperty(prop, h + 'px', 'important');
+  }
+
+  syncHeaderHeight();
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(syncHeaderHeight, 120);
+  }, { passive: true });
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   /* Split Text: wrap each word in a span, preserving the whitespace between
@@ -40,21 +73,18 @@
     if (el) el.style.animationDelay = ms + 'ms';
   }
 
-  /* Eyebrow first, then the headline word by word, then the supporting
-     line, CTAs and finally the service strip. */
-  delay(hero.querySelector('.hero-eyebrow'), 80);
-
+  /* No eyebrow to lead with any more, so the headline opens the sequence:
+     word by word, then the CTAs, then the service strip. */
   words.forEach(function (w, i) {
-    delay(w, 260 + i * 60);
+    delay(w, 80 + i * 60);
   });
 
-  var afterWords = 260 + words.length * 60;
-  delay(hero.querySelector('.hero-sub'), afterWords + 60);
-  delay(hero.querySelector('.hero-cta'), afterWords + 180);
+  var afterWords = 80 + words.length * 60;
+  delay(hero.querySelector('.hero-cta'), afterWords + 120);
 
   var services = hero.querySelectorAll('.hero-service');
   Array.prototype.forEach.call(services, function (s, i) {
-    delay(s, afterWords + 300 + i * 110);
+    delay(s, afterWords + 240 + i * 110);
   });
 
   document.documentElement.classList.add('hero-motion');
