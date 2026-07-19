@@ -1,4 +1,4 @@
-# Homepage gallery → captioned drift rail — design
+# Homepage gallery → captioned scroll-linked rail — design
 
 Branch: `hero-recompose`
 Scope: the homepage slideshow section (`#zOl98u` in `index.html`), the block
@@ -36,7 +36,8 @@ simultaneously unreadable, mostly invisible, and redundant with its neighbour.
 
 ## Goals
 
-1. Make every photo visible to every visitor, not two of fifteen.
+1. Put every photo in front of a visitor who scrolls the page normally, and
+   keep all fifteen reachable on demand — instead of two of fifteen, at random.
 2. Attach meaning to each photo, so the imagery reads as evidence of delivery.
 3. Give the section an exit — send interested visitors toward actual projects.
 4. Cut the section's vertical cost by more than half.
@@ -52,8 +53,8 @@ simultaneously unreadable, mostly invisible, and redundant with its neighbour.
 
 ## Approach
 
-A full-bleed horizontal rail of captioned, clickable cards that drifts
-continuously at a slow constant speed.
+A full-bleed horizontal rail of captioned, clickable cards that advances as the
+visitor scrolls the page past it, and can also be dragged or swiped at any time.
 
 Chosen over three alternatives considered:
 
@@ -65,10 +66,34 @@ Chosen over three alternatives considered:
 - **Deletion** — reclaims the most scroll, discards the client's own asset
   library.
 
-Constant drift was chosen over scroll-linked and manual-only motion because it
-is the only variant that guarantees a passive visitor sees several photos.
-That choice is what makes the pause control in "Accessibility" mandatory rather
-than optional.
+### Why scroll-linked and not constant drift
+
+Constant autonomous drift was chosen first, on the reasoning that it is the only
+variant guaranteeing a passive visitor sees several photos, and nothing else on
+the page moved on its own.
+
+**That second premise stopped being true.** Concurrent work on this branch
+(`44db460`, `9d4dd43`) replaces the hero's service columns with a rolling
+client-logo rail — an autonomously animating marquee, above the fold, roughly
+one screen above this section. Two self-animating horizontal marquees within a
+screen of each other read as a page that will not sit still, and the hero rail
+has the stronger claim on that behaviour: it is above the fold, its logos are
+interchangeable, and it has nothing to gain from user pacing.
+
+So this rail takes the motion the hero rail is not using. Scroll-linked motion
+also removes two pieces of machinery that constant drift required:
+
+- **No duplicated track.** A seamless infinite loop needed the 15 items emitted
+  twice with the second set hidden from assistive technology. Scroll-linked
+  motion has a start and an end, so 15 items is 15 items.
+- **No pause control.** WCAG 2.2.2 governs content that moves *automatically*.
+  Motion the user causes by scrolling is not automatic, so the toggle — and its
+  JavaScript, its icon states and its focus handling — all disappear.
+
+The cost is honest and worth stating: a visitor who scrolls past very fast sees
+fewer photos than a constant drift would have shown them. That is mitigated by
+the rail remaining a genuinely scrollable region, so anyone who wants the rest
+can drag, swipe or trackpad-scroll it without waiting for a timer.
 
 ## Structure
 
@@ -81,10 +106,6 @@ contents are replaced entirely.
     <div class="v2-rail__head">
       <p class="v2-rail__eyebrow">Delivered</p>
       <h3 class="v2-rail__title">Built across Kuwait and the Gulf</h3>
-      <button class="v2-rail__toggle" type="button"
-              aria-pressed="false" aria-label="Pause the moving gallery">
-        <svg aria-hidden="true">…pause / play glyph…</svg>
-      </button>
     </div>
     <div class="v2-rail__viewport">
       <ul class="v2-rail__track">
@@ -94,23 +115,20 @@ contents are replaced entirely.
                  srcset="/assets/img/v2/rail/slide-13-480.jpg 480w,
                          /assets/img/v2/rail/slide-13-960.jpg 960w"
                  sizes="(max-width: 600px) 260px, (max-width: 1024px) 300px, 352px"
-                 loading="lazy" width="480" height="317"
+                 loading="lazy" width="480" height="316"
                  alt="Aerial view of a completed UGCC road interchange in Kuwait City">
             <span class="v2-rail__tag">Roads &amp; Bridges</span>
           </a>
         </li>
-        <!-- 15 items, then the same 15 repeated -->
+        <!-- 15 items, once -->
       </ul>
     </div>
   </div>
 </section>
 ```
 
-The 15 items are emitted **twice**. The animation translates the track by
-exactly `-50%`, so the second set arrives at the position the first set
-started from and the loop has no visible seam. The duplicate set carries
-`aria-hidden="true"` on each `<li>` and `tabindex="-1"` on each `<a>`, so
-assistive technology and keyboard tabbing encounter each project once.
+Fifteen items, emitted once. No duplicate set and no `aria-hidden` bookkeeping:
+the rail has a beginning and an end rather than looping.
 
 `class="slideshow"` was verified to appear on `index.html` only. Removing it
 from this page leaves the builder slideshow CSS in `main.css`/`custom.css` and
@@ -163,56 +181,75 @@ delivered work.
 
 ## Motion
 
-Pure CSS. No JavaScript in the animation path — no `requestAnimationFrame`, no
-scroll listener, no resize observer.
+The rail is a **natively scrollable region** whose `scrollLeft` is driven by the
+page's vertical scroll position. Driving `scrollLeft` rather than a `transform`
+is the load-bearing decision: it means page-driven motion and user-driven
+dragging are the same mechanism acting on the same value, so they compose
+instead of fighting. A transform-based rail would have to choose one or the
+other.
 
-```css
-.v2-rail__track { animation: v2-rail-drift 70s linear infinite; }
-@keyframes v2-rail-drift { to { transform: translateX(-50%); } }
+`.v2-rail__viewport` is `overflow-x: auto` at all times. On scroll:
+
+```
+p         = (windowHeight - sectionTop) / (windowHeight + sectionHeight)   clamped 0..1
+scrollLeft = p * (track.scrollWidth - viewport.clientWidth)
 ```
 
-One set is `15 × (352 + 12) = 5460px`, so 70s gives ~78px/s. A card takes ~4.5s
-to cross its own width; a visitor lingering 8 seconds sees roughly two new
-cards arrive. The duration is a single CSS value and is expected to be tuned
-by eye during implementation.
+So the rail sits at its first card as the section enters the viewport from
+below, and reaches its last card as the section leaves at the top. A visitor
+who scrolls the section through at a normal reading pace passes the whole
+fifteen.
 
-`will-change: transform` is set on the track only, and only inside the
-`prefers-reduced-motion: no-preference` block, so it costs nothing on the
-reduced-motion path.
+Implementation constraints:
 
-Motion pauses on `:hover` and on `:focus-within` via
-`animation-play-state: paused`.
+- The scroll handler is `passive: true` and does nothing but read a rect and
+  write `scrollLeft`. The write is coalesced into a `requestAnimationFrame` so
+  a fast scroll cannot queue more work than one frame can absorb.
+- **User override.** Any user-initiated horizontal interaction on the viewport
+  (`pointerdown`, `wheel` with horizontal delta, `touchstart`, or focusing a
+  card) sets a flag that stops page-scroll driving for that visit. Once a
+  visitor takes hold of the rail, the page must not yank it back.
+- No `scroll-behavior: smooth` on the viewport — it would fight per-frame
+  writes. The site-wide smooth scrolling in `v2.css` applies to `html` only.
+- `scroll-snap-type: x proximity` so manual dragging settles on card
+  boundaries, with `proximity` rather than `mandatory` so programmatic writes
+  are not snapped mid-scroll.
+
+The mapping ratio is the tuning knob and is expected to be adjusted by eye.
+Full-track travel across one viewport transit is the starting point; if it
+feels frantic, the travel is scaled down and the remaining cards stay reachable
+by dragging.
 
 ## Accessibility
 
-The rail is auto-moving content that starts automatically and runs longer than
-five seconds, so WCAG 2.2.2 (Pause, Stop, Hide) requires a pause mechanism
-available to every user. Hover and focus pausing do not satisfy this on their
-own — they are unavailable to a touch user who is not trying to tap a card.
+**WCAG 2.2.2 (Pause, Stop, Hide) does not apply.** It governs content that moves
+automatically. Here nothing moves unless the visitor scrolls, and stopping the
+motion is exactly as easy as stopping scrolling. This is the single largest
+simplification scroll-linking buys: no pause toggle, no `aria-pressed` state, no
+icon swap, no focus-handling around an animation that might restart.
 
-Therefore the design includes a **visible pause/resume toggle** in the section
-heading row. It is not decoration and it is not optional; it is the reason the
-constant-drift option is shippable.
-
-- The toggle sets `aria-pressed` and adds a class that pauses the animation.
-  It is the only JavaScript this feature needs.
-- Under `prefers-reduced-motion: reduce`, the animation is dropped entirely and
-  `.v2-rail__viewport` becomes `overflow-x: auto` so all 15 cards stay
-  reachable by scroll, drag and keyboard. The toggle is hidden in this state —
-  there is nothing to pause.
+- Under `prefers-reduced-motion: reduce`, the scroll driver does not attach at
+  all. The rail is already `overflow-x: auto`, so it degrades to an ordinary
+  horizontally scrollable region with all 15 cards reachable by drag, swipe,
+  trackpad and keyboard. Nothing is lost but the automatic advance.
 - Every `<img>` gets a descriptive `alt` naming the structure and its setting.
   Empty `alt` is wrong here: the photographs carry the section's meaning.
 - The `<a>` cards are keyboard reachable in source order, and `:focus-visible`
   inherits the existing site-wide red outline from `v2.css`.
-- Focusing a card pauses the rail, so a keyboard user is never chasing a moving
-  target.
+- Focusing a card sets the user-override flag, so tabbing through the rail
+  cannot be fought by a concurrent page scroll.
+- The viewport carries `tabindex="0"` and an `aria-label`, so a keyboard user
+  can scroll the region with arrow keys without tabbing through all 15 links —
+  the standard affordance for a scrollable region.
 
 ## Dimensions and surface
 
 - Card **352 × 232** desktop (landscape). The photographs are all 16:9 or
   wider aerials; on this content the horizontal sweep is the information, and a
   portrait crop discards it.
-- Tablet 300 × 198, mobile 260 × 172. Same drift at all sizes.
+- Tablet 300 × 198, mobile 260 × 172. Same scroll-linking at all sizes; the
+  travel distance recomputes from the measured track width, so no per-breakpoint
+  constants are needed.
 - Background: `var(--v2-navy)`. The block above (`#u7vIc0iRh`) is transparent
   on white and the block below (`#zd_fdi`) is already `rgb(0, 42, 65)`. Navy
   merges the rail downward into one intentional dark region rather than
@@ -235,8 +272,9 @@ constant-drift option is shippable.
   is reserved, so the rail cannot contribute to CLS.
 - Measured on two aspect-ratio extremes (slide-01 at 1920x1043, slide-09 at
   1920x1438), the 480w derivative lands at 45–60 KB. Expected payload for this
-  section on a 1x display: from ~7 MB eager to **~750 KB** lazy. The duplicated
-  DOM set references identical URLs, so it costs no additional bytes.
+  section on a 1x display: from ~7 MB eager to **~750 KB** lazy — and less than
+  that in practice, since cards off the right-hand edge do not load until the
+  rail scrolls them into view.
 
 ## Verification
 
@@ -245,20 +283,26 @@ with `tools/rail-check.js`:
 
 1. `#zOl98u` height is under 500px at 1280x720.
 2. No element matching `.slide` or `.slideshow` remains in the document.
-3. The track contains exactly 30 `<li>`, of which 15 have `aria-hidden="true"`.
-4. The 15 visible cards produce exactly 5 distinct `href` values, and each
-   resolves to a directory that exists (checked by `fetch` returning ok).
+3. The track contains exactly 15 `<li>`, and no element in the rail carries
+   `aria-hidden` — the duplicated-track machinery must be genuinely gone, not
+   merely unused.
+4. The 15 cards produce exactly 5 distinct `href` values, and each resolves to
+   a directory that exists (checked by `fetch` returning ok).
 5. `document.body.scrollWidth <= window.innerWidth` at 375, 768 and 1280 — the
    full-bleed track must not create horizontal page overflow.
 6. Every `<img>` in the rail has a non-empty `alt`, and `width`/`height` set.
-7. With `prefers-reduced-motion: reduce` emulated, the track's computed
-   `animation-name` is `none` and the viewport's `overflow-x` is `auto`.
-8. Activating the toggle sets `aria-pressed="true"` and the track's computed
-   `animation-play-state` to `paused`.
+7. The viewport is horizontally scrollable: `scrollWidth > clientWidth` and
+   computed `overflow-x` is `auto`. This must hold in **both** media states —
+   it is the reduced-motion fallback and the manual affordance at once.
+8. Scrolling the page from before the section to past it changes the viewport's
+   `scrollLeft` from 0 to its maximum, under `no-preference`; and leaves it at
+   0 under `reduce`. Asserted by scripted scrolling, not by eye.
+9. After a synthetic `pointerdown` on the viewport, a further page scroll does
+   **not** change `scrollLeft` — the user-override flag holds.
 
-Checks 1–8 are automatable in the harness. Manual verification still required:
-the drift speed feeling right, the caption legibility over each individual
-photograph, and touch drag behaviour on a real device.
+Checks 1–9 are automatable in the harness. Manual verification still required:
+whether the scroll-to-travel ratio feels right, caption legibility over each
+individual photograph, and touch drag behaviour on a real device.
 
 ## Deferred
 
