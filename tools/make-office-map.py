@@ -22,18 +22,30 @@ Output is deterministic: same inputs produce a byte-identical SVG, so a diff on
 tools/generated/office-map.svg is meaningful.
 """
 
+import hashlib
 import json
 import math
 import os
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, '.ne-cache')
 OUT = os.path.join(HERE, 'generated', 'office-map.svg')
 
+# Pinned to a release tag, not `master`. The determinism promise above is only
+# true if the inputs cannot move: on `master` an upstream edit would silently
+# rewrite the checked-in SVG and turn its diff into noise. The digests are
+# verified after download, so a moved tag or a corrupted transfer fails loudly
+# instead of producing a plausible-looking map.
+NE_VERSION = 'v5.1.2'
+BASE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/%s/geojson/' % NE_VERSION
+
 SOURCES = {
-    '50m': 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson',
-    '110m': 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson',
+    '50m': (BASE + 'ne_50m_admin_0_countries.geojson',
+            '3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb'),
+    '110m': (BASE + 'ne_110m_admin_0_countries.geojson',
+             '6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f'),
 }
 
 # Equirectangular window. Chosen to hold all six countries: Malawi at -13.9
@@ -55,15 +67,32 @@ PINS = [
 
 
 def fetch(key):
-    """Download a Natural Earth file once and cache it next to this script."""
+    """Download a Natural Earth file once and cache it next to this script.
+
+    The download lands on a `.part` file and is renamed into place only after
+    its SHA-256 matches: writing straight to the cache path means an
+    interrupted download leaves a truncated file that every later run happily
+    reuses.
+    """
+    url, want = SOURCES[key]
     os.makedirs(CACHE, exist_ok=True)
     path = os.path.join(CACHE, 'ne_%s.geojson' % key)
     if not os.path.exists(path):
         print('downloading %s ...' % key)
-        with urllib.request.urlopen(SOURCES[key], timeout=180) as r:
-            data = r.read()
-        with open(path, 'wb') as f:
+        try:
+            with urllib.request.urlopen(url, timeout=180) as r:
+                data = r.read()
+        except (urllib.error.HTTPError, urllib.error.URLError, OSError) as e:
+            raise SystemExit('cannot fetch %s from %s: %s' % (key, url, e))
+        got = hashlib.sha256(data).hexdigest()
+        if got != want:
+            raise SystemExit(
+                'checksum mismatch for %s (%s)\n  expected %s\n  got      %s'
+                % (key, url, want, got))
+        tmp = path + '.part'
+        with open(tmp, 'wb') as f:
             f.write(data)
+        os.replace(tmp, path)
     with open(path, encoding='utf-8') as f:
         return json.load(f)
 
@@ -170,7 +199,8 @@ def build_path(feature, eps, min_area, precision):
 
 
 def esc(s):
-    return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    return (s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+             .replace('"', '&quot;'))
 
 
 def main():
@@ -185,17 +215,35 @@ def main():
     op_paths = [build_path(fine[n], 0.035, 0.01, 2) for n in OPERATIONS]
 
     context = []
+    excluded = set()
     for f in coarse:
-        if f['properties']['NAME'] in HIGHLIGHT:
+        name = f['properties']['NAME']
+        if name in HIGHLIGHT:
+            excluded.add(name)
             continue
         d = build_path(f, 0.22, 0.45, 1)
         if d:
             context.append(d)
 
+    # The exclusion above is asymmetric: only the fine file's NAMEs were
+    # validated. If 1:110m ever spelled one of the six differently, that
+    # country would be drawn twice -- once in context, once in its own tier --
+    # and the only symptom would be a context count quietly off by one.
+    if len(excluded) != len(HIGHLIGHT):
+        raise SystemExit(
+            'coarse file excluded %d of %d highlight countries; not matched by NAME: %s'
+            % (len(excluded), len(HIGHLIGHT),
+               ', '.join(sorted(set(HIGHLIGHT) - excluded))))
+
     for name, paths in (('office', office_paths), ('operations', op_paths)):
         empty = [i for i, p in enumerate(paths) if not p]
         if empty:
             raise SystemExit('%s tier produced an empty path at index %s' % (name, empty))
+
+    # Fail here rather than in a browser: the harness asserts ctx > 20, and a
+    # shrunken context tier otherwise writes a perfectly valid-looking SVG.
+    if len(context) < 21:
+        raise SystemExit('context tier has only %d paths; harness check 7 needs >20' % len(context))
 
     title = (
         'Map of the Middle East, Africa and South Asia. UGCC offices in '
