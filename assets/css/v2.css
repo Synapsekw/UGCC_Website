@@ -507,3 +507,13 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Facilities Overview cards: clear the gap between images and their
+   descriptions (builder grid let the text overlap the image bottoms). */
+#zCV_Su { margin-top: 54px; }
+#z2e1nj, #zaqKTy { margin-top: 44px; }
+#zknmn2 { margin-top: 20px; }
+
+#zoZkDz {
+  padding-bottom: 40px;
+}
