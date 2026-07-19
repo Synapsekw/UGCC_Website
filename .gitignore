@@ -15,3 +15,6 @@ node_modules/
 package-lock.json
 
 .superpowers/
+
+# Natural Earth download cache for tools/make-office-map.py
+tools/.ne-cache/
