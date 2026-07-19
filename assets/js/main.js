@@ -40,7 +40,9 @@
       iframe.src = 'https://www.youtube-nocookie.com/embed/' + m[1] + '?autoplay=1&rel=0';
       iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
       iframe.setAttribute('allowfullscreen', '');
-      iframe.style.border = '0';
+      /* The builder's sizing CSS is scoped to [data-v-58fe82b4], which this
+         injected iframe lacks, so size it inline to fill the .video container. */
+      iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0';
       video.appendChild(iframe);
       play.style.display = 'none';
     });
