@@ -124,11 +124,31 @@ confirmed present in the repository.
 
 | Sector | Target | Slides |
 |---|---|---|
-| Roads & Bridges | `/roads-and-bridges-completed` | 05, 08, 10, 11, 13, 14 |
-| Civil Infrastructure | `/civil-completed` | 02, 07, 09 |
-| Building Construction | `/building-construction-completed` | 04, 06, 15 |
-| Water Management | `/water-completed` | 03, 12 |
-| Oil & Gas | `/oil-and-gas-completed` | 01 |
+| Roads & Bridges | `/roads-and-bridges-completed` | 05, 08, 10, 11, 12, 13, 14 |
+| Civil Infrastructure | `/civil-completed` | 02, 09, 15 |
+| Oil & Gas | `/oil-and-gas-completed` | 01, 07 |
+| Building Construction | `/building-construction-completed` | 04, 06 |
+| Water Management | `/water-completed` | 03 |
+
+Per-slide subjects, as read off the photographs:
+
+| Slide | Subject |
+|---|---|
+| 01 | Oil & gas gathering centre — pipe racks and process skids |
+| 02 | Serviced land subdivision — road grid and roundabouts in desert |
+| 03 | Wastewater treatment plant — clarifiers and aeration basins |
+| 04 | Campus buildings with tensile canopy — school or university |
+| 05 | Multi-level desert interchange |
+| 06 | Residential city — low-rise housing blocks |
+| 07 | Industrial process plant under construction — structural steel |
+| 08 | Interchange ramps and viaduct |
+| 09 | Serviced land subdivision — plot grid and roundabouts |
+| 10 | Multi-level desert interchange, symmetrical view |
+| 11 | Urban road corridor with underpass, Kuwait City skyline |
+| 12 | Urban interchange with underpass, waterfront skyline |
+| 13 | Coastal interchange, Kuwait City skyline |
+| 14 | Interchange from directly overhead |
+| 15 | Roundabout and serviced plots — infrastructure development |
 
 These assignments are **inferred from the imagery**, not from client metadata.
 The source folder the slides came from (`assets/img/GalleryPicturesHighQuality
@@ -213,9 +233,10 @@ constant-drift option is shippable.
 - Cards render at 352px CSS width, so 480w covers 1x and 960w covers 2x/3x.
 - `loading="lazy"` plus explicit `width`/`height` on every `<img>`. Layout space
   is reserved, so the rail cannot contribute to CLS.
-- Expected payload for this section: from ~7 MB eager to roughly 400–600 KB
-  lazy. The duplicated DOM set references identical URLs, so it costs no
-  additional bytes.
+- Measured on two aspect-ratio extremes (slide-01 at 1920x1043, slide-09 at
+  1920x1438), the 480w derivative lands at 45–60 KB. Expected payload for this
+  section on a 1x display: from ~7 MB eager to **~750 KB** lazy. The duplicated
+  DOM set references identical URLs, so it costs no additional bytes.
 
 ## Verification
 
