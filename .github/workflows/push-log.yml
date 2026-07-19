@@ -1,0 +1,82 @@
+name: Push log
+
+# Records who pushed what, and when, on every branch and tag push.
+# Purely informational: it never fails a push, it just writes a summary
+# you can read in the Actions tab.
+
+on: push
+
+permissions:
+  contents: read
+
+jobs:
+  log:
+    name: Summarise push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write summary
+        env:
+          # Values go through env, never straight into the script, so a commit
+          # message can't inject shell.
+          ACTOR: ${{ github.actor }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          FORCED: ${{ github.event.forced }}
+          CREATED: ${{ github.event.created }}
+          DELETED: ${{ github.event.deleted }}
+          COMPARE: ${{ github.event.compare }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## Push by \`$ACTOR\`"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Ref | \`$REF\` |"
+            echo "| When | $(date -u '+%Y-%m-%d %H:%M UTC') |"
+            echo "| Commit | [\`${AFTER:0:7}\`]($REPO_URL/commit/$AFTER) |"
+            echo "| Compare | $COMPARE |"
+            if [ "$FORCED" = "true" ]; then
+              echo "| Note | **force push** — history was rewritten |"
+            fi
+            if [ "$CREATED" = "true" ]; then
+              echo "| Note | new branch/tag |"
+            fi
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$DELETED" = "true" ]; then
+            echo "_Ref deleted — nothing to diff._" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # A new branch (or a force push whose old tip is gone) has no usable
+          # base, so fall back to the tip commit on its own.
+          if [ "$CREATED" = "true" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            RANGE="$AFTER~1 $AFTER"
+            LOG_RANGE="-1 $AFTER"
+          else
+            RANGE="$BEFORE $AFTER"
+            LOG_RANGE="$BEFORE..$AFTER"
+          fi
+
+          {
+            echo "### Commits"
+            echo
+            git log --no-merges --format='- [`%h`]('"$REPO_URL"'/commit/%H) %s — %an' $LOG_RANGE || true
+            echo
+            echo "### Files changed"
+            echo
+            echo '```'
+            git diff --name-status $RANGE || true
+            echo '```'
+            echo
+            git diff --shortstat $RANGE || true
+          } >> "$GITHUB_STEP_SUMMARY"
