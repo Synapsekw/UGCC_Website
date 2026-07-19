@@ -93,14 +93,24 @@
   margin: 0;
   color: #fff;
   line-height: 1.02;
-  /* The headline carries the whole statement now that the eyebrow and
-     supporting line are gone, so it needs real scale. Fluid via clamp so
-     it tracks the viewport: floors at 56px on the narrowest phones, is
-     ~96px at 1280 (comfortably over the 72px floor the harness checks),
-     and tops out at 128px so "WE BUILD BETTER" never runs past the 1224px
-     content column on very wide screens. */
-  font-size: clamp(56px, 4vw + 44px, 128px);
-  letter-spacing: -.01em;
+  /* Restores the original typeface. The builder styled this via
+     `.text-box h1 { font-family: var(--h1-font-family) }`, and
+     --h1-font-family resolves to var(--font-primary) = 'Hammersmith One'.
+     Rewriting the hero markup moved the <h1> out of .text-box, so it lost
+     that rule and fell back to a heavier, wider face - which is what the
+     client noticed. Declared explicitly here rather than reintroducing the
+     builder wrapper. Hammersmith One ships in a single weight, so 400 is
+     the correct and only weight; letter-spacing and text-transform match
+     the builder's original --h1-* values (0em / none). */
+  font-family: 'Hammersmith One', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  /* The builder's original --h1-font-size was 104px. Kept fluid so it
+     tracks the viewport, but the desktop end now lands at that original
+     size rather than under it: ~104px at 1280, floor 56px on narrow
+     phones, capped at 132px so it never runs past the 1224px column. */
+  font-size: clamp(56px, 4.6vw + 45px, 132px);
 }
 
 /* ---------- CTAs ---------- */
