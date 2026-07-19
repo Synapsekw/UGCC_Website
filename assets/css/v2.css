@@ -538,10 +538,6 @@
   }
 }
 
-.block-header-logo__image {
-  transition: width .35s var(--v2-ease-out-quart), height .35s var(--v2-ease-out-quart);
-}
-
 /* Animated underline, wiping in from the left. */
 .block-header .item-content::after {
   content: '';
