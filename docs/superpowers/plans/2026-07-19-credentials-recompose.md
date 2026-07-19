@@ -138,8 +138,11 @@ Create `tools/credentials-check.js` with exactly this content:
        reader to ignore red. Both numbers are measured, not guessed: this
        markup and CSS render 591px at 1280 wide and 974px at 390. The desktop
        bound is the entire point of the work; the narrow bound is the measured
-       974 plus headroom for longer text or a larger default font. */
-    var bound = window.innerWidth < 769 ? 1100 : 700;
+       974 plus headroom for longer text or a larger default font.
+
+       921, not 769: it must track the stylesheet's own breakpoint, which is
+       920px to match the builder and the header. See credentials.css. */
+    var bound = window.innerWidth < 921 ? 1100 : 700;
     return {
       ok: h < bound,
       detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound
@@ -395,10 +398,15 @@ Create `assets/css/credentials.css` with exactly this content:
   background: #fff;
 }
 
+/* width: min(), not max-width + vw padding. box-sizing is border-box from
+   main.css's * reset, so viewport-proportional padding on a capped-width box
+   eats the cap: the content column peaks around 1115px and then shrinks as the
+   viewport grows — 1054px at 1920, 997px at 2560. It would also misalign this
+   block against #u7vIc0iRh above, which uses the min() form in sections.css. */
 .cred {
-  max-width: 1224px;
-  margin: 0 auto;
-  padding: 88px 4.44vw;
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+  padding-block: 88px;
   display: grid;
   grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
   gap: 64px;
@@ -457,13 +465,16 @@ Create `assets/css/credentials.css` with exactly this content:
   color: var(--v2-navy, #002a41);
 }
 
+/* #6b747c, not a lighter grey. These labels are what make the bare figures
+   mean anything, and at 11px they are normal text for contrast purposes:
+   4.76:1 on white. The first draft used #8a929a, which is 3.15:1 and fails AA. */
 .cred__unit {
   margin-top: 6px;
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 11px;
   letter-spacing: .09em;
   text-transform: uppercase;
-  color: #8a929a;
+  color: #6b747c;
 }
 
 .cred__claim .v2-btn {
@@ -502,7 +513,7 @@ Create `assets/css/credentials.css` with exactly this content:
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: #8a929a;
+  color: #6b747c;
 }
 
 .cred__name {
@@ -521,13 +532,18 @@ Create `assets/css/credentials.css` with exactly this content:
   color: #5a6570;
 }
 
-/* ---------- one column ---------- */
+/* ---------- one column ----------
+   920px, not 768px: the builder's own breakpoint, and where the header swaps
+   to its mobile layout. sections.css:193 argues for it by name. Choosing 768
+   here would leave a 769-920 band where this block is still two-column while
+   the header and the sections around it have already gone mobile. */
 
-@media (max-width: 768px) {
+@media (max-width: 920px) {
   .cred {
+    width: calc(100% - 32px);
+    padding-block: 56px;
     grid-template-columns: minmax(0, 1fr);
     gap: 36px;
-    padding: 56px 16px;
   }
 
   .cred__stats {
@@ -538,20 +554,27 @@ Create `assets/css/credentials.css` with exactly this content:
     font-size: 30px;
   }
 
+  /* Full-width, to match the other two homepage CTAs at this width. */
   .cred__claim .v2-btn {
+    display: block;
     margin-top: 28px;
+    text-align: center;
   }
 
-  /* The year moves up beside its code so the description keeps full width. */
+  /* One column, so the description gets the full width instead of sharing a
+     row with the code. The year stays beside the code, as it already is. */
   .cred__row {
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
     padding: 14px 0;
   }
 
+  /* Still a fixed first track. `auto auto` would size the year column to each
+     row's own content, and the Grade 1 row holds an em-dash rather than a
+     four-digit year — so its name would start ~16px left of the four above
+     it, ragged on exactly the row the fixed track exists to keep in line. */
   .cred__code {
-    grid-template-columns: auto auto;
-    justify-content: start;
+    grid-template-columns: 34px minmax(0, 1fr);
     gap: 10px;
   }
 }
@@ -785,7 +808,17 @@ The height check already carries a per-breakpoint bound (1100 below 769px, 700 a
 document.querySelector('#zZFMdo .cred').innerText
 ```
 
-Expected order: the title, the lede, `1975 Since 6 Countries 7 Sectors`, `View Credentials`, then the five rows beginning `2004 ISO 9001 Quality management system` and ending with the Grade 1 row. The Grade 1 row must **not** contain an em-dash — it is `aria-hidden`, so `innerText` should skip it. If a dash appears, the `aria-hidden` attribute is missing from the span.
+Expected order: the title, the lede, `1975 Since 6 Countries 7 Sectors`, `View Credentials`, then the five rows beginning `2004 ISO 9001 Quality management system` and ending with the Grade 1 row.
+
+**The Grade 1 row will contain a visible em-dash, and that is correct.** `innerText` does not respect `aria-hidden` — verified in this browser: a `<span aria-hidden="true">` still appears in `innerText`. `aria-hidden` removes a node from the accessibility tree, not from the text layout. Do not treat the dash as a missing attribute and do not go looking for a bug. The check harness already asserts the attribute itself via `[aria-hidden="true"]`, which is the correct test.
+
+To inspect what a screen reader would actually get, look at the attribute directly:
+
+```javascript
+document.querySelectorAll('#zZFMdo .cred__row')[4].querySelector('[aria-hidden="true"]')?.outerHTML
+```
+
+Expected: `<span class="cred__year" aria-hidden="true">—</span>`.
 
 - [ ] **Step 3: Fix any defect found, in `credentials.css` only**
 

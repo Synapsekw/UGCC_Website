@@ -182,15 +182,44 @@ down the page a scroll reveal buys very little, and being unconditionally
 readable buys more. The cost is stated plainly: this block will not cascade in
 like its neighbours.
 
-**Colour and contrast.** Navy `#002a41` (`--v2-navy`) for the heading, the
-credential codes and the stat figures. Body and descriptions `#5a6570` on
-white — 5.8:1, above AA. Red (`--v2-red`) appears only as the 34x2px rule under
-the heading and never as text, since `--v2-red` on white is 5.3:1 and the
-codebase already reserves `--v2-red-text` for the cases where red must be read.
+**Colour and contrast.** Every pair, computed against white:
 
-**Responsive.** Two columns above 768px. Below it, one column in the same
-source order, with each row's year moving up onto the same line as its code so
-the description keeps full width.
+| Colour | Used for | Ratio |
+|---|---|---|
+| `#002a41` (`--v2-navy`) | heading, credential codes, stat figures | 14.9:1 |
+| `#5a6570` | lede, row descriptions | 5.95:1 |
+| `#6b747c` | stat unit labels, years | 4.76:1 |
+| `#d41c22` (`--v2-red`) | the 34x2px rule only, never text | 5.26:1 |
+| `#e6e8ea` | row hairlines, non-informational | 1.23:1 |
+
+The muted grey is the one to watch. The first draft used `#8a929a`, which is
+**3.15:1 and fails AA** — caught in review, not in design. It is not decorative:
+it carries the unit labels that make the bare figures mean anything, and the
+certification years. At 11px and 13px neither qualifies as large text, so 4.5:1
+is the bar. `#6b747c` clears it at 4.76:1 rather than the 4.55:1 of the nearest
+passing value, because a ratio that close to the line survives no future tweak.
+
+Red never appears as text; the codebase already reserves `--v2-red-text` for
+the cases where red must be read.
+
+**Responsive.** Two columns above **920px**, one below. 920 is the builder's
+own breakpoint and where the header swaps to its mobile layout; `sections.css`
+argues for it by name. Picking 768 would leave a 769–920 band in which this
+block is still two-column while the header and both neighbouring sections have
+already gone mobile.
+
+Below 920 the block is one column in the same source order, the CTA goes
+full-width to match the other two homepage CTAs, and the ledger rows stack —
+the year staying beside its code, the description taking the full width. The
+year column keeps a fixed track rather than sizing to content: the Grade 1 row
+holds an em-dash instead of a four-digit year, so an auto track would start its
+name ~16px left of the four above it.
+
+Measured: **591px** at 1280 wide, **974px** at 390, no horizontal overflow at
+either. The content column is `min(1224px, 100% - 64px)` rather than a
+max-width with proportional padding — with `box-sizing: border-box`, vw padding
+on a capped box shrinks the content as the viewport grows (1054px at 1920) and
+misaligns this block against the section above it.
 
 **The CTA reuses `.v2-btn.v2-btn--on-light`** from `sections.css` exactly as-is.
 This block adds no button CSS.
