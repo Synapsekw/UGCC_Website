@@ -524,17 +524,22 @@
    Nav — resting state
    ========================================================================== */
 
-/* !important is mandatory here. The builder sets --logo-width, --padding and
-   friends as INLINE custom properties on the <header> element, and inline
-   declarations beat external stylesheets. Without !important these rules
-   parse fine, apply nothing, and the failure is silent. */
-.block-header {
-  --logo-width: 210px !important;
-  --m-logo-width: 124px !important;
+/* The builder sizes the logo from per-build hashed custom properties baked
+   inline on the element (--v6f401cb2 desktop, --v66b767ed at <=920px), NOT
+   from --logo-width, which is inert for sizing in this export. So override
+   the resolved properties directly. The hashed values are identical across
+   all 67 pages, but we deliberately do not reference the hashed names.
+   Source logo is 342x47, so 210px wide keeps the ratio at ~29px tall.
+   Mobile keeps the builder's own size - it is already small. */
+@media (min-width: 921px) {
+  .block-header .block-header-logo {
+    width: 210px !important;
+    height: 29px !important;
+  }
 }
 
 .block-header-logo__image {
-  transition: width .35s var(--v2-ease-out-quart);
+  transition: width .35s var(--v2-ease-out-quart), height .35s var(--v2-ease-out-quart);
 }
 
 /* Animated underline, wiping in from the left. */
