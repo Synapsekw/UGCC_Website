@@ -16,6 +16,16 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /* ---------- background videos: respect reduced motion ----------
+     Pause hero/section background videos for users who prefer reduced
+     motion; the poster frame stays visible. */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('video.block-background__image').forEach(function (v) {
+      v.removeAttribute('autoplay');
+      v.pause();
+    });
+  }
+
   /* ---------- staggered reveals ----------
      The builder's reveal CSS reads --user-animation-delay for its
      transition-delay. Give siblings inside the same container an
