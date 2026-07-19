@@ -15,3 +15,168 @@
     rgba(0, 17, 28, .88) 100%
   ) !important;
 }
+
+/* ---------- section shell ---------- */
+#aCqA2TkE7 {
+  min-height: clamp(640px, 100svh, 860px);
+  display: flex;
+  padding: 0 !important;
+}
+
+#aCqA2TkE7 .hero-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: 1fr auto !important;
+  gap: 0 !important;
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+  padding-top: var(--header-height, 123px);
+}
+
+/* ---------- centred stack ---------- */
+#aCqA2TkE7 .hero-stack {
+  align-self: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 40px;
+}
+
+#aCqA2TkE7 .hero-eyebrow {
+  margin: 0 0 18px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: var(--v2-red-text);
+}
+
+#aCqA2TkE7 .hero-title {
+  margin: 0;
+  color: #fff;
+  line-height: 1.02;
+}
+
+#aCqA2TkE7 .hero-sub {
+  margin: 20px 0 0;
+  max-width: 540px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .72);
+}
+
+/* ---------- CTAs ---------- */
+#aCqA2TkE7 .hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+#aCqA2TkE7 .hero-btn {
+  display: inline-block;
+  padding: 15px 32px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    transform .25s var(--v2-ease-out-quart),
+    background-color .25s var(--v2-ease-out-quart),
+    box-shadow .25s var(--v2-ease-out-quart),
+    color .25s var(--v2-ease-out-quart);
+}
+
+#aCqA2TkE7 .hero-btn--primary {
+  background: #fff;
+  color: #101010;
+}
+
+#aCqA2TkE7 .hero-btn--secondary {
+  border-color: rgba(255, 255, 255, .5);
+  color: #fff;
+}
+
+#aCqA2TkE7 .hero-btn--secondary:hover {
+  background: rgba(255, 255, 255, .12);
+  border-color: #fff;
+}
+
+#aCqA2TkE7 .hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--v2-shadow-lift);
+}
+
+#aCqA2TkE7 .hero-btn:active {
+  transform: translateY(0);
+}
+
+/* ---------- service strip, pinned to the hero's bottom edge ---------- */
+#aCqA2TkE7 .hero-services {
+  align-self: end;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(255, 255, 255, .18);
+  margin-bottom: 40px;
+}
+
+#aCqA2TkE7 .hero-service {
+  padding: 20px 24px 0;
+  border-right: 1px solid rgba(255, 255, 255, .14);
+}
+
+#aCqA2TkE7 .hero-service:first-child { padding-left: 0; }
+#aCqA2TkE7 .hero-service:last-child { border-right: 0; padding-right: 0; }
+
+#aCqA2TkE7 .hero-service__name {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #fff;
+}
+
+#aCqA2TkE7 .hero-service__desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .66);
+}
+
+/* ---------- mobile ----------
+   920px, not 768px: this is the builder's own breakpoint and where the
+   header swaps to its mobile layout. A different number would leave a dead
+   band where the header is mobile but the hero is still desktop. */
+@media (max-width: 920px) {
+  #aCqA2TkE7 {
+    min-height: clamp(560px, 100svh, 900px);
+  }
+
+  #aCqA2TkE7 .hero-layout {
+    width: calc(100% - 32px);
+    padding-top: var(--header-height-mobile, 95px);
+  }
+
+  #aCqA2TkE7 .hero-sub { font-size: 15px; }
+
+  #aCqA2TkE7 .hero-cta { flex-direction: column; align-self: stretch; }
+  #aCqA2TkE7 .hero-btn { text-align: center; }
+
+  #aCqA2TkE7 .hero-services {
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: 28px;
+  }
+
+  #aCqA2TkE7 .hero-service {
+    padding: 14px 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .14);
+  }
+
+  #aCqA2TkE7 .hero-service:last-child { border-bottom: 0; }
+
+  /* Descriptions were hidden on mobile in the original layout. Keep that. */
+  #aCqA2TkE7 .hero-service__desc { display: none; }
+}
