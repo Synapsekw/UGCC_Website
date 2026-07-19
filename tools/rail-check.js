@@ -1,0 +1,212 @@
+/* UGCC gallery rail checks. Dependency-free.
+   Usage: serve the site over HTTP, open the homepage, paste into the console.
+   Returns a Promise of {passed, failed, results} — several checks are async.
+
+   Resize to 1280x720 before running the height check.
+
+   ORDERING MATTERS. The synchronous checks run first. Then the link fetches.
+   Then the scroll-driving check, which needs the rail untouched. Then the
+   user-override check, which permanently disables scroll-driving for the
+   page — anything after it would measure a rail that has stopped listening.
+   Reload before re-running.
+
+   NOT covered (manual verification required):
+     - whether the scroll-to-travel ratio feels right
+     - caption legibility over each individual photograph
+     - touch drag behaviour on a real device */
+(function () {
+  'use strict';
+
+  var results = [];
+  function check(name, fn) {
+    var ok = false, detail = '';
+    try {
+      var r = fn();
+      if (r === true) { ok = true; }
+      else if (r && typeof r === 'object') { ok = !!r.ok; detail = r.detail || ''; }
+    } catch (e) { detail = 'threw: ' + e.message; }
+    results.push({ name: name, ok: ok, detail: detail });
+  }
+  function record(name, ok, detail) {
+    results.push({ name: name, ok: ok, detail: detail || '' });
+  }
+
+  var SECTION = 'zOl98u';
+  var EXPECTED_HREFS = [
+    '/oil-and-gas-completed',
+    '/civil-completed',
+    '/water-completed',
+    '/building-construction-completed',
+    '/roads-and-bridges-completed'
+  ];
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var branch = reduced ? 'reduce' : 'no-preference';
+
+  function cards() {
+    return Array.prototype.slice.call(document.querySelectorAll('.v2-rail__item'));
+  }
+  function viewport() { return document.querySelector('.v2-rail__viewport'); }
+
+  check('section is under 500px tall', function () {
+    var s = document.getElementById(SECTION);
+    if (!s) return { ok: false, detail: 'section #' + SECTION + ' missing' };
+    var h = Math.round(s.getBoundingClientRect().height);
+    if (h === 0) return { ok: false, detail: 'section has zero height — not rendered' };
+    return { ok: h < 500, detail: h + 'px (was 1029px)' };
+  });
+
+  check('old slideshow is gone', function () {
+    var n = document.querySelectorAll('.slideshow, .slide, .slideshow__dots').length;
+    return { ok: n === 0, detail: n + ' legacy slideshow nodes remain' };
+  });
+
+  check('track holds exactly 15 items and no aria-hidden', function () {
+    var all = cards().length;
+    var hidden = document.querySelectorAll('.v2-rail [aria-hidden]').length;
+    return {
+      ok: all === 15 && hidden === 0,
+      detail: all + ' items, ' + hidden + ' aria-hidden nodes (want 15 / 0)'
+    };
+  });
+
+  check('every card has alt text, intrinsic size and lazy loading', function () {
+    var bad = [];
+    cards().forEach(function (li, i) {
+      var img = li.querySelector('img');
+      if (!img) { bad.push('#' + i + ' no img'); return; }
+      if (!img.getAttribute('alt')) bad.push('#' + i + ' empty alt');
+      if (!img.getAttribute('width') || !img.getAttribute('height')) bad.push('#' + i + ' no width/height');
+      if (img.getAttribute('loading') !== 'lazy') bad.push('#' + i + ' not lazy');
+    });
+    return { ok: bad.length === 0, detail: bad.join('; ') || '15/15 ok' };
+  });
+
+  check('no horizontal page overflow', function () {
+    var over = document.body.scrollWidth - window.innerWidth;
+    return {
+      ok: over <= 0,
+      detail: 'body.scrollWidth ' + document.body.scrollWidth +
+              ' vs innerWidth ' + window.innerWidth + ' @ ' + window.innerWidth + 'px'
+    };
+  });
+
+  /* The rail must be a real scrollable region in BOTH media states: under
+     reduce it is the entire fallback, and under no-preference it is the
+     manual affordance. A transform-based rail would fail this. */
+  check('viewport is genuinely horizontally scrollable', function () {
+    var vp = viewport();
+    if (!vp) return { ok: false, detail: 'rail not implemented' };
+    var ovx = getComputedStyle(vp).overflowX;
+    var scrollable = vp.scrollWidth > vp.clientWidth;
+    return {
+      ok: ovx === 'auto' && scrollable,
+      detail: '[' + branch + '] overflow-x=' + ovx +
+              '; scrollWidth=' + vp.scrollWidth + ' clientWidth=' + vp.clientWidth
+    };
+  });
+
+  check('cards produce exactly the 5 expected hrefs', function () {
+    var hrefs = cards().map(function (li) {
+      var a = li.querySelector('a');
+      return a ? a.getAttribute('href') : null;
+    });
+    var distinct = hrefs.filter(function (h, i) { return h && hrefs.indexOf(h) === i; });
+    var missing = EXPECTED_HREFS.filter(function (h) { return distinct.indexOf(h) === -1; });
+    var extra = distinct.filter(function (h) { return EXPECTED_HREFS.indexOf(h) === -1; });
+    return {
+      ok: missing.length === 0 && extra.length === 0,
+      detail: 'missing[' + missing.join(',') + '] extra[' + extra.join(',') + ']'
+    };
+  });
+
+  /* ---------- async section ---------- */
+
+  function frames() {
+    /* Two frames: one for the driver's rAF to fire, one for it to land. */
+    return new Promise(function (res) {
+      requestAnimationFrame(function () { requestAnimationFrame(res); });
+    });
+  }
+  function scrollPageTo(y) {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, y);
+    return frames();
+  }
+
+  var hrefs = cards().map(function (li) {
+    var a = li.querySelector('a');
+    return a ? a.getAttribute('href') : null;
+  });
+  var distinct = hrefs.filter(function (h, i) { return h && hrefs.indexOf(h) === i; });
+
+  return Promise.all(distinct.map(function (h) {
+    return fetch(h, { method: 'GET' })
+      .then(function (r) { return { h: h, ok: r.ok }; })
+      .catch(function () { return { h: h, ok: false }; });
+  })).then(function (linkResults) {
+    var dead = linkResults.filter(function (r) { return !r.ok; }).map(function (r) { return r.h; });
+    record('every href resolves',
+      dead.length === 0 && linkResults.length > 0,
+      dead.length ? 'dead: ' + dead.join(', ') : linkResults.length + '/' + linkResults.length + ' ok');
+
+    var vp = viewport();
+    var sec = document.getElementById(SECTION);
+    if (!vp || !sec) {
+      record('page scroll drives the rail', false, 'rail not implemented');
+      record('user interaction takes the rail over', false, 'rail not implemented');
+      return;
+    }
+
+    var startY = window.scrollY;
+    var secTop = sec.getBoundingClientRect().top + window.scrollY;
+    var before = Math.max(0, secTop - window.innerHeight - 50);
+    var after = secTop + sec.offsetHeight + 50;
+    var max = vp.scrollWidth - vp.clientWidth;
+
+    return scrollPageTo(before)
+      .then(function () {
+        var atStart = vp.scrollLeft;
+        return scrollPageTo(after).then(function () {
+          var atEnd = vp.scrollLeft;
+          if (reduced) {
+            /* Under reduce the driver must not attach at all. */
+            record('page scroll drives the rail',
+              atStart === 0 && atEnd === 0,
+              '[reduce] scrollLeft stayed ' + atStart + ' -> ' + atEnd + ' (want 0 -> 0)');
+          } else {
+            record('page scroll drives the rail',
+              atStart <= 2 && atEnd >= max - 2 && max > 0,
+              '[no-preference] scrollLeft ' + Math.round(atStart) + ' -> ' +
+                Math.round(atEnd) + ' (want 0 -> ' + max + ')');
+          }
+        });
+      })
+      .then(function () {
+        /* MUST BE LAST: this permanently disables scroll-driving. */
+        if (reduced) {
+          record('user interaction takes the rail over', true,
+            '[reduce] not applicable — driver never attached');
+          return;
+        }
+        vp.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+        return scrollPageTo(before).then(function () {
+          var held = vp.scrollLeft;
+          record('user interaction takes the rail over',
+            held >= max - 2,
+            'after pointerdown, scrollLeft held at ' + Math.round(held) +
+              ' (want ~' + max + ', i.e. page scroll ignored)');
+        });
+      })
+      .then(function () { return scrollPageTo(startY); });
+  }).then(function () {
+    var passed = results.filter(function (r) { return r.ok; }).length;
+    var failed = results.length - passed;
+    results.forEach(function (r) {
+      console.log((r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.detail ? '  [' + r.detail + ']' : ''));
+    });
+    console.log('\n' + passed + ' passed, ' + failed + ' failed');
+    console.log('(reload before re-running — the last check is one-way)');
+    return { passed: passed, failed: failed, results: results };
+  });
+})();
