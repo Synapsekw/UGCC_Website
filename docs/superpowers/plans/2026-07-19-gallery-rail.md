@@ -873,33 +873,36 @@ if old.count("<section") != 1:
 
 src = src[:start] + new_section + src[end:]
 
-# Load rail.css after hero.css, and rail.js after hero.js.
+# Load rail.css last in <head> and rail.js last in <body>.
+#
+# Anchor on </head> and </body>, NOT on another stylesheet or script tag. The
+# other session bumps its own cache-busting query strings (hero.css went ?v=1 ->
+# ?v=2 mid-flight, and a sections.css appeared), so anchoring on their filenames
+# breaks silently the moment they re-version. </head> and </body> do not move.
 if "rail.css" not in src:
-    before = src
+    if src.count("</head>") != 1:
+        sys.exit("expected exactly one </head>, found %d" % src.count("</head>"))
     src = src.replace(
-        '<link rel="stylesheet" href="/assets/css/hero.css?v=1">',
-        '<link rel="stylesheet" href="/assets/css/hero.css?v=1">'
-        '<link rel="stylesheet" href="/assets/css/rail.css?v=1">',
+        "</head>",
+        '<link rel="stylesheet" href="/assets/css/rail.css?v=1"></head>',
         1,
     )
-    if src == before:
-        sys.exit("could not find the hero.css link tag to anchor rail.css after")
 if "rail.js" not in src:
-    before = src
+    if src.count("</body>") != 1:
+        sys.exit("expected exactly one </body>, found %d" % src.count("</body>"))
     src = src.replace(
-        '<script defer src="/assets/js/hero.js?v=1"></script>',
-        '<script defer src="/assets/js/hero.js?v=1"></script>'
-        '<script defer src="/assets/js/rail.js?v=1"></script>',
+        "</body>",
+        '<script defer src="/assets/js/rail.js?v=1"></script></body>',
         1,
     )
-    if src == before:
-        sys.exit("could not find the hero.js script tag to anchor rail.js after")
 
 io.open(PATH, "w", encoding="utf-8").write(src)
 print("replaced section, old length", len(old), "-> new", len(new_section))
 ```
 
-> The two `sys.exit` guards on the `<link>`/`<script>` anchors matter because another agent is editing this branch's hero assets. If they renamed or re-versioned `hero.css?v=1`, this script must fail loudly rather than silently skip loading the rail's CSS.
+> **On the anchors:** an earlier draft of this script inserted the tags after `hero.css?v=1` and `hero.js?v=1`. That was already stale by the time this task ran — the other session had bumped `hero.css` to `?v=2` and added a `sections.css`. Anchoring on `</head>` and `</body>` instead is immune to their versioning churn, and the count guards make any surprise fail loudly rather than silently skipping the tag.
+>
+> If a guard does fire, stop and report it. Do not "fix" it by falling back to a filename anchor.
 
 Expected output: `replaced section, old length 3076 ... -> new ...` (the old length will be roughly 3000–3200).
 
