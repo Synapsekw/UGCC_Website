@@ -637,12 +637,26 @@ Expected: `grep -c 'id="zZFMdo"'` prints `1`, and `grep -c 'credentials.css'` pr
 
 - [ ] **Step 2: Add the stylesheet link**
 
-Use an `Edit` call — exact string match, anchored on `</head>` per the convention commit `980946e` established:
+**Do not trust the anchor written here. Read the head first.** This anchor has already gone stale once: it originally named `rail.css?v=1` as the last link, and by the time Task 3 came around another session had bumped `sections.css` to `?v=2` and appended a `careers.css` link after `rail.css`.
 
-- old_string: `<link rel="stylesheet" href="/assets/css/rail.css?v=1"></head>`
-- new_string: `<link rel="stylesheet" href="/assets/css/rail.css?v=1"><link rel="stylesheet" href="/assets/css/credentials.css?v=1"></head>`
+```bash
+python3 -c "
+s=open('index.html',encoding='utf-8').read()
+i=s.find('</head>')
+print(repr(s[i-400:i+7]))"
+```
 
-If that old_string is not found, another session has changed the `<head>`. Re-read the last 200 characters before `</head>` and anchor on whatever the last stylesheet link actually is — **never** anchor on `</head>` alone, because another session may be about to insert there too.
+Take the **last** `<link rel=\"stylesheet\" …>` immediately preceding `</head>` from that output and use it as the anchor. As of this writing that is:
+
+- old_string: `<link rel="stylesheet" href="/assets/css/careers.css?v=1"></head>`
+- new_string: `<link rel="stylesheet" href="/assets/css/careers.css?v=1"><link rel="stylesheet" href="/assets/css/credentials.css?v=1"></head>`
+
+Two rules that do not change even when the anchor does:
+
+1. **Never anchor on `</head>` alone.** Another session may be inserting there in the same window, and a bare `</head>` anchor gives no protection against landing in the wrong place.
+2. **`credentials.css` must come after `sections.css`,** because the CTA inherits `.v2-btn` from it. Appending immediately before `</head>` satisfies this as long as no session inserts `sections.css` later — check the ordering in the output above rather than assuming.
+
+Ordering against `rail.css` and `careers.css` does not matter; those files scope to their own blocks.
 
 - [ ] **Step 3: Replace the block contents**
 
@@ -719,13 +733,17 @@ print('replaced %d bytes with %d; file %d -> %d' % (len(old), len(new), before, 
 PYEOF
 ```
 
-Expected output. These are **measured**, by running this exact script against a scratch copy of `index.html` at 132,288 bytes:
+Expected output. **The removed and added figures are exact; the file totals are not.**
+
+The block is 20,418 bytes and the replacement is 1,930 — both measured by running this exact script against a scratch copy, and the block has not changed since, because no other session touches it. The file totals move every time another session commits: it was 132,288 bytes when this was drafted and 114,421 by the time Task 3 ran.
+
+So expect this shape, with the last two numbers differing:
 
 ```
-replaced 20418 bytes with 1930; file 132288 -> 113800
+replaced 20418 bytes with 1930; file 114421 -> 95933
 ```
 
-The figures will drift as other sessions commit, but the shape must hold: **about 20 KB removed, about 1.9 KB added.** If the removed figure is far under 20 KB, the region matched was too small — stop and investigate rather than committing.
+**`replaced 20418 bytes with 1930` must match exactly.** If the removed figure differs at all, the region matched is not the region measured — stop and investigate rather than committing. The file totals should satisfy `after = before - 20418 + 1930`; check that arithmetic rather than the literal numbers.
 
 If the script prints `ABORT:`, it wrote nothing. Read the message, fix the cause, run it again. The `ABORT: block already replaced` case means the step succeeded earlier — move to Step 4 rather than re-running.
 
@@ -740,10 +758,10 @@ grep -c 'cred__ledger' index.html
 grep -c 'zRxBFj\|zH9LJs\|zXXhjo\|zMxkur\|zRKVL4\|zy95MQ' index.html
 ```
 
-Expected — again, **measured** against the 132,288-byte scratch copy:
+Expected — the **shape** is measured and fixed; the absolute line counts move as other sessions add lines to the head.
 
 - `git diff --numstat` shows `1  13  index.html`: one line added, thirteen removed.
-- `awk 'END{print NR}' index.html` drops from **25 to 13**.
+- `awk 'END{print NR}' index.html` drops by exactly **12** — it was 25→13 when measured on the scratch copy, and 26→14 at the time Task 3 ran, because another session had since added a line to the `<head>`. Check the delta, not the absolutes.
 - `grep -c 'cred__ledger'` prints `1`.
 - The old decorative shape ids print `0` — all six SVG containers are gone.
 
