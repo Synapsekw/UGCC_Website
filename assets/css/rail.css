@@ -55,6 +55,10 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x proximity;
+  /* Keep a horizontal swipe that overshoots the rail's end inside the rail.
+     Without this, iOS Safari hands the overscroll to its back-navigation
+     gesture and the visitor leaves the page by swiping a photo. */
+  overscroll-behavior-x: contain;
   /* Must match .v2-rail__track's inline padding. Without it the first card's
      snap position is 24px in, so the rail rests at scrollLeft 24 instead of 0
      and can never return to a true start. */

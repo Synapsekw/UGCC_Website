@@ -271,10 +271,20 @@ icon swap, no focus-handling around an animation that might restart.
 - `loading="lazy"` plus explicit `width`/`height` on every `<img>`. Layout space
   is reserved, so the rail cannot contribute to CLS.
 - Measured on two aspect-ratio extremes (slide-01 at 1920x1043, slide-09 at
-  1920x1438), the 480w derivative lands at 45–60 KB. Expected payload for this
-  section on a 1x display: from ~7 MB eager to **~750 KB** lazy — and less than
-  that in practice, since cards off the right-hand edge do not load until the
-  rail scrolls them into view.
+  1920x1438), the 480w derivative lands at 45–60 KB.
+
+**Measured after implementation**, at 1x on a 1280x720 viewport: **725 KB** total
+for the section, all of it `-480.jpg` — no `-960.jpg` is ever requested at 1x.
+Down from ~7 MB.
+
+Of that, **394 KB (8 of 15 images) loads at rest, before the section is scrolled
+into view.** An earlier draft of this spec claimed the at-rest figure would be
+near zero; that was wrong and is corrected here. `loading="lazy"` is present on
+every image and is working, but Chromium's viewport-distance threshold is larger
+than this section's distance below the fold, so the vertical axis defers nothing.
+What actually defers cards 9–15 is their **horizontal** distance inside the
+rail's own scroll container. Lazy loading therefore saves about 47% at rest, not
+100%.
 
 ## Verification
 
