@@ -42,8 +42,11 @@
        reader to ignore red. Both numbers are measured, not guessed: this
        markup and CSS render 591px at 1280 wide and 974px at 390. The desktop
        bound is the entire point of the work; the narrow bound is the measured
-       974 plus headroom for longer text or a larger default font. */
-    var bound = window.innerWidth < 769 ? 1100 : 700;
+       974 plus headroom for longer text or a larger default font.
+
+       921, not 769: it must track the stylesheet's own breakpoint, which is
+       920px to match the builder and the header. See credentials.css. */
+    var bound = window.innerWidth < 921 ? 1100 : 700;
     return {
       ok: h < bound,
       detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound
