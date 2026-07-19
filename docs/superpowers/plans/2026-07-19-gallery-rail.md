@@ -541,6 +541,10 @@ Create `assets/css/rail.css`:
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x proximity;
+  /* Must match .v2-rail__track's inline padding. Without it the first card's
+     snap position is 24px in, so the rail rests at scrollLeft 24 instead of 0
+     and can never return to a true start. */
+  scroll-padding-left: 24px;
   scrollbar-width: none;          /* the rail is its own affordance */
 }
 
@@ -627,6 +631,7 @@ Create `assets/css/rail.css`:
   .v2-rail__title { font-size: 22px; }
   .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
   .v2-rail__track { padding: 0 16px; }
+  .v2-rail__viewport { scroll-padding-left: 16px; }
 }
 ```
 
@@ -1011,10 +1016,32 @@ Both should report the "expected" fallback line. The now-dead `.slideshow` CSS i
 ```bash
 git log --oneline -8
 git status --short
-git diff --stat master -- assets/css/hero.css assets/js/hero.js tools/hero-check.js
 ```
 
-The last command must print **nothing** — this work touches none of those three files. If it prints anything, you have picked up someone else's changes; stop and report rather than committing.
+Then, for each commit **this workstream** made in Tasks 1–5 (you know their SHAs — you made them), confirm it touched only owned paths:
+
+```bash
+for sha in <your task 1-5 SHAs>; do
+  echo "--- $(git log -1 --format='%h %s' $sha)"
+  git show --stat --format= $sha
+done
+```
+
+Every file listed must be one of: `tools/rail-check.js`, `tools/make-rail-images.sh`, `assets/img/v2/rail/*`, `assets/css/rail.css`, `assets/js/rail.js`, `index.html`, or the two docs files. Anything else means you swept up the other session's work — report it, do not amend.
+
+> **Do not** try to verify this with `git diff master -- assets/css/hero.css …`. The hero session commits to this same branch, so their files legitimately differ from `master` and that diff will never be empty. It says nothing about whether *you* touched them. Check your own commits, not the branch.
+
+Finally, confirm their work is still live in the page:
+
+```bash
+python3 -c "
+s = open('index.html', encoding='utf-8').read()
+print('hero-clients occurrences:', s.count('hero-clients'))
+print('rail items:', s.count('v2-rail__item'))
+"
+```
+
+Expected: `hero-clients` non-zero and `rail items: 15`.
 
 - [ ] **Step 5: Manual checks the harness cannot make**
 
@@ -1028,8 +1055,10 @@ Walk these by hand and note anything wrong:
 
 - [ ] **Step 6: Commit any tuning**
 
+Explicit paths only — `git add -A` here would sweep up the other session's in-flight `index.html`.
+
 ```bash
-git add -A
+git add assets/css/rail.css assets/js/rail.js
 git commit -m "fix(rail): tune scroll-to-travel ratio and caption scrim after review"
 ```
 
