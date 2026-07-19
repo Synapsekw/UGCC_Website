@@ -39,6 +39,15 @@ Instead, Task 1 builds `tools/hero-check.js`: a dependency-free script that asse
 **Files:**
 - Create: `tools/hero-check.js`
 
+> **Amended after code review.** The script below is the original draft. Code
+> quality review found several false-pass paths in it — no scroll/viewport
+> precondition, zero-size rects counting as above-the-fold, only one of the
+> `<h1>`'s two inline colours detected, and `textContent` asserted where the
+> accessible name was meant. These were fixed in a follow-up commit before any
+> other task ran. **The committed `tools/hero-check.js` is the source of truth,
+> not this block.** Read the file, not the plan, when reasoning about what is
+> verified.
+
 - [ ] **Step 1: Write the assertion script**
 
 Create `tools/hero-check.js`:
