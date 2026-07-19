@@ -189,6 +189,37 @@
     return { ok: c === 'rgb(212,28,34)', detail: c + ' (want rgb(212,28,34) = #d41c22)' };
   });
 
+  /* The builder styles headings via `.text-box h2 { font-family:
+     var(--h2-font-family) }`. Both new sections use headings that sit
+     OUTSIDE .text-box, so they silently fall back to the body face at bold
+     unless the font is declared explicitly. That regression shipped on the
+     hero once, the client caught it, and it shipped again here. Cheap to
+     assert, invisible in a screenshot unless you know the two faces. */
+  check('new section headings use the builder heading face', function () {
+    var targets = [
+      [ABOUT + ' .about-statement', 'about'],
+      [WHO + ' .wr-title', 'who-are-we']
+    ];
+    var seen = 0, bad = [];
+    targets.forEach(function (t) {
+      var el = document.querySelector(t[0]);
+      if (!el) return;
+      seen++;
+      var cs = getComputedStyle(el);
+      if (cs.fontFamily.indexOf('Hammersmith One') === -1) {
+        bad.push(t[1] + ' font-family=' + cs.fontFamily);
+      }
+      if (cs.fontWeight !== '400') {
+        bad.push(t[1] + ' font-weight=' + cs.fontWeight);
+      }
+    });
+    if (!seen) return { ok: false, detail: 'neither heading present yet' };
+    return {
+      ok: bad.length === 0,
+      detail: bad.join('; ') || seen + '/' + targets.length + ' present, all Hammersmith One 400'
+    };
+  });
+
   var passed = results.filter(function (r) { return r.ok; }).length;
   var failed = results.length - passed;
 

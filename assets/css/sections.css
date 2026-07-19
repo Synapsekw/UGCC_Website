@@ -124,20 +124,27 @@
 
 /* ==========================================================================
    About — #BCClZ9bf3
+   Deliberately has no eyebrow: the client had the hero's eyebrow and
+   supporting line removed (44db460), so labelling the next section down
+   would undo that. The statement carries the section alone.
    ========================================================================== */
 
 #BCClZ9bf3 {
+  /* 480px floor is what takes the section from the builder's 726px down to a
+     content-sized band; 62svh lets it breathe on tall screens; the 600px cap
+     stops it competing with the full-viewport hero above it. */
   min-height: clamp(480px, 62svh, 600px);
   display: flex;
-  padding: 0 !important;
 }
 
-/* The builder sets display:grid plus an inline --block-min-height of 726px
-   on .block-layout. Both have to go, or the section cannot shrink. */
+/* main.css lays .block-layout out on a grid sized by inline custom properties
+   (--grid-template-rows, --block-min-height). Every one of those lived on the
+   builder wrapper this section's markup replaced, so they now resolve to
+   invalid and only `display: grid` survives from that rule. Flex plus
+   align-items is what actually centres the stack. */
 #BCClZ9bf3 .about-layout {
-  display: flex !important;
+  display: flex;
   align-items: center;
-  min-height: 0 !important;
   width: min(1224px, 100% - 64px);
   margin-inline: auto;
 }
@@ -146,13 +153,9 @@
   max-width: 720px;
 }
 
-/* A bare rule, no eyebrow text. An earlier draft opened this section with a
-   letterspaced ABOUT UGCC label mirroring .hero-eyebrow; the client then had
-   the hero's eyebrow and supporting line removed (44db460, headline-only
-   composition), so reintroducing one a section lower would undo that call.
-   --v2-red-text is the lightened salmon: correct here because the ground is
-   navy. Wider and thicker than the old inline rule because it now stands on
-   its own rather than sitting beside text. */
+/* --v2-red-text is the lightened salmon, correct here because the ground is
+   navy. 48x2 rather than the hero's 26x1: it stands alone rather than
+   sitting beside eyebrow text, so it needs the extra weight to register. */
 #BCClZ9bf3 .about-rule {
   display: block;
   width: 48px;
@@ -163,9 +166,16 @@
 
 #BCClZ9bf3 .about-statement {
   margin: 0;
-  font-size: clamp(28px, 3.4vw, 46px);
+  font-size: clamp(26px, 3.4vw, 46px);
   line-height: 1.15;
   color: #fff;
+  /* Same reason as .hero-title: this h2 sits outside .text-box, so it never
+     picks up the builder's `.text-box h2 { font-family: var(--h2-font-family) }`
+     and falls back to the body face at bold. Declared explicitly rather than
+     by reintroducing the builder wrapper. Hammersmith One ships a single
+     weight, so 400 is the correct and only weight. */
+  font-family: 'Hammersmith One', sans-serif;
+  font-weight: 400;
 }
 
 #BCClZ9bf3 .about-sub {
@@ -191,8 +201,10 @@
     width: calc(100% - 32px);
   }
 
+  /* Capped at 31.3px = 3.4vw at 920px, so the size is continuous across the
+     breakpoint instead of stepping DOWN as the window gets wider. */
   #BCClZ9bf3 .about-statement {
-    font-size: clamp(26px, 7vw, 34px);
+    font-size: clamp(26px, 7vw, 31.3px);
   }
 
   #BCClZ9bf3 .about-sub {
