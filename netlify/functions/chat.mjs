@@ -61,6 +61,29 @@ export function extractText(data) {
   return cleanText(parts.join("\n"));
 }
 
+// For Arabic questions, derive concise English search keywords so file_search
+// (over English-only knowledge) retrieves the right content. Best-effort:
+// returns null on any error and the caller falls back to the original text.
+async function englishSearchTerms(apiKey, text) {
+  try {
+    const r = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL,
+        input: [
+          { role: "system", content: "Translate the user's message into short English search keywords for a construction-company knowledge base. Reply with ONLY the English keywords, nothing else." },
+          { role: "user", content: text },
+        ],
+      }),
+    });
+    if (!r.ok) return null;
+    return extractText(await r.json()) || null;
+  } catch {
+    return null;
+  }
+}
+
 const ALLOWED_ORIGINS = [
   /\.netlify\.app$/,
   /^https?:\/\/localhost(:\d+)?$/,
@@ -104,10 +127,15 @@ export default async (req) => {
     return new Response(JSON.stringify({ error: "Server not configured." }), { status: 500, headers });
 
   try {
+    let userContent = v.message;
+    if (/[؀-ۿ]/.test(v.message)) {
+      const en = await englishSearchTerms(apiKey, v.message);
+      if (en) userContent = `${v.message}\n\n(Search the knowledge base using these English keywords: ${en})`;
+    }
     const input = [
       { role: "system", content: SYSTEM_PROMPT },
       ...v.history,
-      { role: "user", content: v.message },
+      { role: "user", content: userContent },
     ];
     const r = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
