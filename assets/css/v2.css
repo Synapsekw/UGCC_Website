@@ -519,3 +519,63 @@
 #zoZkDz {
   padding-bottom: 40px;
 }
+
+/* ==========================================================================
+   Nav — resting state
+   ========================================================================== */
+
+/* !important is mandatory here. The builder sets --logo-width, --padding and
+   friends as INLINE custom properties on the <header> element, and inline
+   declarations beat external stylesheets. Without !important these rules
+   parse fine, apply nothing, and the failure is silent. */
+.block-header {
+  --logo-width: 210px !important;
+  --m-logo-width: 124px !important;
+}
+
+.block-header-logo__image {
+  transition: width .35s var(--v2-ease-out-quart);
+}
+
+/* Animated underline, wiping in from the left. */
+.block-header .item-content::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--v2-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .3s var(--v2-ease-out-quart);
+}
+
+.block-header .item-content:hover::after,
+.block-header .item-content:focus-visible::after,
+.block-header .item-content-wrapper--active .item-content::after {
+  transform: scaleX(1);
+}
+
+/* Last nav item ("Contact us") promoted to an outlined pill.
+   Targeted structurally so it needs no markup change on any page. */
+.block-header .block-header-item:last-child .item-content {
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 999px;
+  padding: 9px 20px;
+  transition:
+    background-color .3s var(--v2-ease-out-quart),
+    border-color .3s var(--v2-ease-out-quart),
+    color .3s var(--v2-ease-out-quart);
+}
+
+.block-header .block-header-item:last-child .item-content:hover {
+  background: #fff;
+  border-color: #fff;
+  color: var(--v2-navy);
+}
+
+/* The pill carries its own affordance; suppress the underline on it. */
+.block-header .block-header-item:last-child .item-content::after {
+  display: none;
+}
