@@ -214,8 +214,9 @@ Layout:
 Hover and `:focus-visible` share one rule — the keyboard state must be visually
 identical to the mouse state, not a browser default outline:
 
-- ground tints to `rgba(0, 42, 65,.045)`, bleeding to the full column width via
-  negative inline margin + matching padding
+- ground tints to `rgba(0, 42, 65, .045)` across the row box. It does not bleed
+  past the column: the row dividers and the header rule must share the same two
+  edges, or the section reads as misaligned.
 - `box-shadow: inset 2px 0 0 var(--v2-red)` for the left edge, so no layout
   shift (a `border-left` would move every row 2px)
 - `.wr-num` and `.wr-arrow` go to `var(--v2-red)`

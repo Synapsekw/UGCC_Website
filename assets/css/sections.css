@@ -216,3 +216,179 @@
     text-align: center;
   }
 }
+
+/* ==========================================================================
+   Who are we — #u7vIc0iRh
+   ========================================================================== */
+
+/* No `padding: 0` reset and no `!important` on the display swap: the builder's
+   grid, min-height and padding all read custom properties that lived on the
+   inline style of the .block-layout tag this section's markup replaced, so
+   they now resolve to their initial values. Measured at 1280x720 and 375x812
+   with the declarations removed at runtime - geometry was identical. */
+#u7vIc0iRh .wr-layout {
+  display: block;
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+  padding-block: 88px;
+}
+
+#u7vIc0iRh .wr-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 42, 65, .22);
+}
+
+#u7vIc0iRh .wr-head__text {
+  max-width: 520px;
+}
+
+/* --v2-red, NOT --v2-red-text. The salmon variant the hero and About use is
+   tuned for legibility on dark video; on this near-white ground it computes
+   to roughly 2.9:1 and fails. --v2-red clears 5.3:1. home-check.js asserts
+   this, because getting the two backwards is invisible in a screenshot. */
+#u7vIc0iRh .wr-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: var(--v2-red);
+}
+
+#u7vIc0iRh .wr-rule {
+  flex: none;
+  width: 26px;
+  height: 1px;
+  background: var(--v2-red);
+}
+
+#u7vIc0iRh .wr-title {
+  margin: 14px 0 0;
+  /* Same reason as .hero-title and .about-statement: this h2 sits outside
+     .text-box, so it never picks up the builder's
+     `.text-box h2 { font-family: var(--h2-font-family) }` and would fall
+     back to the body face at bold. Hammersmith One ships a single weight. */
+  font-family: 'Hammersmith One', sans-serif;
+  font-weight: 400;
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1.25;
+  color: var(--v2-navy);
+}
+
+#u7vIc0iRh .wr-intro {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(0, 42, 65, .68);
+}
+
+#u7vIc0iRh .wr-row {
+  display: grid;
+  grid-template-columns: 28px 200px 1fr 24px;
+  align-items: baseline;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: .5px solid rgba(0, 42, 65, .16);
+  text-decoration: none;
+  /* Declared at zero width so the hover state transitions rather than
+     snapping, and so the red edge never affects layout. A border-left would
+     shift every row 2px on hover. */
+  box-shadow: inset 0 0 0 var(--v2-red);
+  transition:
+    background-color .2s var(--v2-ease-out-quart),
+    box-shadow .2s var(--v2-ease-out-quart);
+}
+
+#u7vIc0iRh .wr-num {
+  font-size: 13px;
+  color: rgba(0, 42, 65, .35);
+  transition: color .2s var(--v2-ease-out-quart);
+}
+
+#u7vIc0iRh .wr-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--v2-navy);
+}
+
+#u7vIc0iRh .wr-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(0, 42, 65, .62);
+}
+
+#u7vIc0iRh .wr-arrow {
+  justify-self: end;
+  font-size: 15px;
+  color: rgba(0, 42, 65, .28);
+  transition:
+    color .2s var(--v2-ease-out-quart),
+    transform .2s var(--v2-ease-out-quart);
+}
+
+/* One rule, both states. Keyboard users get exactly what mouse users get and
+   the two cannot drift apart in a later edit. home-check.js asserts that a
+   single rule carries both selectors. */
+#u7vIc0iRh .wr-row:hover,
+#u7vIc0iRh .wr-row:focus-visible {
+  background-color: rgba(0, 42, 65, .045);
+  box-shadow: inset 2px 0 0 var(--v2-red);
+  outline: none;
+}
+
+#u7vIc0iRh .wr-row:hover .wr-num,
+#u7vIc0iRh .wr-row:focus-visible .wr-num,
+#u7vIc0iRh .wr-row:hover .wr-arrow,
+#u7vIc0iRh .wr-row:focus-visible .wr-arrow {
+  color: var(--v2-red);
+}
+
+#u7vIc0iRh .wr-row:hover .wr-arrow,
+#u7vIc0iRh .wr-row:focus-visible .wr-arrow {
+  transform: translateX(4px);
+}
+
+/* The designed focus state is a tint plus a red edge, both of which forced
+   colours discard. Put a real outline back when that is the case. */
+@media (forced-colors: active) {
+  #u7vIc0iRh .wr-row:focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}
+
+@media (max-width: 920px) {
+  #u7vIc0iRh .wr-layout {
+    width: calc(100% - 32px);
+    padding-block: 64px;
+  }
+
+  #u7vIc0iRh .wr-head {
+    display: block;
+  }
+
+  #u7vIc0iRh .wr-head .v2-btn {
+    display: block;
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  /* Two columns: numeral, then name and description stacked beside it. Both
+     need an explicit column or the description drops under the numeral.
+     Descriptions stay visible - unlike the hero strip, which hides them,
+     this section exists to carry them. */
+  #u7vIc0iRh .wr-row {
+    grid-template-columns: 28px 1fr;
+    gap: 6px 16px;
+  }
+
+  #u7vIc0iRh .wr-name { grid-column: 2; }
+  #u7vIc0iRh .wr-desc { grid-column: 2; }
+  #u7vIc0iRh .wr-arrow { display: none; }
+}
