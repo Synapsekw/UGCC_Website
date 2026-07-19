@@ -487,7 +487,7 @@ Create `assets/css/rail.css`:
 /* ==========================================================================
    UGCC — homepage gallery rail (#zOl98u)
    Replaces the builder slideshow. Loaded by index.html only.
-   Tokens (--v2-navy, --v2-red, --v2-ease-out-quart) come from v2.css.
+   Tokens (--v2-navy, --v2-red, --v2-red-text, --v2-ease-out-quart) come from v2.css.
 
    The rail is a natively scrollable region at all times. assets/js/rail.js
    drives its scrollLeft from the page scroll position; the CSS makes no
@@ -514,7 +514,7 @@ Create `assets/css/rail.css`:
 .v2-rail__eyebrow {
   flex: 0 0 100%;
   margin: 0;
-  font-family: var(--font-secondary, sans-serif);
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .18em;
@@ -525,7 +525,7 @@ Create `assets/css/rail.css`:
 .v2-rail__title {
   margin: 6px 0 0;
   flex: 1;
-  font-family: var(--font-primary, sans-serif);
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-size: 32px;
   line-height: 1.2;
   font-weight: 400;
@@ -594,7 +594,7 @@ Create `assets/css/rail.css`:
   right: 0;
   bottom: 0;
   padding: 40px 14px 13px;
-  font-family: var(--font-secondary, sans-serif);
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 11px;
   letter-spacing: .15em;
   text-transform: uppercase;
