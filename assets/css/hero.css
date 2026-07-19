@@ -228,3 +228,77 @@
     padding-right: 76px;
   }
 }
+
+/* ==========================================================================
+   Motion — vanilla ports of the React Bits effects (Split Text, Blur Text).
+   Everything is gated behind .hero-motion on <html>, which hero.js adds ONLY
+   when the user has not requested reduced motion. Without that class no
+   animation property is applied at all, so the reduced-motion path is static
+   by construction rather than by override. Delays are set inline by hero.js.
+   animation-fill-mode: both holds the from-state during the delay, so
+   nothing flashes before its turn.
+   ========================================================================== */
+
+.hero-motion #aCqA2TkE7 .hero-word {
+  display: inline-block;
+  animation: hero-word-in .75s var(--v2-ease-out-expo) both;
+}
+
+.hero-motion #aCqA2TkE7 .hero-eyebrow {
+  animation: hero-blur-in .7s var(--v2-ease-out-quart) both;
+}
+
+.hero-motion #aCqA2TkE7 .hero-sub,
+.hero-motion #aCqA2TkE7 .hero-cta,
+.hero-motion #aCqA2TkE7 .hero-service {
+  animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
+}
+
+@keyframes hero-word-in {
+  from { opacity: 0; transform: translateY(.5em); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-blur-in {
+  from { opacity: 0; filter: blur(9px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Shine sweep on the primary CTA. */
+#aCqA2TkE7 .hero-btn--primary {
+  position: relative;
+  overflow: hidden;
+}
+
+#aCqA2TkE7 .hero-btn--primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, .85) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #aCqA2TkE7 .hero-btn--primary:hover::after {
+    animation: hero-shine .8s var(--v2-ease-out-quart);
+  }
+}
+
+@keyframes hero-shine {
+  from { left: -60%; }
+  to   { left: 120%; }
+}
