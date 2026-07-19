@@ -254,13 +254,26 @@ Append to `assets/css/v2.css`:
    Nav — resting state
    ========================================================================== */
 
-/* !important is mandatory here. The builder sets --logo-width, --padding and
-   friends as INLINE custom properties on the <header> element, and inline
-   declarations beat external stylesheets. Without !important these rules
-   parse fine, apply nothing, and the failure is silent. */
-.block-header {
-  --logo-width: 210px !important;
-  --m-logo-width: 124px !important;
+/* !important is mandatory throughout this section. The builder sets --padding
+   and friends as INLINE custom properties on the <header> element, and inline
+   declarations beat external stylesheets. Without !important these rules parse
+   fine, apply nothing, and the failure is silent.
+
+   CORRECTION, found during implementation: --logo-width is a DEAD token in
+   this export. main.css sizes the logo from per-build hashed properties baked
+   inline on the element:
+     .block-header-logo{width:var(--v6f401cb2);height:var(--v5ef47fbb)}
+     @media screen and (width<=920px){...width:var(--v66b767ed)...}
+   Nothing downstream reads --logo-width, so overriding it — with or without
+   !important — changes nothing. Override the resolved properties instead.
+   The hashed values are identical across all 67 pages, but we deliberately
+   do not reference the hashed names. Source logo is 342x47, so 210px wide
+   keeps the ratio at ~29px tall. Mobile keeps the builder's own size. */
+@media (min-width: 921px) {
+  .block-header .block-header-logo {
+    width: 210px !important;
+    height: 29px !important;
+  }
 }
 
 .block-header-logo__image {
@@ -359,23 +372,32 @@ Replace the existing `.v2-scrolled .block-header` rule in `assets/css/v2.css` wi
   border-bottom: .5px solid rgba(255, 255, 255, .14);
 }
 
-/* Condense: 123px -> 76px. The builder drives header height from its
-   --padding custom property, so animate that rather than height itself. */
-@media (min-width: 769px) {
+/* Condense: 123px -> ~75px.
+   Verified mechanism: .block-header-layout-desktop has
+   `padding: var(--padding, 24px 0)` in main.css, and --padding is set as an
+   INLINE custom property on <header> (38px 16px). Custom properties inherit,
+   so overriding --padding on .block-header with !important cascades down and
+   actually changes the height. Resting height is 38 + 47(logo) + 38 = 123px,
+   which matches the measured value exactly.
+   With the logo at 29px (see Task 3's direct override) and padding at 23px:
+   23 + 29 + 23 = 75px. The harness requires condH < restH - 20, i.e. < 103.
+   The logo deliberately does NOT shrink further here - one moving dimension
+   reads as intentional, two reads as jitter.
+   Breakpoint is 921px because that is the builder's own switch
+   (`@media screen and (width<=920px)` in main.css), not the 768px this plan
+   originally and wrongly assumed. */
+@media (min-width: 921px) {
   .v2-scrolled .block-header {
-    --padding-top: 14px !important;
-    --padding-bottom: 14px !important;
-    --padding: 14px 16px 14px 16px !important;
-    --logo-width: 168px !important;
+    --padding-top: 23px !important;
+    --padding-bottom: 23px !important;
+    --padding: 23px 16px 23px 16px !important;
   }
 }
 
-/* Mobile keeps its 95px height. Shrinking it degrades the tap target. */
-@media (max-width: 768px) {
-  .v2-scrolled .block-header {
-    --logo-width: var(--m-logo-width) !important;
-  }
-}
+/* Mobile (<=920px) keeps its 95px height. Shrinking it degrades the tap
+   target. No rule needed - we simply do not override anything below 921px.
+   Do NOT reintroduce a --logo-width override here: that token is inert for
+   sizing in this export (see Task 3). */
 ```
 
 The bottom hairline is load-bearing: at 70% opacity the header would otherwise dissolve into the light backgrounds used on inner pages.
@@ -656,8 +678,13 @@ Append to `assets/css/hero.css`:
   color: rgba(255, 255, 255, .66);
 }
 
-/* ---------- mobile ---------- */
-@media (max-width: 768px) {
+/* ---------- mobile ----------
+   920px, not 768px: this is the builder's own breakpoint
+   (`@media screen and (width<=920px)` in main.css), and it is where the
+   header swaps from its desktop layout to its mobile one. Using a different
+   number here would leave a dead band where the header is mobile but the
+   hero is still desktop. */
+@media (max-width: 920px) {
   #aCqA2TkE7 {
     min-height: clamp(560px, 100svh, 900px);
   }
