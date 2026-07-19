@@ -128,12 +128,22 @@ Create `tools/credentials-check.js` with exactly this content:
     return Array.prototype.slice.call(document.querySelectorAll('#' + SECTION + ' .cred__row'));
   }
 
-  check('section is under 700px tall', function () {
+  check('section is under its height budget', function () {
     var s = section();
     if (!s) return { ok: false, detail: 'section #' + SECTION + ' missing' };
     var h = Math.round(s.getBoundingClientRect().height);
     if (h === 0) return { ok: false, detail: 'section has zero height — not rendered' };
-    return { ok: h < 700, detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide' };
+    /* The bound is per-breakpoint because one column is legitimately taller
+       than two, and a check that goes red on a correct block teaches the
+       reader to ignore red. Both numbers are measured, not guessed: this
+       markup and CSS render 591px at 1280 wide and 974px at 390. The desktop
+       bound is the entire point of the work; the narrow bound is the measured
+       974 plus headroom for longer text or a larger default font. */
+    var bound = window.innerWidth < 769 ? 1100 : 700;
+    return {
+      ok: h < bound,
+      detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound
+    };
   });
 
   check('all six decorative SVGs are gone', function () {
@@ -173,29 +183,54 @@ Create `tools/credentials-check.js` with exactly this content:
     return { ok: have === want, detail: 'got [' + have + '] want [' + want + ']' };
   });
 
-  check('exactly four dated rows, chronological, Grade 1 undated', function () {
+  check('each dated row pairs its own year with its own credential', function () {
     /* This is the check that stops the original bug from returning. The old
        block drew a timeline whose DOM order was 2004, (none), 2012, 2007,
-       2019 — a chronology that was not chronological. */
-    var s = section();
-    if (!s) return { ok: false, detail: 'section missing' };
-    var times = Array.prototype.slice.call(s.querySelectorAll('.cred__ledger time'));
-    if (times.length !== 4) {
-      return { ok: false, detail: times.length + ' <time> elements (want exactly 4)' };
+       2019 — a chronology that was not chronological.
+
+       Bind year to row POSITIONALLY. Gathering every <time> in the ledger
+       into one flat list and comparing that list to the expected years is not
+       enough: a block with two <time> elements in row 1 and none in row 2
+       still yields four datetimes in the right order, so it passes while
+       rendering ISO 45001 with no year at all — the exact mispairing this
+       check exists to catch. */
+    var list = rows();
+    if (list.length !== 5) {
+      return { ok: false, detail: 'expected 5 rows to inspect, found ' + list.length };
     }
-    var got = times.map(function (t) { return t.getAttribute('datetime'); });
-    var ordered = got.join(',') === EXPECTED_YEARS.join(',');
-    var labelled = times.every(function (t) {
-      return t.textContent.trim() === t.getAttribute('datetime');
+    var bad = [];
+    EXPECTED_YEARS.forEach(function (year, i) {
+      var name = list[i].querySelector('.cred__name');
+      var label = name ? name.textContent.trim().toUpperCase() : '(none)';
+      if (label !== EXPECTED_CODES[i]) {
+        bad.push('row ' + i + ' is ' + label + ', want ' + EXPECTED_CODES[i]);
+      }
+      var times = list[i].querySelectorAll('time');
+      if (times.length !== 1) {
+        bad.push('row ' + i + ' (' + label + ') has ' + times.length + ' <time>, want 1');
+        return;
+      }
+      var dt = times[0].getAttribute('datetime');
+      var txt = times[0].textContent.trim();
+      if (dt !== year) bad.push('row ' + i + ' (' + label + ') datetime=' + dt + ', want ' + year);
+      if (txt !== year) bad.push('row ' + i + ' (' + label + ') text=' + txt + ', want ' + year);
     });
-    var last = rows()[4];
-    var lastName = last && last.querySelector('.cred__name');
-    var gradeUndated = !!last && last.querySelectorAll('time').length === 0 &&
-      !!lastName && lastName.textContent.trim().toUpperCase() === 'GRADE 1';
+
+    /* Grade 1 has no year in any source. The dash standing in for one must be
+       hidden from assistive technology — an announced "em dash" in the year
+       column is worse than an empty cell. Asserting only the absence of
+       <time> would let an announced dash through. */
+    var last = list[4];
+    var lastName = last.querySelector('.cred__name');
+    if (!lastName || lastName.textContent.trim().toUpperCase() !== 'GRADE 1') {
+      bad.push('last row is not GRADE 1');
+    }
+    if (last.querySelectorAll('time').length !== 0) bad.push('GRADE 1 row carries a <time>');
+    if (!last.querySelector('[aria-hidden="true"]')) bad.push('GRADE 1 dash is not aria-hidden');
+
     return {
-      ok: ordered && labelled && gradeUndated,
-      detail: 'datetime[' + got.join(',') + '] ordered=' + ordered +
-              ' labelled=' + labelled + ' gradeUndated=' + gradeUndated
+      ok: bad.length === 0,
+      detail: bad.join('; ') || '4 rows correctly paired; GRADE 1 undated and hidden'
     };
   });
 
@@ -268,12 +303,25 @@ Create `tools/credentials-check.js` with exactly this content:
        render. See "Behaviour" in the spec. */
     var s = section();
     if (!s) return { ok: false, detail: 'section missing' };
-    var hidden = s.querySelectorAll('.transition').length;
+    /* closest() as well as querySelectorAll(): the former excludes the section
+       itself and every ancestor, so a .transition landing on #zZFMdo would
+       hide the whole block while this check stayed green. */
+    var hidden = s.querySelectorAll('.transition').length + (s.closest('.transition') ? 1 : 0);
     var title = s.querySelector('.cred__title');
-    var op = title ? getComputedStyle(title).opacity : '0';
+    if (!title) return { ok: false, detail: 'no .cred__title to measure' };
+    /* Walk the ancestors too. getComputedStyle(title).opacity reports the
+       title's own value, which stays "1" underneath a faded parent. */
+    var faded = '';
+    for (var el = title; el && el !== document.body; el = el.parentElement) {
+      if (parseFloat(getComputedStyle(el).opacity) < 1) {
+        faded = el.id || el.className || el.tagName;
+        break;
+      }
+    }
     return {
-      ok: hidden === 0 && parseFloat(op) === 1,
-      detail: hidden + ' .transition nodes, title opacity ' + op
+      ok: hidden === 0 && faded === '',
+      detail: hidden + ' .transition nodes; ' +
+              (faded ? 'faded ancestor: ' + faded : 'nothing faded')
     };
   });
 
@@ -291,19 +339,19 @@ Create `tools/credentials-check.js` with exactly this content:
 
 Serve the site (see "Serving the site" above), open `http://localhost:8747/` at 1280x720, and paste the contents of `tools/credentials-check.js` into the browser console.
 
-Expected: **11 of 12 checks FAIL.** Specifically:
+Expected: **11 of 12 checks FAIL.** These detail strings are **measured** — this harness was run against the unmodified page at 1280x720:
 
-- `section is under 700px tall` → FAIL, `1779px (was 1779px) @ 1280px wide`
+- `section is under its height budget` → FAIL, `1779px (was 1779px) @ 1280px wide, bound 700`
 - `all six decorative SVGs are gone` → FAIL, `6 svg elements remain (want 0)`
-- `ledger holds exactly five dt/dd pairs` → FAIL, `0 rows, 0 dt, 0 dd`
+- `ledger holds exactly five dt/dd pairs` → FAIL, `0 rows, 0 dt, 0 dd (want 5 / 5 / 5)`
 - `the five credential codes are present, in ledger order` → FAIL, `expected 5 rows to inspect, found 0`
-- `exactly four dated rows, chronological, Grade 1 undated` → FAIL, `0 <time> elements`
-- `the three stat figures read 1975 / 6 / 7` → FAIL, `0 figures`
+- `each dated row pairs its own year with its own credential` → FAIL, `expected 5 rows to inspect, found 0`
+- `the three stat figures read 1975 / 6 / 7` → FAIL, `0 figures (want exactly 3)`
 - `exactly one link, pointing at /credentials/` → FAIL, `0 links []`
 - `the CTA reuses the shared button classes` → FAIL, `no link found`
 - `heading is an h2 and is the block only heading` → FAIL, `0 h2, 1 other headings`
-- `no legacy builder layout elements survive in the block` → FAIL (a large count, ~14)
-- `block is readable without JavaScript reveals` → FAIL (a non-zero `.transition` count)
+- `no legacy builder layout elements survive in the block` → FAIL, `37 builder nodes remain (want 0)`
+- `block is readable without JavaScript reveals` → FAIL, `no .cred__title to measure`
 
 The one that should already PASS is `no horizontal page overflow`. If it fails, that is a pre-existing problem in someone else's block — record it and move on; it is not yours to fix.
 
@@ -708,28 +756,18 @@ Name `index.html` explicitly. Do not use `-a`.
 The block is now correct at 1280px. This task proves it at phone width, where the two-column grid collapses.
 
 **Files:**
-- Modify: `tools/credentials-check.js` (the height bound — expected)
 - Modify: `assets/css/credentials.css` (only if a defect is found — not expected)
 
 - [ ] **Step 1: Check the single-column layout at 390px**
 
 Resize the browser to 390x844 and reload. Paste `tools/credentials-check.js` again.
 
-Two checks are genuinely width-sensitive, and one of them is **expected to fail** here. Both numbers below were measured during planning by rendering this exact markup and CSS in a 390px viewport:
+Expected: **12 passed, 0 failed** — the same as desktop.
 
-- `no horizontal page overflow` — should **pass**. Measured `scrollWidth` 390 against a 390px viewport, no overflow. This is the check most likely to catch a real defect, so treat a failure as genuine.
-- `section is under 700px tall` — should **fail**, reporting roughly **974px**. That is correct and expected: one column is taller than two. The *check* is what needs relaxing, not the design.
+The height check already carries a per-breakpoint bound (1100 below 769px, 700 above), so it should pass at roughly **974px** rather than going red. Both figures were measured during planning by rendering this exact markup and CSS in a 390px viewport. Two checks are genuinely width-sensitive and are the reason for re-running:
 
-So the honest expected result is **11 passed, 1 failed**, and then you fix the check. Change that one check's return line to:
-
-```javascript
-    var bound = window.innerWidth < 769 ? 1100 : 700;
-    return { ok: h < bound, detail: h + 'px (was 1779px) @ ' + window.innerWidth + 'px wide, bound ' + bound };
-```
-
-`1100` is the measured 974px plus headroom for longer text or a larger default font. **Do not widen the 700px desktop bound** — that one is the whole point of the work. After the edit, re-run at both widths and expect 12 passed, 0 failed at each.
-
-Commit that check change together with the Step 4 commit, naming it as a check fix rather than a design fix.
+- `section is under its height budget` — expect roughly **974px** against the 1100 bound. If it reports a number near 1779, the media query is not applying. If it exceeds 1100, do not simply raise the bound; find out what got taller first.
+- `no horizontal page overflow` — measured `scrollWidth` 390 against a 390px viewport. This is the check most likely to catch a real defect at this width, so treat any failure as genuine rather than as a threshold to relax.
 
 - [ ] **Step 2: Read the block and confirm it reads in the right order**
 
@@ -747,21 +785,14 @@ If overflow was found, the fix goes in the `@media (max-width: 768px)` block alr
 
 - [ ] **Step 4: Commit**
 
-The check-bound change from Step 1 is always expected, so there is always at least one commit here:
+If Steps 1–3 were clean, **there is nothing to commit.** Say so plainly in your report rather than manufacturing a change or implying a fix was needed. A task that correctly ends in no commit is a good outcome, not a failure.
 
-```bash
-git add tools/credentials-check.js
-git commit -m "test(credentials): height bound is per-breakpoint, not global"
-```
-
-If Step 3 also changed the stylesheet, commit that separately so the two are reviewable apart:
+Otherwise:
 
 ```bash
 git add assets/css/credentials.css
 git commit -m "fix(credentials): <the specific defect, named>"
 ```
-
-If Step 3 changed nothing, say so plainly in your report rather than implying a fix was needed.
 
 ---
 

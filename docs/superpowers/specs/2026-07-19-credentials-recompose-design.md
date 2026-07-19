@@ -114,7 +114,10 @@ section#zZFMdo
       h2.cred__title      THE POWER OF EXPERIENCE
       .cred__rule         34x2px, --v2-red
       p.cred__lede        the existing kicker sentence, verbatim
-      ul.cred__stats      1975 / SINCE · 6 / COUNTRIES · 7 / SECTORS
+      ul.cred__stats
+        li x3
+          span.cred__figure   1975 · 6 · 7          (the numeral alone)
+          span.cred__unit     SINCE · COUNTRIES · SECTORS
       a.v2-btn.v2-btn--on-light  href="/credentials/"  View credentials
     dl.cred__ledger
       div.cred__row x5
@@ -123,6 +126,13 @@ section#zZFMdo
           span.cred__name   ISO 9001 … GRADE 1
         dd.cred__desc       one line
 ```
+
+`.cred__figure` wraps **the numeral alone**, not the whole stat. A review of the
+check harness read this structure block, found it stopped at `ul.cred__stats`,
+and reasonably concluded the harness had invented a selector — so the block is
+spelled out to the leaf. The unit label is a separate element because the two
+are set in different faces and sizes, and because a check asserting the figure
+reads exactly `1975` must not also match `1975 SINCE`.
 
 The `<time>` sits **inside** the `<dt>`, not beside it. A `div` inside a `dl`
 may contain only `dt` and `dd` elements, so a `time` as their sibling would be
