@@ -33,6 +33,23 @@ blocks above this one. Three rules follow:
    `git add -A` or `git add .` — the working tree contains other sessions'
    in-flight changes to `assets/js/rail.js`, `tools/rail-check.js` and files under
    `docs/superpowers/`.
+
+   **This is necessary but NOT sufficient for `index.html`, and Task 4 proved it.**
+   Five sessions edit that one file. `git add index.html` stages the file, not your
+   hunks — so it also commits whatever uncommitted edits another session happens to
+   have in the working tree at that moment. Commit `e46d50f` (this plan's Task 4)
+   did exactly that: it swept in the careers session's deletion of the
+   `v2-careers__facts` list from `#Jways5TtQ`. Nothing was lost — `assets/css/careers.css`
+   styles only the nine classes that remain and has no `.v2-careers__fact*` rules,
+   so the deletion was deliberate and in-flight — but the commit's stated scope was
+   wrong, and a less lucky draw would have committed someone's half-finished edit.
+   The same mechanism produced `51b56a2`, a *rail* commit that introduced *careers*
+   markup.
+
+   Before staging `index.html`, always run `git diff index.html` and confirm every
+   hunk is yours. If a foreign hunk is present, either wait for that session to
+   commit, or stage selectively with `git add -p index.html` and accept only your
+   own hunks. Never assume a whole-file `git add` is scoped to your change.
 3. **Do not touch** `assets/css/v2.css`, `assets/js/v2.js`, `assets/js/rail.js`,
    `assets/css/rail.css`, `README.md`, or any block other than `#zd_fdi`.
 
