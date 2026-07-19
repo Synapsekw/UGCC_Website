@@ -7,8 +7,12 @@
 
    NOT covered by this script (manual verification required):
      - 375px layout for both sections
-     - contrast of .wr-desc against the white-wall background image
-     - the chat widget overlapping the Explore More button or the last row */
+     - the chat widget overlapping the Explore More button or the last row
+
+   Who-are-we text contrast HAS been computed against the section's own
+   background photo rather than assumed white: that wall runs 203-255, and
+   rgba(0, 42, 65, .72) is the measured floor that clears 4.5:1 at the dark
+   end and under the .07 hover tint. Anything lighter fails somewhere. */
 (function () {
   'use strict';
 
@@ -180,8 +184,11 @@
 
   /* --v2-red-text (#e8635e) is a lightened salmon chosen for legibility on
      dark video. On this section's near-white ground it falls to roughly
-     2.9:1. --v2-red (#d41c22) clears 5.3:1. Getting these two backwards is
-     invisible in a screenshot and fails accessibility. */
+     2.9:1. --v2-red measures 3.3-5.3:1 across this photo's range versus
+     1.6-2.6:1 for --v2-red-text, so it is the correct token of the two; the
+     eyebrow is 12px/600 letterspaced label text rather than body copy.
+     Getting these two backwards is invisible in a screenshot and fails
+     accessibility. */
   check('who-are-we uses the light-ground red', function () {
     var eyebrow = document.querySelector(WHO + ' .wr-eyebrow');
     if (!eyebrow) return { ok: false, detail: '.wr-eyebrow not found' };

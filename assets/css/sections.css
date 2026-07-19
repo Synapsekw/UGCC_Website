@@ -248,8 +248,11 @@
 
 /* --v2-red, NOT --v2-red-text. The salmon variant the hero and About use is
    tuned for legibility on dark video; on this near-white ground it computes
-   to roughly 2.9:1 and fails. --v2-red clears 5.3:1. home-check.js asserts
-   this, because getting the two backwards is invisible in a screenshot. */
+   to roughly 2.9:1 and fails. --v2-red measures 3.3-5.3:1 across this photo's
+   range versus 1.6-2.6:1 for --v2-red-text, so it is the correct token of the
+   two; the eyebrow is 12px/600 letterspaced label text rather than body copy.
+   home-check.js asserts this, because getting the two backwards is invisible
+   in a screenshot. */
 #u7vIc0iRh .wr-eyebrow {
   display: flex;
   align-items: center;
@@ -285,15 +288,22 @@
   margin: 12px 0 0;
   font-size: 15px;
   line-height: 1.7;
-  color: rgba(0, 42, 65, .68);
+  color: rgba(0, 42, 65, .72);
 }
 
 #u7vIc0iRh .wr-row {
   display: grid;
-  grid-template-columns: 28px 200px 1fr 24px;
+  /* 224, not the 211px where the longest name (BUILDING CONSTRUCTION,
+     205.33px) stops wrapping: on the 8px rhythm, and ~9% headroom so a
+     webfont-fallback swap or a modest rename does not re-break the row. */
+  grid-template-columns: 28px 224px 1fr 24px;
   align-items: baseline;
   gap: 24px;
   padding: 18px 0;
+  /* The arrow's 4px hover nudge would otherwise cross the column edge that
+     every divider and the header rule share. Clipped, it reads as sliding
+     out under the edge. */
+  overflow: hidden;
   border-bottom: .5px solid rgba(0, 42, 65, .16);
   text-decoration: none;
   /* Declared at zero width so the hover state transitions rather than
@@ -307,7 +317,7 @@
 
 #u7vIc0iRh .wr-num {
   font-size: 13px;
-  color: rgba(0, 42, 65, .35);
+  color: rgba(0, 42, 65, .72);
   transition: color .2s var(--v2-ease-out-quart);
 }
 
@@ -318,16 +328,20 @@
   color: var(--v2-navy);
 }
 
+/* .72 is the floor that clears 4.5:1 against the DARKEST pixel of this
+   section's background photo (the wall runs 203-255, not pure white) and
+   still clears it under the hover tint. .62 measured 3.71 at that end and
+   4.47 even on pure white - it never passed anywhere. */
 #u7vIc0iRh .wr-desc {
   font-size: 14px;
   line-height: 1.6;
-  color: rgba(0, 42, 65, .62);
+  color: rgba(0, 42, 65, .72);
 }
 
 #u7vIc0iRh .wr-arrow {
   justify-self: end;
   font-size: 15px;
-  color: rgba(0, 42, 65, .28);
+  color: rgba(0, 42, 65, .45);
   transition:
     color .2s var(--v2-ease-out-quart),
     transform .2s var(--v2-ease-out-quart);
@@ -338,8 +352,8 @@
    single rule carries both selectors. */
 #u7vIc0iRh .wr-row:hover,
 #u7vIc0iRh .wr-row:focus-visible {
-  background-color: rgba(0, 42, 65, .045);
-  box-shadow: inset 2px 0 0 var(--v2-red);
+  background-color: rgba(0, 42, 65, .07);
+  box-shadow: inset 3px 0 0 var(--v2-red);
   outline: none;
 }
 
@@ -360,6 +374,17 @@
 @media (forced-colors: active) {
   #u7vIc0iRh .wr-row:focus-visible {
     outline: 2px solid CanvasText;
+  }
+}
+
+/* forced-colors covers Windows High Contrast, but it is not the only way a
+   user asks for a stronger indicator. Anyone on an OS "increase contrast"
+   setting gets a real outline back too - the tint and the 3px edge alone are
+   a small fraction of the area WCAG 2.4.13 expects. */
+@media (prefers-contrast: more) {
+  #u7vIc0iRh .wr-row:focus-visible {
+    outline: 2px solid var(--v2-navy);
+    outline-offset: -2px;
   }
 }
 
