@@ -497,3 +497,13 @@
   .v2-prose h2 { font-size: 26px; }
   .v2-banner p { font-size: 20px; }
 }
+
+/* Section background images that must stay contained (no parallax):
+   fills the .block-background slot exactly, clipped to the section. */
+.v2-bgimg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
