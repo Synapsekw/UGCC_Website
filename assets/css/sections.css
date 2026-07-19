@@ -342,6 +342,13 @@
   justify-self: end;
   font-size: 15px;
   color: rgba(0, 42, 65, .45);
+  /* The travel happens INSIDE the column: the arrow rests 4px back and
+     moves to 0 on hover, rather than resting at 0 and moving 4px past the
+     edge. Both read identically, but nudging outward pushed the glyph past
+     the column edge that every divider and the header rule share, and
+     clipping it there cut 4px off a 15px glyph whose ink fills its box
+     edge to edge - i.e. it removed the arrowhead and left a dash. */
+  transform: translateX(-4px);
   transition:
     color .2s var(--v2-ease-out-quart),
     transform .2s var(--v2-ease-out-quart);
@@ -366,7 +373,7 @@
 
 #u7vIc0iRh .wr-row:hover .wr-arrow,
 #u7vIc0iRh .wr-row:focus-visible .wr-arrow {
-  transform: translateX(4px);
+  transform: translateX(0);
 }
 
 /* The designed focus state is a tint plus a red edge, both of which forced
