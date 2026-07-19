@@ -1,5 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { validate, MAX_LEN, rateLimited, extractText, cleanText } from "../netlify/functions/chat.mjs";
+import { validate, MAX_LEN, rateLimited, extractText, cleanText, formatSearchResults } from "../netlify/functions/chat.mjs";
+
+describe("formatSearchResults", () => {
+  it("joins text content from vector-store search results", () => {
+    const data = { data: [
+      { filename: "a.txt", content: [{ type: "text", text: "Duqm berth in Oman." }] },
+      { filename: "b.txt", content: [{ type: "text", text: "Cairo Street RA-200." }] },
+    ] };
+    const out = formatSearchResults(data);
+    expect(out).toContain("Duqm berth in Oman.");
+    expect(out).toContain("Cairo Street RA-200.");
+  });
+  it("returns empty string for no results", () => {
+    expect(formatSearchResults({ data: [] })).toBe("");
+  });
+});
 
 describe("cleanText", () => {
   it("strips OpenAI citation markers", () => {

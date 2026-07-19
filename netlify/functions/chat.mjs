@@ -1,16 +1,18 @@
 // UGCC chatbot proxy. Dependency-free (native fetch) so nothing is bundled or
-// published. Holds the OpenAI key server-side and calls the Responses API with
-// file_search over the UGCC knowledge vector store.
+// published. Deterministic retrieval: Arabic queries are translated to English
+// keywords, the vector store is searched directly (not via the model), and the
+// answer is generated grounded in the retrieved excerpts, in the user's language.
 
 export const MAX_LEN = 1000;
 const MAX_HISTORY = 12;
 const MODEL = "gpt-4o-mini";
+const OPENAI = "https://api.openai.com/v1";
 
 const SYSTEM_PROMPT = `You are the assistant for United Gulf Construction Company (UGCC), a construction company in Kuwait.
-Answer ONLY using the provided knowledge (file search results about UGCC's projects, business lines, facilities, equipment, HSSE, quality, CSR, careers, and contact details).
-The knowledge base is written in English. ALWAYS query the knowledge base with English search terms, even when the user writes in Arabic — translate their question into English keywords to search, then write your reply in the user's language (Arabic for Arabic questions, otherwise English).
-If the answer is not in the knowledge, say you don't have that information and suggest visiting the contact page. Be concise and professional. Never invent projects, numbers, or contacts.
-Write clean prose. Do NOT include citation markers, source numbers, footnotes, or bracketed references such as "(15)" or "【...】" in your answer.`;
+Answer ONLY using the "Knowledge base excerpts" provided in the user's message (about UGCC's projects, business lines, facilities, equipment, HSSE, quality, CSR, careers, and contact details).
+Reply in the user's language: Arabic for Arabic questions, otherwise English.
+If the excerpts do not contain the answer, say you don't have that information and suggest visiting the contact page. Be concise and professional. Never invent projects, numbers, or contacts.
+Write clean prose. Do NOT include citation markers, source numbers, footnotes, or bracketed references such as "(15)" or "【...】".`;
 
 export function validate(body) {
   const message = (body?.message ?? "").toString().trim();
@@ -37,9 +39,8 @@ export function rateLimited(key, now = Date.now()) {
   return arr.length > RATE_MAX;
 }
 
-// Remove file_search citation artifacts the model sometimes leaks into prose:
-// OpenAI's 【..†source】 markers and markdown links whose target is a bare
-// source index like [text](15).
+// Remove citation artifacts the model sometimes leaks into prose:
+// OpenAI's 【..†source】 markers and markdown links whose target is a bare index.
 export function cleanText(text) {
   return text
     .replace(/【[^】]*】/g, "")
@@ -61,12 +62,20 @@ export function extractText(data) {
   return cleanText(parts.join("\n"));
 }
 
-// For Arabic questions, derive concise English search keywords so file_search
-// (over English-only knowledge) retrieves the right content. Best-effort:
-// returns null on any error and the caller falls back to the original text.
+// Concatenate vector-store search results into a grounded context string.
+export function formatSearchResults(data) {
+  const chunks = [];
+  for (const item of data?.data || []) {
+    const text = (item.content || []).map((c) => c?.text).filter(Boolean).join(" ").trim();
+    if (text) chunks.push(text);
+  }
+  return chunks.join("\n\n---\n\n").slice(0, 12000);
+}
+
+// Arabic -> concise English search keywords (best-effort; null on error).
 async function englishSearchTerms(apiKey, text) {
   try {
-    const r = await fetch("https://api.openai.com/v1/responses", {
+    const r = await fetch(`${OPENAI}/responses`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -81,6 +90,22 @@ async function englishSearchTerms(apiKey, text) {
     return extractText(await r.json()) || null;
   } catch {
     return null;
+  }
+}
+
+// Deterministic retrieval straight from the vector store (model does not choose
+// the query), so English and Arabic both search with a strong English query.
+async function retrieveContext(apiKey, vsId, query) {
+  try {
+    const r = await fetch(`${OPENAI}/vector_stores/${vsId}/search`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query, max_num_results: 8 }),
+    });
+    if (!r.ok) return "";
+    return formatSearchResults(await r.json());
+  } catch {
+    return "";
   }
 }
 
@@ -127,24 +152,23 @@ export default async (req) => {
     return new Response(JSON.stringify({ error: "Server not configured." }), { status: 500, headers });
 
   try {
-    let userContent = v.message;
+    // Search in English regardless of the question's language.
+    let query = v.message;
     if (/[؀-ۿ]/.test(v.message)) {
       const en = await englishSearchTerms(apiKey, v.message);
-      if (en) userContent = `${v.message}\n\n(Search the knowledge base using these English keywords: ${en})`;
+      if (en) query = en;
     }
+    const context = await retrieveContext(apiKey, vsId, query);
+
     const input = [
       { role: "system", content: SYSTEM_PROMPT },
       ...v.history,
-      { role: "user", content: userContent },
+      { role: "user", content: `Knowledge base excerpts:\n${context || "(no relevant excerpts found)"}\n\n---\nQuestion: ${v.message}` },
     ];
-    const r = await fetch("https://api.openai.com/v1/responses", {
+    const r = await fetch(`${OPENAI}/responses`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        input,
-        tools: [{ type: "file_search", vector_store_ids: [vsId], max_num_results: 10 }],
-      }),
+      body: JSON.stringify({ model: MODEL, input }),
     });
     if (!r.ok) return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });
     const data = await r.json();
