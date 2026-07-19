@@ -14,6 +14,18 @@
 (function () {
   'use strict';
 
+  /* Fraction of the rail's full scrollable width traversed across one viewport
+     transit of the section.
+
+     At 1.0 all fifteen cards pass in ~1.5 screenfuls of page scroll — 8 to 10
+     cards per screenful, fast enough that no individual photograph registers.
+     0.75 walks the visitor past twelve of the fifteen at a legible
+     pace; the remainder are one drag away, which costs nothing because the rail
+     is a real scrollable region.
+
+     Coverage vs legibility. Lower is calmer and shows fewer. */
+  var TRAVEL_RATIO = 0.75;
+
   function init() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -21,6 +33,10 @@
     Array.prototype.forEach.call(rails, function (rail) {
       var vp = rail.querySelector('.v2-rail__viewport');
       if (!vp) return;
+
+      /* Published on the element so tools/rail-check.js asserts against this
+         value rather than duplicating it. One source of truth. */
+      rail.setAttribute('data-travel-ratio', String(TRAVEL_RATIO));
 
       var taken = false;    /* the user has taken hold; stop driving, for good */
       var ticking = false;
@@ -55,7 +71,7 @@
         if (p < 0) p = 0;
         if (p > 1) p = 1;
 
-        vp.scrollLeft = p * max;
+        vp.scrollLeft = p * max * TRAVEL_RATIO;
       }
 
       function onScroll() {

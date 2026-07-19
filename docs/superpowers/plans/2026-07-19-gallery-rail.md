@@ -320,6 +320,28 @@ Create `tools/rail-check.js`:
     var ratio = parseFloat((rail && rail.getAttribute('data-travel-ratio')) || '1');
     var want = max * ratio;
 
+    /* scroll-snap quantizes where the rail comes to REST, so the settled
+       scrollLeft is the nearest card boundary to what the driver wrote — off by
+       up to half a card pitch, in either direction, essentially arbitrarily.
+       Asserting an exact target here is not achievable, and making the driver
+       write snap-aligned values instead would make the motion visibly stepped.
+
+       Half a pitch is the theoretical bound on that error, and measurement lands
+       right at it: -153px against a half-pitch of 156 at 768x1024, leaving 6px of
+       margin. That is not a pass worth trusting. 0.6 of a pitch buys real
+       headroom and still discriminates — at 768x1024 it accepts [2774, 3148],
+       which excludes both a rail that never moved (0) and one that ran to its
+       maximum (3948), the two failures that actually matter. */
+    var itemEls = document.querySelectorAll('.v2-rail__item');
+    var pitch = itemEls.length > 1 ? (itemEls[1].offsetLeft - itemEls[0].offsetLeft) : 0;
+    var tol = Math.max(3, pitch * 0.6 + 3);
+
+    /* Where the rail actually came to rest, for the override check below to
+       compare against. That check is about whether the rail HELD, not about
+       where it was — comparing it to `want` would make it inherit the snap
+       error and fail for an unrelated reason. */
+    var settled = null;
+
     return scrollPageTo(before)
       .then(function () {
         var atStart = vp.scrollLeft;
@@ -334,11 +356,12 @@ Create `tools/rail-check.js`:
             /* Both bounds matter. A lower bound alone would pass a rail that
                overshot to max, silently losing the tuning; an upper bound alone
                would pass a rail that never moved. */
+            settled = atEnd;
             record('page scroll drives the rail',
-              atStart <= 2 && Math.abs(atEnd - want) <= 3 && want > 0,
+              atStart <= 2 && Math.abs(atEnd - want) <= tol && want > 0,
               '[no-preference] scrollLeft ' + Math.round(atStart) + ' -> ' +
-                Math.round(atEnd) + ' (want 0 -> ' + Math.round(want) +
-                ', ratio ' + ratio + ' of ' + max + ')');
+                Math.round(atEnd) + ' (want ' + Math.round(want) + ' +/- ' +
+                Math.round(tol) + ', ratio ' + ratio + ' of ' + max + ')');
           }
         });
       })
@@ -352,10 +375,15 @@ Create `tools/rail-check.js`:
         vp.dispatchEvent(new Event('pointerdown', { bubbles: true }));
         return scrollPageTo(before).then(function () {
           var held = vp.scrollLeft;
+          /* `settled > 0` is not redundant. Comparing held to settled alone is
+             satisfied vacuously by a rail parked at 0 that never moved and never
+             could — 0 holds at 0. Requiring it to have travelled somewhere first
+             makes this a statement about yielding rather than about stillness. */
           record('user interaction takes the rail over',
-            Math.abs(held - want) <= 3,
+            settled !== null && settled > 0 && Math.abs(held - settled) <= 3,
             'after pointerdown, scrollLeft held at ' + Math.round(held) +
-              ' (want ~' + Math.round(want) + ', i.e. page scroll ignored)');
+              ' (want ~' + Math.round(settled) + ', where it already was — ' +
+              'i.e. page scroll ignored)');
         });
       })
       .then(function () { return scrollPageTo(startY); });
@@ -714,7 +742,7 @@ Create `assets/js/rail.js`:
 
      At 1.0 all fifteen cards pass in ~1.5 screenfuls of page scroll — 8 to 10
      cards per screenful, fast enough that no individual photograph registers.
-     0.75 walks the visitor past roughly eleven of the fifteen at a legible
+     0.75 walks the visitor past twelve of the fifteen at a legible
      pace; the remainder are one drag away, which costs nothing because the rail
      is a real scrollable region.
 
