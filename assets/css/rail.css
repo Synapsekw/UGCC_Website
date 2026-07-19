@@ -11,14 +11,14 @@
 
 .v2-rail-block {
   background: var(--v2-navy);
-  padding: 40px 0 44px;
+  padding: 52px 0 57px;
   overflow: hidden;               /* full-bleed track must not scroll the page */
 }
 
 /* The eyebrow spans the full row so the title sits on the line beneath it. */
 .v2-rail__head {
   max-width: 1224px;
-  margin: 0 auto 24px;
+  margin: 0 auto 30px;
   padding: 0 24px;
   display: flex;
   flex-wrap: wrap;
@@ -41,7 +41,7 @@
   margin: 6px 0 0;
   flex: 1;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
-  font-size: 32px;
+  font-size: 38px;
   line-height: 1.2;
   font-weight: 400;
   color: #fff;
@@ -87,12 +87,12 @@
    its own trailing margin instead. That is what makes translateX(-50%) land on
    exactly one repeat period.
 
-   With `gap` and `padding: 0 24px` the track's border box was 10956px while the
-   true period was 15 x (352 + 12) = 5460px — 29 gaps between 30 items, plus 48px
-   of end padding. Half of 10956 is 5478, so the loop jumped 18px every cycle.
-   With a trailing margin each item occupies exactly card + gap, 30 of them span
-   exactly two periods, and -50% is exact at every breakpoint with no per-
-   breakpoint constant to keep in sync.
+   The bug this avoids: with `gap` plus `padding: 0 24px`, the track's border box
+   was 10956px while the true period was 15 x (card + gap) = 5460px — 29 gaps
+   between 30 items, plus 48px of end padding. Half of 10956 is 5478, so the loop
+   jumped 18px every cycle. With a trailing margin each item occupies exactly
+   card + gap, 30 of them span exactly two periods, and -50% stays exact at every
+   breakpoint and at any card size, with no constant to keep in sync.
 
    The lead-in inset lives on the viewport (padding-left) where it shifts the
    content without contributing to the track's width. */
@@ -106,15 +106,15 @@
 
 .v2-rail__item {
   flex: none;
-  width: 352px;
-  margin-right: 12px;
+  width: 458px;
+  margin-right: 16px;
 }
 
 .v2-rail__card {
   position: relative;
   display: block;
-  height: 232px;
-  border-radius: 4px;
+  height: 302px;
+  border-radius: 5px;
   overflow: hidden;
   background: #0b2233;
   text-decoration: none;
@@ -201,11 +201,16 @@
    motion available and smoothness is the whole point of the autoplay.
 
    The track holds two identical sets of 15, so translating by exactly -50%
-   advances by one full set and the loop has no visible seam. */
+   advances by one full set and the loop has no visible seam.
+
+   Duration is the speed knob and is per-track, not per-breakpoint, so the drift
+   rate varies a little with card size: at 90s a desktop period of 7110px gives
+   ~79px/s, tablet ~68px/s, mobile ~53px/s. A card crosses its own width in
+   roughly 6 seconds throughout. */
 
 @media (prefers-reduced-motion: no-preference) {
   .v2-rail__track {
-    animation: v2-rail-drift 70s linear infinite;
+    animation: v2-rail-drift 90s linear infinite;
     will-change: transform;
   }
 
@@ -243,16 +248,20 @@
 /* ---------- responsive ---------- */
 
 @media (max-width: 1024px) {
-  .v2-rail__item { width: 300px; }
-  .v2-rail__card { height: 198px; }
-  .v2-rail__title { font-size: 26px; }
+  .v2-rail__item { width: 390px; }
+  .v2-rail__card { height: 258px; }
+  .v2-rail__title { font-size: 31px; }
 }
 
 @media (max-width: 600px) {
-  .v2-rail-block { padding: 30px 0 34px; }
-  .v2-rail__item { width: 260px; }
-  .v2-rail__card { height: 172px; }
-  .v2-rail__title { font-size: 22px; }
+  .v2-rail-block { padding: 39px 0 44px; }
+  /* Mobile grows by 15%, not 30%. At 30% the card would be 338px against a
+     375px viewport — 90% of the width, leaving no visible sliver of the next
+     card, which is the only cue that the rail continues. At 300px the next card
+     shows 43px of itself past the 16px gap. Measured, not estimated. */
+  .v2-rail__item { width: 300px; }
+  .v2-rail__card { height: 198px; }
+  .v2-rail__title { font-size: 25px; }
   .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
   .v2-rail__viewport { padding-left: 16px; scroll-padding-left: 16px; }
 }

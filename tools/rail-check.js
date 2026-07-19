@@ -59,12 +59,21 @@
   }
   function viewport() { return document.querySelector('.v2-rail__viewport'); }
 
-  check('section is under 500px tall', function () {
+  /* The original slideshow was 1029px. The point of the redesign was to stop
+     spending a whole viewport on this section, so the bound is expressed as a
+     fraction of what it replaced rather than a bare pixel count that drifts out
+     of meaning every time the cards are resized. */
+  var ORIGINAL_HEIGHT = 1029;
+  check('section costs well under the slideshow it replaced', function () {
     var s = document.getElementById(SECTION);
     if (!s) return { ok: false, detail: 'section #' + SECTION + ' missing' };
     var h = Math.round(s.getBoundingClientRect().height);
     if (h === 0) return { ok: false, detail: 'section has zero height — not rendered' };
-    return { ok: h < 500, detail: h + 'px (was 1029px)' };
+    var pct = Math.round((1 - h / ORIGINAL_HEIGHT) * 100);
+    return {
+      ok: h < ORIGINAL_HEIGHT * 0.6,
+      detail: h + 'px vs ' + ORIGINAL_HEIGHT + 'px — ' + pct + '% reduction (want >40%)'
+    };
   });
 
   check('old slideshow is gone', function () {

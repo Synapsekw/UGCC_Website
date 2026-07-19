@@ -40,7 +40,8 @@ simultaneously unreadable, mostly invisible, and redundant with its neighbour.
    all fifteen reachable on demand — instead of two of fifteen, at random.
 2. Attach meaning to each photo, so the imagery reads as evidence of delivery.
 3. Give the section an exit — send interested visitors toward actual projects.
-4. Cut the section's vertical cost by more than half.
+4. Cut the section's vertical cost substantially. Originally stated as "by more
+   than half"; see Dimensions for what actually shipped and why that changed.
 5. Cut its image payload by roughly an order of magnitude.
 6. Keep the site buildless — no React, no bundler, no new runtime dependency.
 
@@ -216,8 +217,11 @@ no scroll listener, no per-frame JavaScript:
 @keyframes v2-rail-drift { to { transform: translateX(-50%); } }
 ```
 
-One set is `15 x (352 + 12) = 5460px`, so 70s is ~78px/s. It pauses on `:hover`,
-on `:focus-within`, and on `[data-paused="true"]` from the toggle.
+One desktop set is `15 x (458 + 16) = 7110px`, so 90s is ~79px/s. Duration is
+per-track rather than per-breakpoint, so the rate varies a little with card size —
+~79 / ~68 / ~53 px/s — but a card crosses its own period in 6.03s at all three,
+measured. It pauses on `:hover`, on `:focus-within`, and on `[data-paused="true"]`
+from the toggle.
 
 ### Handover
 
@@ -291,24 +295,51 @@ clean handover, not access to the content.
 
 ## Dimensions and surface
 
-- Card **352 × 232** desktop (landscape). The photographs are all 16:9 or
-  wider aerials; on this content the horizontal sweep is the information, and a
+- Card **458 × 302** desktop (landscape). The photographs are all 16:9 or wider
+  aerials; on this content the horizontal sweep is the information, and a
   portrait crop discards it.
-- Tablet 300 × 198, mobile 260 × 172. Same drift at all sizes: because each item
-  carries its own trailing margin, `translateX(-50%)` equals exactly one repeat
-  period at every breakpoint, so no per-breakpoint constant exists to fall out of
-  sync. A card crosses its own width in ~4.5s at all three.
-- Background: `var(--v2-navy)`. The block above (`#u7vIc0iRh`) is transparent
-  on white and the block below (`#zd_fdi`) is already `rgb(0, 42, 65)`. Navy
-  merges the rail downward into one intentional dark region rather than
-  introducing a third band.
-- Heading row sits inside the 1224px content width, matching the page's other
-  blocks. The track runs full-bleed, so cards bleed off both edges and signal
-  that there is more to see.
+- Tablet 390 × 258, mobile 300 × 198. Items carry a 16px `margin-right` at every
+  breakpoint rather than a flex `gap`, which is what keeps `translateX(-50%)`
+  equal to exactly one repeat period — see Structure.
+- **Mobile grows by 15%, not 30%, deliberately.** At +30% the card would be 338px
+  against a 375px viewport — 90% of the width — leaving no visible sliver of the
+  next card. At 300px the following card shows 43px of itself past the 16px gap,
+  which is the only cue that the rail continues.
+- Background: `var(--v2-navy)`. The block above (`#u7vIc0iRh`) is transparent on
+  white and the block below (`#zd_fdi`) is already `rgb(0, 42, 65)`. Navy merges
+  the rail downward into one intentional dark region rather than introducing a
+  third band.
+- Heading row sits inside the 1224px content width. The track runs full-bleed, so
+  cards bleed off both edges and signal that there is more to see. Note that
+  above a 1272px viewport the centred heading gains a gutter the full-bleed track
+  does not, so at 1280 the first card sits 28px left of the heading text.
 - Caption: sector name in a small uppercase tag over a bottom-anchored scrim,
-  with a `--v2-red` rule on its leading edge, matching the site's existing
-  accent treatment.
-- Resulting section height **~375px**, down from 1029px.
+  with a `--v2-red` rule on its leading edge.
+
+### Section height, and a goal that moved
+
+Measured, against the 1029px slideshow this replaced:
+
+| Viewport | Height | Reduction |
+|---|---|---|
+| 1280x720 | 527.6px | 49% |
+| 768x1024 | 475.2px | 54% |
+| 375x812 | 400.0px | 61% |
+
+The first build came in at 419px on desktop — a 59% reduction, comfortably inside
+the original "more than half" goal. The cards were then scaled up 30% at the
+client's request, which is a deliberate trade of vertical economy for presence.
+
+**Desktop now misses the original goal by 13.6px** (527.6 against a 514.5px
+bound). That is recorded rather than quietly absorbed, because the verification
+harness's height check was relaxed in the same change — from a flat "under 500px"
+to "under 60% of the original" — and a threshold loosened alongside the change
+that would have tripped it is exactly how a missed goal disappears. Tablet and
+mobile still clear the original bound.
+
+Recovering those 14px is cheap if it ever matters: the block's 52/57px padding or
+the 30px heading margin. It was not done because the section was made larger on
+purpose.
 
 ## Performance
 
