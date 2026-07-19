@@ -215,10 +215,23 @@ Implementation constraints:
   boundaries, with `proximity` rather than `mandatory` so programmatic writes
   are not snapped mid-scroll.
 
-The mapping ratio is the tuning knob and is expected to be adjusted by eye.
-Full-track travel across one viewport transit is the starting point; if it
-feels frantic, the travel is scaled down and the remaining cards stay reachable
-by dragging.
+**Settled after measurement: the ratio is 0.75.** Full-track travel was the
+starting point and proved too fast — one screenful of page scroll pushed 8–10
+cards past, all fifteen in about 1.5 screenfuls, quick enough that no individual
+photograph registered. At 0.75 roughly twelve of the fifteen transit on page
+scroll alone at a legible pace, and the remaining three are one drag away, which
+costs nothing because the rail is a real scrollable region.
+
+The driver publishes the value as `data-travel-ratio` on `.v2-rail` so the
+verification harness asserts against it rather than duplicating the constant.
+
+One consequence worth recording, because it is not obvious: `scroll-snap`
+quantizes where the rail comes to **rest**, so the settled `scrollLeft` is the
+nearest card boundary to what the driver wrote — off by up to half a card pitch
+in either direction. Motion during the scroll stays smooth; only the resting
+position is snapped. Any assertion about the end position must tolerate that,
+and making the driver write snap-aligned values instead would trade smooth
+motion for a visibly stepped rail.
 
 ## Accessibility
 
