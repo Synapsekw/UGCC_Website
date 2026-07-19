@@ -1,4 +1,4 @@
-# Homepage gallery → captioned scroll-linked rail — design
+# Homepage gallery → captioned drifting rail — design
 
 Branch: `hero-recompose`
 Scope: the homepage slideshow section (`#zOl98u` in `index.html`), the block
@@ -36,8 +36,8 @@ simultaneously unreadable, mostly invisible, and redundant with its neighbour.
 
 ## Goals
 
-1. Put every photo in front of a visitor who scrolls the page normally, and
-   keep all fifteen reachable on demand — instead of two of fifteen, at random.
+1. Put every photo in front of a visitor who simply stays on the page, and keep
+   all fifteen reachable on demand — instead of two of fifteen, at random.
 2. Attach meaning to each photo, so the imagery reads as evidence of delivery.
 3. Give the section an exit — send interested visitors toward actual projects.
 4. Cut the section's vertical cost by more than half.
@@ -53,8 +53,9 @@ simultaneously unreadable, mostly invisible, and redundant with its neighbour.
 
 ## Approach
 
-A full-bleed horizontal rail of captioned, clickable cards that advances as the
-visitor scrolls the page past it, and can also be dragged or swiped at any time.
+A full-bleed horizontal rail of captioned, clickable cards that drifts
+continuously at a slow constant speed, pauses on hover, and hands over to
+ordinary scrolling the moment the visitor touches it.
 
 Chosen over three alternatives considered:
 
@@ -66,34 +67,45 @@ Chosen over three alternatives considered:
 - **Deletion** — reclaims the most scroll, discards the client's own asset
   library.
 
-### Why scroll-linked and not constant drift
+### Motion: drift, then scroll-linked, then drift again
 
-Constant autonomous drift was chosen first, on the reasoning that it is the only
-variant guaranteeing a passive visitor sees several photos, and nothing else on
-the page moved on its own.
+This decision was made three times. The reasoning is recorded because the
+reversals were driven by evidence, not by taste drifting about.
 
-**That second premise stopped being true.** Concurrent work on this branch
-(`44db460`, `9d4dd43`) replaces the hero's service columns with a rolling
-client-logo rail — an autonomously animating marquee, above the fold, roughly
-one screen above this section. Two self-animating horizontal marquees within a
-screen of each other read as a page that will not sit still, and the hero rail
-has the stronger claim on that behaviour: it is above the fold, its logos are
-interchangeable, and it has nothing to gain from user pacing.
+**Round 1 — constant drift.** Chosen because it is the only variant that
+guarantees a passive visitor sees several photographs, and because nothing else
+on the page moved on its own.
 
-So this rail takes the motion the hero rail is not using. Scroll-linked motion
-also removes two pieces of machinery that constant drift required:
+**Round 2 — scroll-linked.** That second premise stopped being true. Concurrent
+work on this branch (`44db460`, `9d4dd43`) replaced the hero's service columns
+with a rolling client-logo marquee, above the fold, roughly one screen above
+this section. Two self-animating horizontal marquees that close together read as
+a page that will not sit still, and the hero rail had the stronger claim on the
+behaviour. So this rail took the motion the hero was not using.
 
-- **No duplicated track.** A seamless infinite loop needed the 15 items emitted
-  twice with the second set hidden from assistive technology. Scroll-linked
-  motion has a start and an end, so 15 items is 15 items.
-- **No pause control.** WCAG 2.2.2 governs content that moves *automatically*.
-  Motion the user causes by scrolling is not automatic, so the toggle — and its
-  JavaScript, its icon states and its focus handling — all disappear.
+**Round 3 — back to constant drift, and this is what shipped.** Seen on the real
+page, scroll-linked motion looked juddery. The reason is structural rather than
+a tuning failure: scroll-linked motion is only ever as smooth as the visitor's
+scroll wheel, so it inherits every notch, flick and trackpad stutter. A rail
+whose purpose is to make photography feel considered cannot be animated by an
+input device.
 
-The cost is honest and worth stating: a visitor who scrolls past very fast sees
-fewer photos than a constant drift would have shown them. That is mitigated by
-the rail remaining a genuinely scrollable region, so anyone who wants the rest
-can drag, swipe or trackpad-scroll it without waiting for a timer.
+The two-marquee concern that motivated round 2 was re-examined directly rather
+than assumed. It does not hold up: the hero marquee is 44px tall, logos at ~62%
+opacity on a 48s loop — ambient texture — while this rail is 335px of full-colour
+photography. They never share a viewport, sitting roughly a thousand pixels
+apart. One is wallpaper, the other is content, and they read as two applications
+of one page-wide band language rather than two competing widgets.
+
+What round 3 costs, honestly: the duplicated track and the pause control both
+come back. A seamless loop needs the 15 items emitted twice, and WCAG 2.2.2
+applies again the moment motion becomes automatic — hover-pausing is no use to a
+touch user. Both were in the round-1 design and both return unchanged.
+
+What it keeps from round 2: the rail is still a genuine `overflow-x: auto`
+region, so dragging, swiping, trackpad and keyboard all still work, and the
+reduced-motion path is still a plain scrollable list rather than a frozen one.
+Handover is what joins the two halves — see Motion below.
 
 ## Structure
 
@@ -106,8 +118,11 @@ contents are replaced entirely.
     <div class="v2-rail__head">
       <p class="v2-rail__eyebrow">Delivered</p>
       <h3 class="v2-rail__title">Built across Kuwait and the Gulf</h3>
+      <button class="v2-rail__toggle" type="button"
+              aria-pressed="false" aria-label="Pause the moving gallery">…</button>
     </div>
-    <div class="v2-rail__viewport">
+    <div class="v2-rail__viewport" tabindex="0" role="group"
+         aria-label="Gallery of completed UGCC projects, scrollable">
       <ul class="v2-rail__track">
         <li class="v2-rail__item">
           <a class="v2-rail__card" href="/roads-and-bridges-completed">
@@ -120,15 +135,27 @@ contents are replaced entirely.
             <span class="v2-rail__tag">Roads &amp; Bridges</span>
           </a>
         </li>
-        <!-- 15 items, once -->
+        <!-- the 15 items, then the same 15 again -->
       </ul>
     </div>
   </div>
 </section>
 ```
 
-Fifteen items, emitted once. No duplicate set and no `aria-hidden` bookkeeping:
-the rail has a beginning and an end rather than looping.
+The 15 items are emitted **twice**. The animation translates the track by exactly
+`-50%`, so the second set arrives where the first began and the loop has no seam.
+The duplicate set carries `aria-hidden="true"` on each `<li>` and `tabindex="-1"`
+on each `<a>`, so assistive technology and keyboard tabbing encounter each
+project once.
+
+**The `-50%` is only exact if the track's width is exactly two repeat periods.**
+That is why the track carries no horizontal padding and no flex `gap`, and each
+item owns a `margin-right` instead. With `gap` plus `padding: 0 24px` the track
+measured 10956px against a true period of 5460px — 29 gaps between 30 items plus
+48px of end padding — and the loop jumped 18px every cycle. With a trailing
+margin the identity holds at every breakpoint with no constant to keep in sync.
+The 24px lead-in lives on the viewport's `padding-left`, which does not
+contribute to the track's width.
 
 `class="slideshow"` was verified to appear on `index.html` only. Removing it
 from this page leaves the builder slideshow CSS in `main.css`/`custom.css` and
@@ -181,88 +208,96 @@ delivered work.
 
 ## Motion
 
-The rail is a **natively scrollable region** whose `scrollLeft` is driven by the
-page's vertical scroll position. Driving `scrollLeft` rather than a `transform`
-is the load-bearing decision: it means page-driven motion and user-driven
-dragging are the same mechanism acting on the same value, so they compose
-instead of fighting. A transform-based rail would have to choose one or the
-other.
+The drift is a **pure CSS keyframe on the compositor** — no `requestAnimationFrame`,
+no scroll listener, no per-frame JavaScript:
 
-`.v2-rail__viewport` is `overflow-x: auto` at all times. On scroll:
-
-```
-p         = (windowHeight - sectionTop) / (windowHeight + sectionHeight)   clamped 0..1
-scrollLeft = p * (track.scrollWidth - viewport.clientWidth)
+```css
+.v2-rail__track { animation: v2-rail-drift 70s linear infinite; }
+@keyframes v2-rail-drift { to { transform: translateX(-50%); } }
 ```
 
-So the rail sits at its first card as the section enters the viewport from
-below, and reaches its last card as the section leaves at the top. A visitor
-who scrolls the section through at a normal reading pace passes the whole
-fifteen.
+One set is `15 x (352 + 12) = 5460px`, so 70s is ~78px/s. It pauses on `:hover`,
+on `:focus-within`, and on `[data-paused="true"]` from the toggle.
 
-Implementation constraints:
+### Handover
 
-- The scroll handler is `passive: true` and does nothing but read a rect and
-  write `scrollLeft`. The write is coalesced into a `requestAnimationFrame` so
-  a fast scroll cannot queue more work than one frame can absorb.
-- **User override.** Any user-initiated horizontal interaction on the viewport
-  (`pointerdown`, `wheel` with horizontal delta, `touchstart`, or focusing a
-  card) sets a flag that stops page-scroll driving for that visit. Once a
-  visitor takes hold of the rail, the page must not yank it back.
-- No `scroll-behavior: smooth` on the viewport — it would fight per-frame
-  writes. The site-wide smooth scrolling in `v2.css` applies to `html` only.
-- `scroll-snap-type: x proximity` so manual dragging settles on card
-  boundaries, with `proximity` rather than `mandatory` so programmatic writes
-  are not snapped mid-scroll.
+`.v2-rail__viewport` is `overflow-x: auto` at all times, so the rail is a real
+scrollable region even while drifting. On the visitor's first `pointerdown`,
+`touchstart`, `focusin` or horizontal `wheel`, `rail.js` converts one positioning
+mechanism into the other:
 
-**Settled after measurement: the ratio is 0.75.** Full-track travel was the
-starting point and proved too fast — one screenful of page scroll pushed 8–10
-cards past, all fifteen in about 1.5 screenfuls, quick enough that no individual
-photograph registered. At 0.75 roughly twelve of the fifteen transit on page
-scroll alone at a legible pace, and the remaining three are one drag away, which
-costs nothing because the rail is a real scrollable region.
+```
+dx = current translateX of the track      (read from the live computed matrix)
+set data-manual="true"                    -> stylesheet drops the animation
+clear the inline transform
+scrollLeft = -dx                          -> same pixel position, natively scrolled
+```
 
-The driver publishes the value as `data-travel-ratio` on `.v2-rail` so the
-verification harness asserts against it rather than duplicating the constant.
+The transform positions the track during drift; `scrollLeft` positions it
+afterwards, and the two cannot both be in charge. Reading the live matrix rather
+than the keyframe endpoint is what makes the swap invisible.
 
-One consequence worth recording, because it is not obvious: `scroll-snap`
-quantizes where the rail comes to **rest**, so the settled `scrollLeft` is the
-nearest card boundary to what the driver wrote — off by up to half a card pitch
-in either direction. Motion during the scroll stays smooth; only the resting
-position is snapped. Any assertion about the end position must tolerate that,
-and making the driver write snap-aligned values instead would trade smooth
-motion for a visibly stepped rail.
+**This conversion must be lossless, and getting it wrong is the worst failure
+this design has.** An early version set `data-manual` before writing
+`scrollLeft`, which activated `scroll-snap` in the same tick and let the browser
+quantize the write to a card boundary — the rail jumped up to 173px, and all the
+way back to the first card whenever the drift was under half a card in. That is
+strictly worse than the judder the drift exists to remove.
+
+The fix is that **`scroll-snap` applies only under reduced motion**, never after
+handover. Snapping was a nicety; losing the visitor's place is not. Measured
+worst case across 24 trials spanning the drift cycle at three viewports: 0.50px,
+which is integer `scrollLeft` rounding a fractional transform and cannot be
+driven lower without sub-pixel scroll positioning.
+
+Handover is one-way for the life of the page. Once the visitor has taken hold,
+the rail never starts drifting again.
 
 ## Accessibility
 
-**WCAG 2.2.2 (Pause, Stop, Hide) does not apply.** It governs content that moves
-automatically. Here nothing moves unless the visitor scrolls, and stopping the
-motion is exactly as easy as stopping scrolling. This is the single largest
-simplification scroll-linking buys: no pause toggle, no `aria-pressed` state, no
-icon swap, no focus-handling around an animation that might restart.
+The rail moves automatically for longer than five seconds, so **WCAG 2.2.2
+(Pause, Stop, Hide) applies** and requires a pause mechanism available to every
+user. Hover and focus pausing do not satisfy it on their own — they are useless
+to a touch user who is not trying to tap a card.
 
-- Under `prefers-reduced-motion: reduce`, the scroll driver does not attach at
-  all. The rail is already `overflow-x: auto`, so it degrades to an ordinary
-  horizontally scrollable region with all 15 cards reachable by drag, swipe,
-  trackpad and keyboard. Nothing is lost but the automatic advance.
+So the design includes a **visible pause/resume toggle** in the heading row. It
+is not decoration and it is not optional; it is the reason automatic motion is
+defensible here.
+
+- The toggle sets `aria-pressed` and flips a `data-paused` attribute the
+  stylesheet keys off. It is one of only two things `rail.js` does.
+- It hides itself once the visitor has handed over, and under reduced motion.
+  In both states nothing is drifting, so a pause control would be a button that
+  does nothing — hidden outright rather than disabled, so it is not reachable.
+- Under `prefers-reduced-motion: reduce` the animation never starts and
+  `rail.js` returns before attaching anything. The rail is already
+  `overflow-x: auto`, so it degrades to an ordinary horizontally scrollable
+  region with all 15 cards reachable by drag, swipe, trackpad and keyboard.
+  `scroll-snap` is active here, and only here.
 - Every `<img>` gets a descriptive `alt` naming the structure and its setting.
-  Empty `alt` is wrong here: the photographs carry the section's meaning.
+  Empty `alt` is wrong: the photographs carry the section's meaning.
 - The `<a>` cards are keyboard reachable in source order, and `:focus-visible`
-  inherits the existing site-wide red outline from `v2.css`.
-- Focusing a card sets the user-override flag, so tabbing through the rail
-  cannot be fought by a concurrent page scroll.
+  inherits the site-wide red outline from `v2.css`. Focusing a card triggers
+  handover, so a keyboard user is never chasing a moving target.
 - The viewport carries `tabindex="0"` and an `aria-label`, so a keyboard user
-  can scroll the region with arrow keys without tabbing through all 15 links —
-  the standard affordance for a scrollable region.
+  can scroll the region with arrow keys without tabbing through all 15 links.
+- The duplicate set is `aria-hidden` with `tabindex="-1"`, so the page announces
+  fifteen projects rather than thirty.
+
+**The rail is fully usable with `rail.js` deleted.** It still drifts, still
+pauses on hover, and is still scrollable — verified by blocking the script at the
+network layer. What is lost without it is the touch-accessible pause and the
+clean handover, not access to the content.
 
 ## Dimensions and surface
 
 - Card **352 × 232** desktop (landscape). The photographs are all 16:9 or
   wider aerials; on this content the horizontal sweep is the information, and a
   portrait crop discards it.
-- Tablet 300 × 198, mobile 260 × 172. Same scroll-linking at all sizes; the
-  travel distance recomputes from the measured track width, so no per-breakpoint
-  constants are needed.
+- Tablet 300 × 198, mobile 260 × 172. Same drift at all sizes: because each item
+  carries its own trailing margin, `translateX(-50%)` equals exactly one repeat
+  period at every breakpoint, so no per-breakpoint constant exists to fall out of
+  sync. A card crosses its own width in ~4.5s at all three.
 - Background: `var(--v2-navy)`. The block above (`#u7vIc0iRh`) is transparent
   on white and the block below (`#zd_fdi`) is already `rgb(0, 42, 65)`. Navy
   merges the rail downward into one intentional dark region rather than
@@ -301,31 +336,43 @@ rail's own scroll container. Lazy loading therefore saves about 47% at rest, not
 
 ## Verification
 
-Extend the dependency-free console-harness pattern of `tools/hero-check.js`
-with `tools/rail-check.js`:
+`tools/rail-check.js` follows the dependency-free console-harness pattern of
+`tools/hero-check.js`. 14 checks, all passing at 1280x720, 768x1024, 375x812 and
+under emulated `prefers-reduced-motion: reduce`.
 
-1. `#zOl98u` height is under 500px at 1280x720.
-2. No element matching `.slide` or `.slideshow` remains in the document.
-3. The track contains exactly 15 `<li>`, and no element in the rail carries
-   `aria-hidden` — the duplicated-track machinery must be genuinely gone, not
-   merely unused.
-4. The 15 cards produce exactly 5 distinct `href` values, and each resolves to
-   a directory that exists (checked by `fetch` returning ok).
-5. `document.body.scrollWidth <= window.innerWidth` at 375, 768 and 1280 — the
-   full-bleed track must not create horizontal page overflow.
-6. Every `<img>` in the rail has a non-empty `alt`, and `width`/`height` set.
-7. The viewport is horizontally scrollable: `scrollWidth > clientWidth` and
-   computed `overflow-x` is `auto`. This must hold in **both** media states —
-   it is the reduced-motion fallback and the manual affordance at once.
-8. Scrolling the page from before the section to past it changes the viewport's
-   `scrollLeft` from 0 to its maximum, under `no-preference`; and leaves it at
-   0 under `reduce`. Asserted by scripted scrolling, not by eye.
-9. After a synthetic `pointerdown` on the viewport, a further page scroll does
-   **not** change `scrollLeft` — the user-override flag holds.
+Structure and content: section under 500px; no legacy `.slideshow` nodes; exactly
+30 items of which 15 are `aria-hidden` duplicates carrying `tabindex="-1"`; every
+card has non-empty `alt`, explicit `width`/`height` and `loading="lazy"`; no
+horizontal page overflow; exactly 5 distinct hrefs, each resolving.
 
-Checks 1–9 are automatable in the harness. Manual verification still required:
-whether the scroll-to-travel ratio feels right, caption legibility over each
-individual photograph, and touch drag behaviour on a real device.
+Behaviour, which is where the care went:
+
+- **The rail actually drifts.** Samples the track's live transform twice over
+  400ms and requires leftward movement. "An animation is declared" and "the thing
+  is moving" are different claims — the first passes on a track whose animation is
+  paused, zero-duration, or overridden later in the cascade.
+- **The pause toggle actually stops it.** Waits two animation frames before
+  sampling, because reading synchronously after the click catches ~1.3px of
+  already-committed drift and measures our own timing rather than the product.
+- **Handover is lossless**, measured as a card's real `getBoundingClientRect()`
+  before and after. An earlier version compared `scrollLeft` to `-translateX`,
+  which only proves two numbers we chose agree — it passed or failed depending on
+  where the drift happened to be. The rect is what the visitor actually sees.
+
+Three negative controls establish the harness has teeth, and are worth re-running
+after any change here:
+
+1. Block `rail.js` — handover must fail; drift and hover-pause must still pass.
+2. Force `animation: none` — "the rail actually drifts" must fail.
+3. Re-inject the `scroll-snap` rule on the manual state — handover must fail.
+   This one is the important one: it reproduces the original snap-back bug, and
+   it failed 6 times out of 6. Without it there is no evidence the handover check
+   protects anything.
+
+Still requiring a human: whether the drift speed feels right, caption legibility
+over each individual photograph, and touch drag and handover on real hardware.
+Playwright cannot emulate finger-panning of an `overflow: auto` container, so
+that last one is genuinely unverified.
 
 ## Deferred
 
