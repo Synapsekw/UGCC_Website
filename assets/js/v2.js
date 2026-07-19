@@ -26,6 +26,15 @@
     });
   }
 
+  /* ---------- accordions (CSR page etc.) ---------- */
+  document.querySelectorAll('.v2-acc__btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var acc = btn.closest('.v2-acc');
+      var open = acc.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+
   /* ---------- staggered reveals ----------
      The builder's reveal CSS reads --user-animation-delay for its
      transition-delay. Give siblings inside the same container an
