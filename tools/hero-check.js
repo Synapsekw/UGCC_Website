@@ -23,6 +23,29 @@
     results.push({ name: name, ok: ok, detail: detail });
   }
 
+  /* Vertical midpoint of an element in viewport coordinates, with any
+     transform removed - i.e. where the element sits in LAYOUT.
+
+     getBoundingClientRect() includes transforms. Several hero elements
+     carry entry animations declared with animation-fill-mode: both, which
+     pins them at their from-state (translateY(18px) for hero-fade-up)
+     through the animation delay. A positional assertion that measures the
+     raw rect therefore reads the animation as displacement and is true or
+     false depending on when it happens to run. That is not a hypothetical:
+     the rail alignment check below passed while the rail was genuinely
+     18px out of place, because a script had shifted `bottom` by exactly
+     the amount the transform was cancelling. */
+  function layoutMid(el) {
+    var r = el.getBoundingClientRect();
+    var m = getComputedStyle(el).transform;
+    var ty = 0;
+    if (m && m !== 'none') {
+      var p = m.replace(/^matrix3d\(/, '').replace(/^matrix\(/, '').replace(/\)$/, '').split(',');
+      ty = parseFloat(p.length === 16 ? p[13] : p[5]) || 0;
+    }
+    return r.top - ty + r.height / 2;
+  }
+
   /* Title divs + description boxes for all three service columns. The
      description boxes are intentionally display:none at mobile widths;
      at 1280x720 (the viewport this script requires) all six must render. */
@@ -122,8 +145,8 @@
     var widget = document.getElementById('glass-ai-widget-host');
     if (!rail) return { ok: false, detail: 'no rail' };
     if (!widget) return { ok: true, detail: 'chat widget not present on this load - nothing to align to' };
-    var rr = rail.getBoundingClientRect(), wr = widget.getBoundingClientRect();
-    var railMid = rr.top + rr.height / 2, widgetMid = wr.top + wr.height / 2;
+    var wr = widget.getBoundingClientRect();
+    var railMid = layoutMid(rail), widgetMid = wr.top + wr.height / 2;
     var off = railMid - widgetMid;
     /* 16px: the client asked for the rail to sit "in line with the chat
        icon". Tight enough to read as deliberately aligned, loose enough to
@@ -398,6 +421,43 @@
     var ok2 = hasClass && words.length > 0 && animatedWords > 0;
     return { ok: ok2, detail: '[' + branch + '] hero-motion class present=' + hasClass +
                '; animated .hero-word=' + animatedWords + '/' + words.length };
+  });
+
+  /* The logo rail is aligned on the chat widget by CSS alone: bottom:34px
+     plus half of its 44px height puts its midpoint 56px above the viewport
+     bottom, which is where the widget's midpoint sits.
+
+     This asserts the alignment WITHOUT the entry transform, because
+     getBoundingClientRect() includes transforms and .hero-clients carries
+     hero-fade-up — whose animation-fill-mode: both pins it at
+     translateY(18px) through the entry delay. A script that measures the
+     raw rect during that window reads the animation as an 18px layout
+     error; correcting it lands the rail 18px high until the transform
+     reaches 0, at which point the correction is undone and the rail visibly
+     drops. That regression shipped once. The inline-style half of this
+     check is what catches it: if anything is writing `bottom` onto the
+     element at runtime, the alignment is being driven by measurement rather
+     than by CSS, and it is only ever one mistimed pass from jumping. */
+  check('logo rail aligned by CSS, not corrected at runtime', function () {
+    var rail = document.querySelector('#aCqA2TkE7 .hero-clients');
+    var widget = document.getElementById('glass-ai-widget-host');
+    if (!rail) return { ok: false, detail: '.hero-clients not found' };
+    if (!widget) return { ok: false, detail: 'chat widget absent — cannot verify alignment' };
+
+    var inline = rail.style.bottom;
+    if (inline) {
+      return { ok: false, detail: 'inline bottom=' + inline + ' — rail is being positioned by script' };
+    }
+
+    var railMid = layoutMid(rail);
+    var wr = widget.getBoundingClientRect();
+    var widgetMid = wr.top + wr.height / 2;
+    var off = Math.abs(railMid - widgetMid);
+    return {
+      ok: off <= 1,
+      detail: 'rail mid=' + railMid.toFixed(1) + '; widget mid=' + widgetMid.toFixed(1) +
+              '; off by ' + off.toFixed(1) + 'px'
+    };
   });
 
   var passed = results.filter(function (r) { return r.ok; }).length;

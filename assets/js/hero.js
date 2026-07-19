@@ -47,6 +47,16 @@
      puts the two midpoints on one line is
        (viewportHeight - widgetMidpoint) - railHeight / 2.
      Falls back to the CSS value when the widget is absent. */
+  /* Vertical translation currently applied to an element, in px, so a
+     measurement can be reduced to layout position. Handles both matrix()
+     (2D, ty at index 5) and matrix3d() (ty at index 13). */
+  function translateY(el) {
+    var m = getComputedStyle(el).transform;
+    if (!m || m === 'none') return 0;
+    var p = m.replace(/^matrix3d\(/, '').replace(/^matrix\(/, '').replace(/\)$/, '').split(',');
+    return parseFloat(p.length === 16 ? p[13] : p[5]) || 0;
+  }
+
   function syncRailToWidget() {
     var rail = hero.querySelector('.hero-clients');
     var widget = document.getElementById('glass-ai-widget-host');
@@ -56,14 +66,25 @@
     if (!wr.height || !rr.height) return;
 
     /* Measure the error and correct it, rather than computing an offset
-       from the viewport. The rail's containing block is the builder's
-       .block-layout, whose padding box does NOT coincide with the section
-       box - an analytically derived `bottom` lands ~18px out. Nudging by
-       the observed delta is correct whatever the containing block turns
-       out to be, and converges in one pass because the relationship is
-       linear. Increasing `bottom` moves the rail up. */
+       from the viewport. Nudging by the observed delta is correct whatever
+       the containing block turns out to be, and converges in one pass
+       because the relationship is linear. Increasing `bottom` moves the
+       rail up.
+
+       The rail's transform MUST come out of the measurement first.
+       getBoundingClientRect() includes transforms, and .hero-clients
+       carries hero-fade-up - whose animation-fill-mode: both pins it at
+       translateY(18px) through the entry delay. A pass that lands in that
+       window reads the animation as an 18px layout error and writes it
+       into `bottom`; once the animation ends and the transform returns to
+       0, the next pass measures -18 and undoes it. That round trip was
+       visible on load as the rail sitting high and then dropping into
+       place - and it is also where the "the containing block is ~18px out"
+       theory came from. There is no 18px containing-block error. The CSS
+       bottom:34px is exact: it puts the rail's midpoint 56px above the
+       viewport bottom, which is where the widget's midpoint sits. */
     var widgetMid = wr.top + wr.height / 2;
-    var railMid = rr.top + rr.height / 2;
+    var railMid = rr.top - translateY(rail) + rr.height / 2;
     var delta = railMid - widgetMid;
     if (Math.abs(delta) < 0.5) return;
 
