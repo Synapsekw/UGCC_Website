@@ -566,10 +566,20 @@ cd "/Users/danijeljovanovic/Dev/UGCC Website"
 for c in cred cred__claim cred__title cred__rule cred__lede cred__stats cred__figure cred__unit cred__ledger cred__row cred__code cred__year cred__name cred__desc; do
   grep -q "\.$c[ ,{:]" assets/css/credentials.css && echo "ok   .$c" || echo "MISSING .$c"
 done
-grep -c "v2-btn" assets/css/credentials.css
+
+# Count RULES mentioning the shared button, not lines. The file's own header
+# comment names .v2-btn in prose, so a plain `grep -c v2-btn` returns 3 and
+# looks like a violation. It is not. Match selector lines only.
+grep -cE '^\s*\.[^{]*v2-btn[^{]*\{' assets/css/credentials.css
+
+# The assertion that actually matters: this file must never define a bare
+# .v2-btn or .v2-btn--* rule, which would fork the shared button.
+grep -nE '^\s*\.v2-btn' assets/css/credentials.css || echo "ok   shared button not redefined"
 ```
 
-Expected: fourteen `ok` lines, no `MISSING`, and the final count is `2` — the two `.cred__claim .v2-btn` margin rules and nothing else. **If that count is higher, the file is redefining the shared button; delete those rules before continuing.**
+Expected: fourteen `ok` lines, no `MISSING`; the rule count is `2` — the two `.cred__claim .v2-btn` margin overrides and nothing else; and the last command prints `ok   shared button not redefined` with no line numbers above it.
+
+**If the rule count is higher than 2, or the last command prints any line numbers, the file is forking the shared button; delete those rules before continuing.**
 
 Note that `.cred__claim` legitimately has no standalone rule of its own beyond the descendant selector — it is a positioning wrapper only. The loop above checks for `.cred__claim ` with a trailing space, which the `.cred__claim .v2-btn` rules satisfy.
 
