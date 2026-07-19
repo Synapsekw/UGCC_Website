@@ -1,0 +1,144 @@
+/* ==========================================================================
+   UGCC — homepage gallery rail (#zOl98u)
+   Replaces the builder slideshow. Loaded by index.html only.
+   Tokens (--v2-navy, --v2-red, --v2-ease-out-quart) come from v2.css.
+
+   The rail is a natively scrollable region at all times. assets/js/rail.js
+   drives its scrollLeft from the page scroll position; the CSS makes no
+   assumption that the JS is present, so the rail is fully usable without it.
+   ========================================================================== */
+
+.v2-rail-block {
+  background: var(--v2-navy);
+  padding: 40px 0 44px;
+  overflow: hidden;               /* full-bleed track must not scroll the page */
+}
+
+/* The eyebrow spans the full row so the title sits on the line beneath it. */
+.v2-rail__head {
+  max-width: 1224px;
+  margin: 0 auto 24px;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.v2-rail__eyebrow {
+  flex: 0 0 100%;
+  margin: 0;
+  font-family: var(--font-secondary, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--v2-red-text);
+}
+
+.v2-rail__title {
+  margin: 6px 0 0;
+  flex: 1;
+  font-family: var(--font-primary, sans-serif);
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: #fff;
+}
+
+/* ---------- track ----------
+   overflow-x is auto in BOTH media states: it is the reduced-motion fallback
+   and the manual drag affordance at the same time. Do not set
+   scroll-behavior: smooth here — it fights the per-frame scrollLeft writes. */
+
+.v2-rail__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;          /* the rail is its own affordance */
+}
+
+.v2-rail__viewport::-webkit-scrollbar { display: none; }
+
+.v2-rail__track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  margin: 0;
+  padding: 0 24px;
+  list-style: none;
+}
+
+.v2-rail__item {
+  flex: none;
+  width: 352px;
+  scroll-snap-align: start;
+}
+
+.v2-rail__card {
+  position: relative;
+  display: block;
+  height: 232px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0b2233;
+  text-decoration: none;
+}
+
+.v2-rail__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .5s var(--v2-ease-out-quart),
+              filter .5s var(--v2-ease-out-quart);
+}
+
+.v2-rail__card:hover img,
+.v2-rail__card:focus-visible img {
+  transform: scale(1.05);
+  filter: brightness(1.06) saturate(1.05);
+}
+
+/* ---------- caption ---------- */
+
+.v2-rail__tag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 14px 13px;
+  font-family: var(--font-secondary, sans-serif);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 20, 32, .92), rgba(0, 20, 32, 0));
+}
+
+.v2-rail__tag::before {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 11px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  background: var(--v2-red);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1024px) {
+  .v2-rail__item { width: 300px; }
+  .v2-rail__card { height: 198px; }
+  .v2-rail__title { font-size: 26px; }
+}
+
+@media (max-width: 600px) {
+  .v2-rail-block { padding: 30px 0 34px; }
+  .v2-rail__item { width: 260px; }
+  .v2-rail__card { height: 172px; }
+  .v2-rail__title { font-size: 22px; }
+  .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
+  .v2-rail__track { padding: 0 16px; }
+}
