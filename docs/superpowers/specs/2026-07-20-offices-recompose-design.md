@@ -117,7 +117,9 @@ as `viewBox="0 0 100 87"`.
 | Context | Every other country in frame | Muted plate fill, faint border stroke |
 
 Plus three white pins at the true coordinates of Kuwait City (47.98, 29.37),
-Riyadh (46.72, 24.69) and Muscat (58.41, 23.59).
+Riyadh (46.72, 24.69) and Muscat (58.41, 23.59), each with an `<text>` label
+naming the city. The labels are `<text>`, not paths, so they stay selectable and
+translatable — the property the baked-in screenshot text could never have.
 
 The navy hairline between the three office countries is not decoration: filled
 solid without it, Kuwait, Saudi Arabia and Oman merge into a single red mass and
@@ -218,7 +220,7 @@ the same one whose media query currently hides this block. Not 768px.
 
 - **Above 920px** — two columns, register left, map right.
 - **At or below 920px** — single column. The map moves above the register and
-  drops its country labels, which are illegible at that width; the tier fills
+  drops its three city labels, which are illegible at that width; the tier fills
   and the three pins remain, so it still reads as a locator. The office list
   stacks. The presence row wraps.
 
