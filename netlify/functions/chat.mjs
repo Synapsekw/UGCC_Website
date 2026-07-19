@@ -8,8 +8,9 @@ const MODEL = "gpt-4o-mini";
 
 const SYSTEM_PROMPT = `You are the assistant for United Gulf Construction Company (UGCC), a construction company in Kuwait.
 Answer ONLY using the provided knowledge (file search results about UGCC's projects, business lines, facilities, equipment, HSSE, quality, CSR, careers, and contact details).
-Reply in the user's language: if they write in Arabic, answer in Arabic; otherwise answer in English.
-If the answer is not in the knowledge, say you don't have that information and suggest the contact page. Be concise and professional. Never invent projects, numbers, or contacts.`;
+The knowledge base is written in English. ALWAYS query the knowledge base with English search terms, even when the user writes in Arabic — translate their question into English keywords to search, then write your reply in the user's language (Arabic for Arabic questions, otherwise English).
+If the answer is not in the knowledge, say you don't have that information and suggest visiting the contact page. Be concise and professional. Never invent projects, numbers, or contacts.
+Write clean prose. Do NOT include citation markers, source numbers, footnotes, or bracketed references such as "(15)" or "【...】" in your answer.`;
 
 export function validate(body) {
   const message = (body?.message ?? "").toString().trim();
@@ -36,6 +37,17 @@ export function rateLimited(key, now = Date.now()) {
   return arr.length > RATE_MAX;
 }
 
+// Remove file_search citation artifacts the model sometimes leaks into prose:
+// OpenAI's 【..†source】 markers and markdown links whose target is a bare
+// source index like [text](15).
+export function cleanText(text) {
+  return text
+    .replace(/【[^】]*】/g, "")
+    .replace(/\[([^\]]+)\]\(\s*\d+\s*\)/g, "$1")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
+}
+
 // Pull the assistant text out of an OpenAI Responses API payload.
 export function extractText(data) {
   const parts = [];
@@ -46,7 +58,7 @@ export function extractText(data) {
       }
     }
   }
-  return parts.join("\n").trim();
+  return cleanText(parts.join("\n"));
 }
 
 const ALLOWED_ORIGINS = [
@@ -103,7 +115,7 @@ export default async (req) => {
       body: JSON.stringify({
         model: MODEL,
         input,
-        tools: [{ type: "file_search", vector_store_ids: [vsId] }],
+        tools: [{ type: "file_search", vector_store_ids: [vsId], max_num_results: 10 }],
       }),
     });
     if (!r.ok) return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });

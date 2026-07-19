@@ -1,5 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { validate, MAX_LEN, rateLimited, extractText } from "../netlify/functions/chat.mjs";
+import { validate, MAX_LEN, rateLimited, extractText, cleanText } from "../netlify/functions/chat.mjs";
+
+describe("cleanText", () => {
+  it("strips OpenAI citation markers", () => {
+    expect(cleanText("UGCC built the berth【4:0†source】.")).toBe("UGCC built the berth.");
+  });
+  it("unwraps markdown links whose target is a bare source index", () => {
+    expect(cleanText("See [صفحة الاتصال](15) for more.")).toBe("See صفحة الاتصال for more.");
+  });
+  it("leaves real markdown links alone", () => {
+    expect(cleanText("Visit [contact](/contact-us).")).toBe("Visit [contact](/contact-us).");
+  });
+});
 
 describe("rateLimited", () => {
   it("trips after RATE_MAX requests in the window", () => {
