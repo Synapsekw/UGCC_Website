@@ -201,15 +201,19 @@
     return { ok: offenders.length === 0, detail: offenders.join('; ') };
   });
 
-  check('header condenses on scroll', function () {
-    /* Only asserts the shrink. A separate "no content jump" assertion used
-       to live here, measuring the hero's next in-flow sibling — but once
-       the header overlays the hero (Task 7 of the plan), nothing below it
-       can move, so that half was structurally incapable of failing
-       (verified: rest=123 condensed=72 siblingJump=0px PASSED even though
-       nothing about "no jump" had actually been checked). Content-jump
-       coverage now lives on the manual list, to be verified on inner pages
-       where the header is in flow instead of overlaying. */
+  check('header frosts on scroll and does NOT change height', function () {
+    /* Condensing was attempted and REJECTED. On inner pages the header sits
+       in flow above .page__blocks, and shrinking its padding shifted that
+       content up by 30px on all three pages tested — far past the 2px
+       tolerance. On the homepage the header overlays the hero, so the jump
+       is invisible there; that blind spot is exactly why the old automated
+       "no content jump" assertion was removed rather than trusted.
+
+       So this now asserts what actually shipped: the frosted-glass state
+       applies AND the height stays put. The height half is a regression
+       guard — if someone reintroduces condensing, inner pages break again
+       and this goes red. Content-jump verification on inner pages remains
+       on the manual list below. */
     var header = document.querySelector('header.block-header');
     var y0 = window.scrollY;
     var prevScrollBehavior = document.documentElement.style.scrollBehavior;
@@ -221,12 +225,29 @@
 
       document.documentElement.classList.add('v2-scrolled');
       var condH = header.getBoundingClientRect().height;
+      var cs = getComputedStyle(header);
+      var filter = cs.backdropFilter || cs.webkitBackdropFilter || '';
+      var bg = cs.backgroundColor;
 
-      /* 20px margin: condensed header must be meaningfully shorter than
-         resting, not just different by font-metric/subpixel noise. */
-      var shrank = condH < restH - 20;
-      return { ok: shrank,
-               detail: 'rest=' + Math.round(restH) + ' condensed=' + Math.round(condH) };
+      var problems = [];
+      /* 2px tolerance: same threshold used for the manual inner-page jump
+         check, and absorbs subpixel/font-metric noise. */
+      if (Math.abs(condH - restH) >= 2) {
+        problems.push('height changed ' + Math.round(restH) + '->' + Math.round(condH) +
+                      ' (condensing was rejected: it shifts inner-page content 30px)');
+      }
+      if (filter.indexOf('blur') === -1) {
+        problems.push('no backdrop blur when scrolled (got "' + filter + '")');
+      }
+      /* Must be translucent, or there is nothing for the blur to act on -
+         the original 92% opacity was why the frost was invisible. */
+      if (!/rgba\([^)]*0?\.\d+\s*\)/.test(bg)) {
+        problems.push('scrolled background is not translucent (got ' + bg + ')');
+      }
+
+      return { ok: problems.length === 0,
+               detail: problems.length ? problems.join('; ')
+                                       : 'h=' + Math.round(restH) + ' stable, ' + filter };
     } finally {
       /* Restore v2-scrolled explicitly using the site's own threshold
          (assets/js/v2.js: window.scrollY > 24) rather than relying on its
