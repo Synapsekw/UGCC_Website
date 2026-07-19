@@ -805,10 +805,23 @@ Create `assets/css/offices.css` with exactly this content:
   border: 1px solid var(--off-hair);
 }
 
+/* No internal borders in the background tier. The 48 context countries are
+   still separate <path> elements (the harness asserts ctx > 20), but the
+   stroke matches the fill, which closes the anti-aliasing seams between
+   adjacent polygons so they read as one continuous landmass.
+
+   This is deliberate and was the site owner's call. The background's job is
+   orientation, not geopolitics, and Natural Earth's default boundaries put
+   Israel, Palestine, N. Cyprus and Somaliland in frame as distinct outlined
+   entities. Drawing land-versus-sea only keeps the block out of every one of
+   those arguments, and costs nothing that the block needed.
+
+   Do not "fix" this by restoring a contrasting stroke. If the seams ever show
+   as faint hairlines, increase stroke-width rather than changing the colour. */
 .off__map-ctx path {
   fill: #083c56;
-  stroke: #0e5477;
-  stroke-width: .16;
+  stroke: #083c56;
+  stroke-width: .2;
 }
 
 .off__map-op path {

@@ -114,7 +114,7 @@ as `viewBox="0 0 100 87"`.
 | --- | --- | --- |
 | Offices | Kuwait, Saudi Arabia, Oman | Brand red fill, navy hairline stroke between them |
 | Operations | Iraq, India, Malawi | Lighter blue fill |
-| Context | Every other country in frame | Muted plate fill, faint border stroke |
+| Context | Every other country in frame | Muted plate fill, no internal borders |
 
 Plus three white pins at the true coordinates of Kuwait City (47.98, 29.37),
 Riyadh (46.72, 24.69) and Muscat (58.41, 23.59), each with an `<text>` label
@@ -125,6 +125,25 @@ The navy hairline between the three office countries is not decoration: filled
 solid without it, Kuwait, Saudi Arabia and Oman merge into a single red mass and
 the block appears to claim one country, not three. Verified visually during the
 spike.
+
+**The context tier draws no internal borders.** Its 48 countries render as one
+continuous landmass — land against sea, nothing more. This is an editorial
+decision by the site owner, taken once the generated map was inspected: Natural
+Earth's default boundaries put Israel, Palestine, N. Cyprus and Somaliland in
+frame as distinct outlined entities, and a Kuwaiti contractor's homepage is not
+the place to take a position on any of them. The background exists for
+orientation; country lines in it carried no information this block needed.
+
+Implementation is in CSS, not the generator: the paths stay separate (the
+harness asserts more than 20 of them) but take a stroke matching their own fill,
+which closes the anti-aliasing seams between adjacent polygons. See the comment
+on `.off__map-ctx path` in `assets/css/offices.css`.
+
+This does **not** neutralise India's own outline, which is drawn in the
+operations tier and therefore keeps Natural Earth's treatment of the Kashmir
+boundary. India is a country UGCC operates in, so it has to be individually
+outlined; there is no version of this map that shows India without taking
+Natural Earth's line on its borders.
 
 **Resolution is deliberately mixed.** The six UGCC countries are built from
 Natural Earth 1:50m; every context country from 1:110m. At 110m Kuwait
