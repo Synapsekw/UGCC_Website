@@ -46,7 +46,7 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
     const d = doc();
     const iV2 = d.indexOf('/assets/css/v2.css?v=4');
     const iKit = d.indexOf('/assets/css/about-suite.css?v=3');
-    const iPage = d.indexOf('/assets/css/pages/business-line.css?v=1');
+    const iPage = d.indexOf('/assets/css/pages/business-line.css?v=2');
     expect(iV2).toBeGreaterThan(-1);
     expect(iKit).toBeGreaterThan(iV2);
     expect(iPage).toBeGreaterThan(iKit);

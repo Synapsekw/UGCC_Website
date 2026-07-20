@@ -289,6 +289,19 @@ element.
   contracts linked from that line's listing pages (Oil and Gas has exactly
   four). Values and statuses are quoted from the project pages.
 
+### 4.7b Gallery (added post-merge, user request 2026-07-20)
+
+Between Key Projects and All Projects, a page may carry a `Gallery` section:
+title-only `as-head` ("Gallery"), then `<ul class="blp-gallery">` of kit
+`as-card--tile` items — the page's own project photographs at their largest
+same-frame exports, captioned with the contract names (navigation-label
+text; image-freeze compliant by construction). The grid is page-owned
+(`.blp-gallery`, strict 2 columns → 1 at ≤600px) because the kit's
+`.as-cards` auto-fit rags four photo tiles 3+1 at 1224px; the tiles
+themselves are untouched kit. Shipped on Roads and Bridges (RA-245, RA-259,
+RA-200, RA-126 — the four project photographs the old page carried); other
+pages adopt it as their photo sets allow.
+
 ### 4.8 All projects
 
 `as-section--tint`. Head: title `All Projects` (generic label; no drafted
