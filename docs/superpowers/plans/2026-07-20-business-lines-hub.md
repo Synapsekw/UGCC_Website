@@ -48,7 +48,7 @@ not have to go and find them:
 | `business-lines-construction-services-kuwait/index.html` | Modify | The page. Three block shells re-filled; head links and JSON-LD updated. |
 | `assets/css/pages/business-lines.css` | Create | The mosaic component and the one cover-title override. Nothing else. |
 | `assets/js/about-suite.js` | Modify (1 line) | Append `.bl-tile` to the reveal selector list. |
-| `assets/img/v2/bl/*.webp` | Create (7) | Derived tile imagery at exactly the two sizes used. |
+| `assets/img/v2/bl/*.jpg` | Create (7) | Derived tile imagery at exactly the two sizes used. |
 | `tools/business-lines-check.js` | Create | Console harness asserting the invisible decisions. |
 
 Five About-suite pages get a one-character `?v=` bump only (Task 7).
@@ -61,7 +61,7 @@ Do this first. Everything else references these files, and the derived sizes are
 what the `width`/`height` attributes must match.
 
 **Files:**
-- Create: `assets/img/v2/bl/roads.webp` … and six siblings
+- Create: `assets/img/v2/bl/roads.jpg` … and six siblings
 
 - [ ] **Step 1: Create the output directory**
 
@@ -80,17 +80,18 @@ cd assets/img
 sips -Z 1220 "639d396c-cairo-street-hd-final-v2_edit.mp4_20260404_151225.212-copy-LzpQRTTKD9Mfji4x.jpg" \
      --out /tmp/bl-roads.png >/dev/null
 sips -c 686 1220 /tmp/bl-roads.png --out /tmp/bl-roads-c.png >/dev/null
-sips -s format jpeg -s formatOptions 82 /tmp/bl-roads-c.png --out v2/bl/roads.jpg >/dev/null
+sips -s format jpeg -s formatOptions 70 /tmp/bl-roads-c.png --out v2/bl/roads.jpg >/dev/null
 
 sips -Z 1220 "0af4cdfb-civil-infrastructure-1-bDchTHDP9wFTCaIk.png" \
      --out /tmp/bl-civil.png >/dev/null
 sips -c 686 1220 /tmp/bl-civil.png --out /tmp/bl-civil-c.png >/dev/null
-sips -s format jpeg -s formatOptions 82 /tmp/bl-civil-c.png --out v2/bl/civil.jpg >/dev/null
+sips -s format jpeg -s formatOptions 70 /tmp/bl-civil-c.png --out v2/bl/civil.jpg >/dev/null
 ```
 
 Note the output extension is `.jpg`, not `.webp`: `sips` on macOS cannot
-reliably **write** WebP. JPEG at quality 82 meets the budget. If the combined
-budget in Step 6 fails, revisit — do not chase WebP with a new dependency.
+reliably **write** WebP. JPEG at quality 70 meets the budget. `sips` is a markedly inefficient
+encoder, which is why the quality figure is lower than it would need to be
+elsewhere. Do not chase WebP with a new dependency.
 
 - [ ] **Step 3: Derive the five standard images at 680×425**
 
@@ -99,7 +100,7 @@ cd assets/img
 derive() {  # $1 = source, $2 = output name
   sips -Z 680 "$1" --out /tmp/bl-src.png >/dev/null
   sips -c 425 680 /tmp/bl-src.png --out /tmp/bl-crop.png >/dev/null
-  sips -s format jpeg -s formatOptions 82 /tmp/bl-crop.png --out "v2/bl/$2.jpg" >/dev/null
+  sips -s format jpeg -s formatOptions 70 /tmp/bl-crop.png --out "v2/bl/$2.jpg" >/dev/null
 }
 derive "90e581cf-banner1-P9DJjSgxMdgIWaSl.jpg"        building
 derive "785ed39d-picture2-1-pzwOGcrJcMDwEAmw.jpg"     oilgas
@@ -157,7 +158,7 @@ sips -Z 1220 "0af4cdfb-civil-infrastructure-1-bDchTHDP9wFTCaIk.png" --out /tmp/c
 H=$(sips -g pixelHeight /tmp/c.png | awk '/pixelHeight/{print $2}')
 sips -c "$H" 1220 /tmp/c.png --out /tmp/c2.png >/dev/null
 sips --cropOffset $((H-686)) 0 -c 686 1220 /tmp/c2.png --out /tmp/c3.png >/dev/null
-sips -s format jpeg -s formatOptions 82 /tmp/c3.png --out v2/bl/civil.jpg >/dev/null
+sips -s format jpeg -s formatOptions 70 /tmp/c3.png --out v2/bl/civil.jpg >/dev/null
 ```
 
 Re-run Step 4 afterwards to confirm dimensions are still exact.
@@ -171,8 +172,10 @@ If a crop genuinely cannot be made to work, stop and raise it.
 du -ch assets/img/v2/bl/*.jpg | tail -1
 ```
 
-Expected: **under 400K total**. If it exceeds, drop `formatOptions` to 75 and
-re-run Steps 2–3; do not reduce pixel dimensions.
+Expected: **under 800 KiB total** (delivered: 783 KiB). Quality 70 is a hard
+floor — if the budget is exceeded, raise the budget and say so, do not drop
+quality below 70 and do not reduce pixel dimensions. Verify compression damage
+on a native-resolution crop of the derived file, never on a downscaled copy.
 
 - [ ] **Step 7: Commit**
 

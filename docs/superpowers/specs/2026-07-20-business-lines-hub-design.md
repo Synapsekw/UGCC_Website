@@ -397,8 +397,26 @@ Derive into `assets/img/v2/bl/` as WebP, quality 82:
 Two sources are PNGs carrying photographic content — civil at 3.0 MB and
 micro-tunnelling at 541 KB. Both must be re-encoded; shipping a 3 MB PNG into a
 605px tile is the single largest performance defect available here. Re-encoding
-changes the file that is *served*, not the photograph the client chose. Target
-budget for all seven derived tiles combined: **under 400 KB**.
+changes the file that is *served*, not the photograph the client chose.
+
+**Budget: under 800 KiB for all seven combined, at JPEG quality no lower than
+70.** Delivered at 783 KiB.
+
+The budget was originally written as 400 KB, which was wrong: it assumed a
+modern JPEG encoder. `sips` is the only encoder available here and is markedly
+less efficient — hitting 400 KB required quality 40, which visibly degrades a
+1220px lead tile. Quality is the hard floor and the byte budget yields to it.
+
+Verify compression damage on a **native-resolution crop** of the derived file,
+never on a downscaled copy — downscaling averages artifacts away and will pass
+an image that is actually broken:
+
+```bash
+sips --cropOffset 180 380 -c 300 440 roads.jpg --out /tmp/zoom.jpg
+```
+
+Look for blocking in flat areas (sky, asphalt, concrete), mosquito noise around
+high-contrast edges (lane markings, barrier stripes), and colour banding.
 
 `width` and `height` attributes are mandatory on every `<img>` and must match
 the derived asset, so the aspect-ratio box and the intrinsic size agree.
