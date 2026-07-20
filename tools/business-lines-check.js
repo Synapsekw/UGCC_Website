@@ -142,6 +142,25 @@
        return a.getAttribute('href');
      }));
 
+  /* Every anchor carries an explicit aria-label, and it must BEGIN with the
+     visible name (SC 2.5.3, Label in Name).
+
+     Do not "simplify" this by deleting the aria-label and trusting the
+     subtree. Name-from-content includes the <img> alt, and the image
+     precedes the text in DOM order, so the computed name would start with
+     the photo description and run to ~30 words. Checking textContent here
+     instead of aria-label hides that entirely — textContent excludes alt,
+     so the broken version passes. That false pass shipped once. */
+  Array.prototype.forEach.call(links, function (a) {
+    var n = a.querySelector('.bl-tile__name');
+    var visible = n ? n.textContent.trim() : 'All projects';
+    var label = a.getAttribute('aria-label') || '';
+    ok(visible + ': has an explicit aria-label', !!label);
+    ok(visible + ': aria-label begins with the visible name',
+       label.toLowerCase().indexOf(visible.toLowerCase()) === 0,
+       JSON.stringify(label));
+  });
+
   /* The display text is double-L "Micro-Tunnelling"; the URL keeps the
      single-L spelling it shipped with. Do not "fix" the href. */
   ok('micro-tunnelling href keeps its single-L URL',
