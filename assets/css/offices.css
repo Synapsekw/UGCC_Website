@@ -304,15 +304,38 @@
    the UAE partly fills in, Bahrain and Qatar lose their shape, and Oman's
    Musandam nub merges toward the mainland. If seams ever show, the fix is
    source resolution in the generator, not a thicker stroke here. */
+/* CONTRAST, and why these three numbers are where they are.
+
+   #083c56 measured 1.50:1 against the #001b2a sea in every vision type. On the
+   old 594x517 panel that was survivable; on the 633x720 one it was not --
+   proving Africa was even drawn took 17 elementFromPoint probes, which is the
+   clearest evidence a fill is not doing its job. #13597c is the same hue (200)
+   and near the same saturation, lifted to 2.30:1 (2.20:1 worst case across
+   protanopia and deuteranopia, three simulation models).
+
+   Stroke stays identical to fill and stays at 0.2. Non-negotiable -- see the
+   long note below. A LIGHTER context makes any residual seam MORE visible, so
+   this was re-checked at 15x in the African interior, the Arabian peninsula
+   and the Bengal delta after the change, not assumed to carry over. */
 .off__map-ctx path {
-  fill: #083c56;
-  stroke: #083c56;
+  fill: #13597c;
+  stroke: #13597c;
   stroke-width: .2;
 }
 
+/* Operations had to move a long way, and the direction was forced rather than
+   chosen. Once context sits at 2.30:1 against the sea, keeping operations
+   >=1.8:1 against context puts its luminance above the brand red's -- there is
+   no darker solution. That is fortunate, because the old #1c6d8f sat at
+   1.10:1 against #d41c22: near-identical luminance, separated by hue alone,
+   which is exactly what a dichromat cannot use. Worse, the luminance curves
+   CROSS around op:bg 4.2 under deuteranopia, where office:op collapses to
+   1.00:1 -- so a timid lift would have been actively worse than doing nothing.
+   #4c9fc9 clears the crossover: 1.79:1 normal, 1.39:1 worst case.
+   If you re-tune this, plot the whole curve first; the local gradient lies. */
 .off__map-op path {
-  fill: #1c6d8f;
-  stroke: #2f88ad;
+  fill: #4c9fc9;
+  stroke: #7cbcdb;
   stroke-width: .16;
 }
 
@@ -376,7 +399,7 @@
 }
 
 .off__key-swatch--op {
-  background: #1c6d8f;
+  background: #4c9fc9; /* must track .off__map-op path's fill */
 }
 
 /* ---------- 920px: the builder's own breakpoint, and the width at which
