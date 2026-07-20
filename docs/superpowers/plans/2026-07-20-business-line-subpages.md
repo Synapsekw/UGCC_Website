@@ -1610,3 +1610,171 @@ already-built pages).
 
 **Checkpoint discipline:** Task 6 Step 9 blocks Tasks 7–12 on user approval
 of the reference page.
+
+---
+
+## Amendment A — customer text/image freeze (2026-07-20)
+
+Added mid-execution (after Task 2), on the user's instruction: **existing
+text and images must not be changed — customer requirement.** Confirmed
+interpretation: body copy frozen with only the §9.1 error repairs; sub-nav
+tabs, listing buttons, generic section-head labels and the three derived stat
+figures are permitted new text; images limited to photographs already on each
+page (or its hub tile), optimization of the same frame allowed.
+
+This amendment **supersedes** the prose/pill/lede content of Tasks 5 and
+7–12, the band sources of Task 1 Step 2, and harness assertion 9 / DATA in
+Task 4. Everything else (structure, section order, markup shapes, splice
+scripts, head edits, stats, verification flow) stands.
+
+### A.1 Frozen-copy rule for all page tasks
+
+Retained paragraphs are **extracted verbatim from the page's own current
+HTML** (before splicing) — never retyped from this plan — preserving every
+character (curly apostrophes, em-dashes, commas). Where the old page renders
+list-ish content as separate builder elements, each element becomes one
+`<li>`; do not merge or split sentences. Old project-card captions, card
+labels and their images are NOT retained (replaced by `blp-proj` rows); the
+old "Our Clients" logo strips are NOT retained as-is (replaced by
+`blp-clients` per the frozen client tables, which drop UGCC's own logo).
+The `USD 358M / COMPLETED PROJECTS` tiles on electro are NOT retained
+(provably false; replaced by the approved derived stats).
+
+Section heads: title-only `as-head` (no eyebrow, no drafted lede), titles
+being generic labels or the page's existing headings: `Overview`,
+`Capabilities`, `At a glance`, `Key Projects`, `All Projects`, `Our
+Clients`. The cover eyebrow stays "Business lines"; cover ledes stay the hub
+tile scope lines (existing text on the live hub). The Contact section is
+byte-identical to the hub's shipped CTA. Key-projects lede: only Roads and
+Civil keep their existing (discipline-correct) key-projects paragraph as the
+lede; the other five pages have no lede (§9.1 repair — the civil boilerplate
+is dropped, not rewritten).
+
+### A.2 Task 1b — re-derive five bands from on-page sources
+
+The `div-*.jpg` frames do not appear on these pages and are no longer
+eligible. Oil (`d37b16ed-banner5`) and electro (`2a698f22-banner2`, same
+frame as on-page `ebe744a9-banner2`) already comply and keep their band
+files. Re-derive the other five, overwriting the existing band files, same
+budget/quality rules (q ≥ 70, ≤ 1920 wide, per-slug ≤ 800 KiB best-effort
+with quality precedence):
+
+| Slug | Primary source (on page) | Fallbacks (in order) |
+|---|---|---|
+| roads | `f16454cd-dji_20241202095605_0092_d.mp4_20250518_142228.229_edit-mnl4x5ej2ysEqr0y.jpg` | `67866055-dji_0902_edit-AR01jV9kvJHyeD0W.jpg`, `24584e6d-dji_0059-Yle4a6Jzo7UW896B.JPG` |
+| civil | `3eda2288-dji_20240529082555_0021_d-Yle4orEzqMcVwqnO.JPG` | `6b818d12-dji_0042-YX4jqX75gxFDr8Kp.JPG`, `378afa4d-cover-AzGMBZ95W8tqw0VQ.JPG` |
+| building | `cded776d-cbe-gal-04-a-edit-YbN4PZqjykhNzD7x.jpg` | `94110e17-cover-1-m2WqxlXl1eT9Ve8O.jpg`, `992aac66-picture8-A85MvZLNGjcM2K6Q.png` (small — last resort) |
+| water | `e373ebad-banner4-ShXENQIgC0rkfCBF.jpg` | `823b1d5d-banner2-soD4LfkN9VD8kTHo.jpg`, `f0ac5c96-29p3070014_edit-mv0PnjqX85FWp0Za.jpg` |
+| micro | `01c33a76-banner3-d8s1BGKMZBIwindG.jpg` | `8ced92a2-banner1-CRtgdbXjlnOvESdp.jpg`, `abb6f95f-banner4-zmMOSorYkZRYLfRS.jpg`, `d59bc2a2-dsc_1162-mk34B5pjavtzrx58.JPG` |
+
+Constraints: band frame ≠ that page's cover frame (water: avoid
+`442b1394-banner1`, likely the cover frame; micro: cover is
+`84b54fc2-banner2` — verify the chosen band differs); avoid using the same
+frame as another page's band (civil `6b818d12-dji_0042` and building
+`a09542bb-dji_0042` are the same photograph — at most one page may use it).
+Visually verify each, record what the frame shows, note intrinsic sizes for
+the markup, and record final per-slug byte totals. Commit:
+`fix(business-line-pages): bands re-derived from on-page photographs (customer image freeze)`.
+
+### A.3 Harness change (Task 4)
+
+DATA gains `keyPills` per page: 1 for `micro-tunneling-kuwait`, 0 for the
+other six. Assertion 9 becomes:
+
+```js
+ok(document.querySelectorAll('.as-pill--key').length === D.keyPills,
+   D.keyPills + ' as-pill--key expected');
+```
+
+### A.4 Superseded content blocks — frozen replacements
+
+Markup shapes are unchanged from Task 5 Step 1; only the strings below
+replace the drafted ones. Paragraph identifiers give the opening words of
+the existing paragraph to extract verbatim.
+
+**Roads (Task 5):** Overview prose = ["UGCC’s Roads and Bridges division
+stands at the core…", "UGCC’s Roads and Bridges division offers end-to-end
+capabilities…"] then `<h3>Quality, Safety & Sustainability</h3>` + ["UGCC
+integrates global best practices…"]. Pills (6, verbatim): Highway and
+expressway construction / Interchanges and flyovers / Bridge design and
+erection / Road rehabilitation and maintenance / Asphalt and concrete paving
+works / Drainage and stormwater management. No key pill. Key Projects lede =
+existing ["Over the years, UGCC has delivered some of Kuwait’s most
+significant road and bridge projects…"]. Rows/stats/buttons/clients/meta as
+originally planned. Band per A.2 with alt matching the actual frame.
+
+**Civil (Task 7):** Overview prose = ["UGCC’s Civil Infrastructure division
+delivers the essential backbone…", "UGCC provides full-spectrum civil
+infrastructure solutions…"] then `<h3>Quality, Safety & Sustainability</h3>`
++ ["At UGCC, we recognize that civil infrastructure projects serve
+generations…"]. Pills (7, verbatim): Water supply and distribution networks /
+Sewerage and drainage systems / Pumping stations and reservoirs / Utility
+corridors and duct banks / Foundations and earthworks / Structural concrete
+and retaining systems / Site development and grading works. No key pill.
+Key Projects lede = existing ["UGCC has successfully executed numerous civil
+infrastructure projects…"] (correct on THIS page only).
+
+**Building (Task 8):** Overview prose = ["Our Building Construction division
+delivers projects that meet the highest standards…"] (the page's FIRST
+paragraph — the civil intro — is dropped, §9.1) then `<h3>Quality, Safety &
+Sustainability</h3>` + ["We are committed to upholding the highest
+standards…"]. Pills (7, verbatim): Structural and reinforced concrete works /
+Architectural and interior finishes / Electro-mechanical and HVAC
+installation / Steel structure and roof systems / Building envelopes and
+facade works / Fit outs and turnkey solutions / Project management and
+quality control. No key pill. Key Projects: no lede.
+
+**Oil (Task 9):** Overview prose = ["Construction projects in the oil & gas
+industry is a key component…", "UGCC constructs and provides maintenance
+services for gathering centers…", "UGCC also manages maintenance projects
+for government-owned oil companies."] then `<h3>Project references</h3>` +
+["In the past, UGCC projects included handling road maintenance services…"]
++ the existing reference list as a `<ul>` (extract each builder element as
+one `<li>`, verbatim — the list naming ZOR/EPC-0059, GC32, the Steam Flood
+Pilot, the Effluent Water Pipelines Tankage Upgrade, and the Water & Gas
+Networks replacement). Pills (3, verbatim incl. original casing):
+STRUCTURAL FOUNDATIONS / TANKS / BLAST RESISTANT SHELTERS. No key pill.
+Key Projects: no lede. One listing button (completed), as originally
+planned.
+
+**Water (Task 10):** Overview prose = ["GCC has tremendous expertise…" with
+the single repair GCC→UGCC, "Water and Wastewater Management has pumping
+stations facilities…"] then `<h3>Relevant experience</h3>` + the existing
+3-item list as a `<ul>` (SE/19 pumping station; Contract 5A A’Seeb sewage
+collection; SE/97 pumping station — each element one `<li>`, verbatim).
+Pills (4, verbatim): Water and Wastewater Management / Water Treatment
+Plants / Pumping Stations / Pipeline Works. No key pill. H1 = "Water and
+Wastewater" (canonical repair of the broken split H1). Key Projects: no
+lede.
+
+**Electro (Task 11):** Overview prose = ["United Gulf Construction Company
+handles various types of electro-mechanical works", "UGCC’s
+electro-mechanical works include projects such as sewage pumping
+stations…"] then `<h3>Relevant Experience</h3>` + the existing 3-item list
+as a `<ul>` (same three contracts as water's list — kept verbatim; it is
+this page's existing text). The old `USD 358M / COMPLETED PROJECTS` tiles
+are dropped (replaced by the real stats). Pills (5, verbatim): Pumping
+Stations / Treatment Plants / Street Lighting / Fire-fighting Systems /
+Pipeline Works. No key pill. H1 = "Electro-Mechanical" (canonical repair).
+Key Projects: no lede. Band: existing `electro-band.jpg` (on-page banner2
+frame) — alt describes rooftop HVAC/mechanical plant, e.g. "Rooftop HVAC
+and mechanical plant installed by UGCC".
+
+**Micro (Task 12):** Overview prose = ["United Gulf Construction Company
+has international experience in installing pipelines…", "UGCC’s specialised
+teams can accommodate works requiring shaft sinking…"] then
+`<h3>Reference projects</h3>` + the existing 3-item list as a `<ul>`
+(Mishrif SE/19; Contract 5A Al Khoudh; the Hyderabad trenchless
+installation — each one `<li>`, verbatim). Pills (3): "Micro-Tunnelling"
+(canonical double-L display repair of the existing "Micro-tunneling" pill) /
+`as-pill--key` "Pipelines range - 250mm dia. to 2400mm dia." / "Depth - up
+to 30m" (both verbatim). Key Projects: no lede. Title tag double-L as
+originally planned.
+
+### A.5 Verification notes
+
+Static tests (Task 3) are unchanged — the typo strings must still be absent
+(they disappear via the row rebuild and the two H1/UGCC repairs), alt
+coverage and sub-nav assertions stand. Add to each page's browser check: the
+retained paragraphs render (spot-check the first retained paragraph's
+opening words on each page).

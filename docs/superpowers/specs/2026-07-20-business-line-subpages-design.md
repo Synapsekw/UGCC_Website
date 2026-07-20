@@ -18,6 +18,25 @@ User decisions taken 2026-07-20 (recorded, all four accepted as recommended):
 | Clients | Derived per line from actual project owners; UGCC's own logo dropped; clients with no logo asset omitted |
 | Template overall | Approved as presented ("Approved — write the spec") |
 
+**Customer constraint, added 2026-07-20 after plan approval (supersedes §7 as
+first written):** existing text and images must not be changed.
+Interpretation confirmed with the user:
+
+| Question | Decision |
+|---|---|
+| Body copy | **Freeze + agreed repairs only** — every existing sentence is reused verbatim; only the documented §9.1 error repairs apply (wrong-discipline intro dropped, missing-U fix, canonical names, the shared civil "Key Projects" boilerplate dropped from the five pages where it is wrong-discipline text). No newly drafted marketing copy, no new claims. |
+| New UI text | **Navigation labels and stats allowed** — sub-nav tabs, listing buttons, generic section headings, and the three derived stat figures may be added. |
+| Images | **Same photos, optimize allowed** — only photographs already on each page (or its hub tile) may appear; re-encoding/resizing the same frame is permitted. Pages with no distinct second photograph get no band. |
+
+Consequences threaded through this spec: overview prose is the page's own
+existing paragraphs (§7); section heads use generic labels or the page's
+existing headings, with no drafted titles or ledes (§4.3–§4.10); capability
+pills are the page's existing capability list verbatim (§4.4); the
+value-claim key pills are dropped — only Micro-Tunnelling keeps one, from its
+existing specification text (§6.5); bands are re-derived from on-page
+photographs (§4.6). Alt text, `aria-label`s and meta fixes are accessibility
+and metadata, not customer-visible copy, and proceed as specified.
+
 ---
 
 ## 1. Why
@@ -180,22 +199,25 @@ on mobile; no CSS is added.
 
 ### 4.3 Overview
 
-`as-section--light`, default 1224px inner. Head: eyebrow `Overview`, per-page
-title (drafted, §7), rule, no lede. Body: `as-prose`, 2–4 paragraphs plus at
-most one `<h3>` sub-topic. Copy rules in §7.
+`as-section--light`, default 1224px inner. Head: title `Overview` (generic
+label — no eyebrow, no lede; drafted titles are out under the customer
+constraint), rule. Body: `as-prose` holding the page's **existing paragraphs
+verbatim** (§7), including the page's existing `<h3>` sub-headings ("Quality,
+Safety & Sustainability", "Relevant experience", "Project references",
+"Reference projects") and their content where present.
 
 ### 4.4 Capabilities
 
-`as-section--tint`. Head: eyebrow `Capabilities`, per-page title. One
-`as-pills` group of 6–9 pills naming real capabilities from the page's own
-(corrected) copy; exactly one `as-pill--key` carrying the line's one
-substantiated specification (§7 table). At most one `--key` per group, per the
-kit.
+`as-section--tint`. Head: title `Capabilities` (the page's own existing
+heading), rule. One `as-pills` group holding the page's **existing capability
+list items verbatim** (4–7 pills). No value-claim key pills: only
+Micro-Tunnelling carries one `as-pill--key`, its existing specification pill
+(§6.5). At most one `--key` per group, per the kit.
 
 ### 4.5 At a glance
 
-`as-section--navy` (first of the two navy sections). Head: eyebrow
-`At a glance`, title `{{Display name}} in numbers`. Then `as-stats` with
+`as-section--navy` (first of the two navy sections). Head: title
+`At a glance` (generic label). Then `as-stats` with
 exactly three tiles, figures from the frozen table in §6 — every figure is
 derived from the project pages and re-checkable there. Units:
 
@@ -213,20 +235,26 @@ true; Electro-Mechanical shows its real USD 2.03B.
 ### 4.6 Band
 
 Kit §9 full-bleed `as-band`, between sections 5 and 7, direct child of the
-page body. One photograph per page, chosen from that page's existing assets
-(or the `div-*.jpg` set already in `assets/img/v2/`), **different from the
-cover photograph**, derived to `assets/img/v2/blp/{{slug}}-band.jpg` at
-1920px, quality ≥ 70. Real alt. Band choice is verified visually during the
-build; if a page has no usable second photograph, raise it rather than
-repeating the cover.
+page body. One photograph per page, **sourced only from that page's own
+existing content photographs** (customer constraint — the `div-*.jpg` set is
+NOT eligible: those frames appear on other pages, not these), **different
+from the cover photograph**, derived to
+`assets/img/v2/blp/{{slug}}-band.jpg` at up to 1920px, quality ≥ 70. Real
+alt. Band choice is verified visually during the build; if a page has no
+distinct usable second photograph, the page ships without a band.
 
 ### 4.7 Key projects
 
-`as-section--light`. Head: eyebrow `Key projects`, per-page title, lede
-optional. Then the one new component with real structure — `blp-proj`, four
-text-first contract rows. No card imagery: the cover and band carry the
-page's photography, and seventeen more derived images would spend weight on
-what is a routing element.
+`as-section--light`. Head: title `Key Projects` (the page's own existing
+heading). Lede: **only** where the page's existing key-projects paragraph is
+discipline-correct (Roads and Civil), reused verbatim; the shared
+civil-infrastructure boilerplate on the other five pages is dropped, not
+rewritten (§9.1 repair — no replacement copy is drafted). Then the one new
+component with real structure — `blp-proj`, four text-first contract rows,
+their names taken from the project pages' own titles (existing site text).
+No card imagery: the cover and band carry the page's photography, and
+seventeen more derived images would spend weight on what is a routing
+element.
 
 ```html
 <ul class="blp-proj">
@@ -263,10 +291,9 @@ what is a routing element.
 
 ### 4.8 All projects
 
-`as-section--tint`. Head: eyebrow `All projects`, title
-`Every {{display name}} contract on record`, lede stating the real counts
-(e.g. "Six contracts in delivery and eight completed, each with its own
-page."). Then the listing links as buttons:
+`as-section--tint`. Head: title `All Projects` (generic label; no drafted
+lede — the counts live in the button labels). Then the listing links as
+buttons:
 
 ```html
 <a class="as-btn as-btn--on-light" href="/{{line}}-current">Current projects ({{n}})</a>
@@ -285,8 +312,8 @@ Listing slugs are irregular and are frozen in §6 (`water-current`, not
 
 ### 4.9 Clients
 
-`as-section--light`. Head: eyebrow `Clients`, title `Who we build for`, lede
-optional. Then `blp-clients`: a `<ul>` of logo tiles.
+`as-section--light`. Head: title `Our Clients` (the page's own existing
+heading), rule, no lede. Then `blp-clients`: a `<ul>` of logo tiles.
 
 ```html
 <ul class="blp-clients">
@@ -316,10 +343,12 @@ optional. Then `blp-clients`: a `<ul>` of logo tiles.
 
 ### 4.10 Contact
 
-`as-section--navy` (second navy). Identical shape to the hub's CTA — head
-(eyebrow `Get in touch`, title `Talk to us about your project`, rule, lede)
-plus one `as-btn as-btn--on-dark` to `/contact-us`. The lede may carry one
-per-line clause; everything else is byte-identical across the seven.
+`as-section--navy` (second navy). Byte-identical on all seven pages to the
+hub's shipped CTA — head (eyebrow `Get in touch`, title `Talk to us about
+your project`, rule, lede "Tell us what you are building and we will point
+you at the team that has done it before.") plus one `as-btn as-btn--on-dark`
+to `/contact-us`. This wording already exists on the live hub; no per-line
+variation (that would be new copy).
 
 ## 5. Meta, JSON-LD, share cards
 
@@ -412,40 +441,52 @@ Al-Khaleej Real Estate.
 ### 6.5 Cover sources and specification pills
 
 Cover sources are the hub spec §7 client-specified files (verbatim table
-there). The one `as-pill--key` spec per page:
+there); each is also the page's own current hero background, so the covers
+comply with the image freeze by construction.
 
-| Page | Key pill |
-|---|---|
-| Roads and Bridges | Motorway interchanges to USD 487M single-contract scale |
-| Civil Infrastructure | 17 contracts across water, sewerage and earthworks |
-| Building Construction | Turnkey delivery to USD 509M contract scale |
-| Oil and Gas | Gathering-centre civil works for KOC |
-| Water and Wastewater | Pump stations to USD 152M contract scale |
-| Electro-Mechanical | Street lighting to 30-inch HP gas lines |
-| Micro-Tunnelling | Guided boring 250–2400 mm · shafts to 30 m |
-
-Key-pill wording is copy (draftable, replaceable); the figures inside them are
-from §6.1/§6.2 or the pages' own corrected prose and must stay substantiated.
+Key pills (superseding the first version of this table, which drafted new
+value claims — dropped under the customer constraint): **only
+Micro-Tunnelling carries `as-pill--key`**, on its existing specification pill
+"Pipelines range - 250mm dia. to 2400mm dia." (with "Depth - up to 30m" as a
+plain pill beside it). All other pages have zero key pills; their pill sets
+are the existing capability lists verbatim.
 
 ## 7. Copy
 
-Every string is Claude-drafted and **not client-approved**; structure ships
-independent of wording and every string is replaceable without touching CSS.
-Rules:
+**Customer constraint: existing text is frozen.** Rules (superseding the
+first version of this section, which drafted new prose):
 
-1. Overview prose is written per discipline from that line's real contracts —
-   never from another line's. Building Construction gets a new intro (its
-   current one is Civil's, verbatim).
-2. Each Key-projects head gets its own lede; the shared civil-infrastructure
-   boilerplate is deleted from all five pages that carry it.
-3. Typos corrected wherever the surrounding sentence is reused: "steam flood"
-   (not "stream flood"), "sewer network" (not "sever network"), "tank
-   upgrade" (not "tankge upgradation"), "UGCC has tremendous expertise" (the
-   missing U), "Duqm" (not "Duqum").
-4. Canonical names throughout: Micro-Tunnelling, Water and Wastewater,
-   Grade I (roman).
-5. Real technical claims already in the source copy (250–2400 mm, 30 m
-   shafts, 30-inch HP gas line) survive verbatim; nothing new is invented.
+1. Overview prose is the page's **existing paragraphs, verbatim**, in their
+   existing order, including existing `<h3>` sub-headings and their content
+   (quality/sustainability paragraphs, "Relevant experience" / "Project
+   references" lists). Nothing is drafted, nothing is reworded.
+2. The only permitted deviations are the documented §9.1 error repairs:
+   - Building Construction **drops** its first paragraph (it is the Civil
+     Infrastructure intro verbatim) and leads with its own, correct,
+     existing division paragraph. No replacement sentence is written.
+   - The shared civil-infrastructure "Key Projects" paragraph is **dropped**
+     from the five pages where it is wrong-discipline text (building, oil,
+     water, electro-mechanical, micro-tunnelling). It is kept, verbatim, on
+     Roads and Civil where it is correct for the page.
+   - "GCC has tremendous expertise" → "UGCC has tremendous expertise"
+     (water page, missing letter).
+   - Broken/wrong H1 display text is set to the canonical display names
+     (water: "Water and waste / water management" → "Water and Wastewater";
+     electro: "Electro Mechanical" → "Electro-Mechanical"; micro keeps its
+     existing "Micro-Tunnelling").
+   - Micro's capability pill "Micro-tunneling" takes the canonical double-L
+     display spelling; the micro `<title>` likewise.
+   - The typo strings "stream flood", "sever network", "tankge upgradation"
+     and "Duqum" live only in the old project-card captions, which are
+     replaced by the `blp-proj` rows (whose names come from the project
+     pages' own titles) — they disappear by construction, not by rewriting
+     retained sentences.
+3. New text is limited to: sub-nav tab labels, generic section-head labels
+   ("Overview", "At a glance", "All Projects"), listing-button labels with
+   counts, the three stat figures and their units, alt text, and
+   `aria-label`s. Nothing else.
+4. Every retained string remains replaceable without touching CSS; nothing
+   here is client-approved beyond the freeze itself.
 
 ## 8. The page stylesheet
 
@@ -500,7 +541,8 @@ of the §6 tables. Assertions:
    asserts the current-side button is **absent**.
 7. Every client logo has non-empty alt; count equals §6.4.
 8. No descendant of any `as-section` computes to `opacity: 0` after load.
-9. Exactly one `as-pill--key` on the page.
+9. `as-pill--key` count equals the page's frozen value: 1 on
+   Micro-Tunnelling, 0 everywhere else.
 10. No horizontal overflow at the current viewport.
 
 **Negative-testing is part of done** (the standing lesson: three hub
@@ -548,7 +590,7 @@ in a vitest config so the root run stops globbing other sessions' suites.
 
 | Risk | Handling |
 |---|---|
-| Copy not client-approved | Drafted per §7, flagged at handover; strings replaceable without CSS changes. |
+| Copy frozen to existing text (customer requirement) | Only §9.1 repairs applied, per the constraint table above; retained strings extracted verbatim from the source pages at build time. |
 | Stat figures drift as listings change | Figures are visible, re-derivable numbers; harness embeds them so drift fails loudly. |
 | Cover H1 overflow on long names | Measured during reference build; one commented override if needed. |
 | Band photograph weak or duplicating the cover | Verified visually per page; raised, not shipped, if unusable. |
