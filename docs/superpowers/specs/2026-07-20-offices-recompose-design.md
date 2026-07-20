@@ -143,7 +143,21 @@ This does **not** neutralise India's own outline, which is drawn in the
 operations tier and therefore keeps Natural Earth's treatment of the Kashmir
 boundary. India is a country UGCC operates in, so it has to be individually
 outlined; there is no version of this map that shows India without taking
-Natural Earth's line on its borders.
+some line on its borders.
+
+**India is drawn on de-facto control, deliberately.** Determined from the
+generated coordinates rather than assumed: India's outline reaches 35.50°N, not
+the ~37°N claim line. Gilgit-Baltistan renders as Pakistan, Aksai Chin and the
+Shaksgam tract as China; the Kashmir Valley and Arunachal Pradesh render as
+India. There is no dashed line-of-control anywhere in the file — the generator
+emits only closed filled paths. This is Natural Earth's standard treatment and
+is neither the Indian, Pakistani nor Chinese claim line.
+
+The site owner chose this over showing India's full claim line. It is the
+neutral cartographic convention and defensible to anyone who asks. The cost is
+recorded honestly: a viewer in India may notice the outline stops short of the
+claim line, and maps published *in* India are legally required to show it.
+Revisit if the site is ever marketed there.
 
 **Resolution is deliberately mixed.** The six UGCC countries are built from
 Natural Earth 1:50m; every context country from 1:110m. At 110m Kuwait

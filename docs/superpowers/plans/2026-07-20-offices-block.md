@@ -816,8 +816,18 @@ Create `assets/css/offices.css` with exactly this content:
    entities. Drawing land-versus-sea only keeps the block out of every one of
    those arguments, and costs nothing that the block needed.
 
-   Do not "fix" this by restoring a contrasting stroke. If the seams ever show
-   as faint hairlines, increase stroke-width rather than changing the colour. */
+   Do not "fix" this by restoring a contrasting stroke.
+
+   0.2 is the measured knee of the curve, not a guess: below it the open-seam
+   share climbs steeply (13.6% at 0.10), above it you buy almost nothing
+   (7.4% -> 5.9% between 0.20 and 0.40) because the remainder are wide wedges,
+   not hairlines. Pure anti-aliasing needs only ~0.1, so this has real margin.
+
+   NEVER exceed 0.3. A stroke fattens every coastline into the sea by w/2. At
+   0.9 -- what it would take to close ~99% of gaps -- the Gulf between Qatar and
+   the UAE partly fills in, Bahrain and Qatar lose their shape, and Oman's
+   Musandam nub merges toward the mainland. If seams ever show, the fix is
+   source resolution in the generator, not a thicker stroke here. */
 .off__map-ctx path {
   fill: #083c56;
   stroke: #083c56;
