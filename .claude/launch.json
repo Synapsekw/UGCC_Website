@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "ugcc-static",
+      "name": "ugcc-business-lines",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8747"],
-      "port": 8747
+      "runtimeArgs": ["-m", "http.server", "8759"],
+      "port": 8759
     }
   ]
 }
