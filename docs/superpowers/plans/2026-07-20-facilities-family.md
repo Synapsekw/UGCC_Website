@@ -545,7 +545,7 @@ git commit -m "feat(facilities): opt fx- components into the about-suite reveal 
 - Modify: `facilities-overview-construction-equipment-kuwait/index.html`
 
 **Interfaces:**
-- Consumes: `fx-tiles`/`fx-tile*` (Task 2), `about-suite.js?v=3` (Task 3), kit classes from `about-suite.css?v=3`.
+- Consumes: `fx-tiles`/`fx-tile*` (Task 2), `about-suite.js?v=3` (Task 3), kit classes from `about-suite.css?v=4`.
 - Produces: the hub the three subpages' `fx-next` cards link back to.
 
 - [ ] **Step 1: Head — add the two stylesheet links**
@@ -553,7 +553,7 @@ git commit -m "feat(facilities): opt fx- components into the about-suite reveal 
 Immediately after the existing `<link rel="stylesheet" href="/assets/css/v2.css?v=4">`:
 
 ```html
-<link rel="stylesheet" href="/assets/css/about-suite.css?v=3">
+<link rel="stylesheet" href="/assets/css/about-suite.css?v=4">
 <link rel="stylesheet" href="/assets/css/pages/facilities.css?v=1">
 ```
 

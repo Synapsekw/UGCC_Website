@@ -54,7 +54,7 @@ Head order on each page (the about-suite convention):
 
 ```html
 <link rel="stylesheet" href="/assets/css/v2.css?v=4">
-<link rel="stylesheet" href="/assets/css/about-suite.css?v=3">
+<link rel="stylesheet" href="/assets/css/about-suite.css?v=4">
 <link rel="stylesheet" href="/assets/css/pages/facilities.css?v=1">
 ```
 
