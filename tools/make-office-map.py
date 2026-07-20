@@ -13,10 +13,27 @@ Natural Earth raster + vector map data found on this website are in the public
 domain... renounce all financial claim to the maps and invites you to use them
 for personal, educational, and commercial purposes." No attribution required.
 
-Resolution is mixed on purpose. The six UGCC countries come from 1:50m; every
-other country from 1:110m. At 110m Kuwait simplifies to a 9-point smudge, which
-is unacceptable for the head office; at 50m it is 67 points and correctly
-shaped. Bytes are spent only where the eye goes.
+Every country comes from 1:50m. What is mixed is the SIMPLIFICATION, not the
+source: the six UGCC countries are simplified at eps 0.035, the context tier at
+eps 0.22. Bytes are spent only where the eye goes -- at 110m Kuwait collapses to
+a 9-point smudge, unacceptable for the head office, where at 50m it is 67 points
+and correctly shaped.
+
+Do not "optimise" the context tier back to 1:110m to save ~2.2 KB. Shared
+borders drawn from different source resolutions do not coincide, and the tiers
+are painted ctx -> op -> hq, so wherever the highlight polygon was the smaller
+of the two a background-coloured sliver opened along the border -- up to 7.9 CSS
+px on the desktop render. Moving context to 1:50m collapsed the Indo-Pak border
+vertices sitting more than 0.2 units from their neighbour from 34.2% to 5.2%
+(Bhutan and Myanmar to 0.0%). Tightening eps does not substitute for this: at
+1:110m, eps 0.035 measured no better than eps 0.22 (22.6% vs 22.1%), because the
+source resolution, not the simplification, is the floor.
+
+Task 3's CSS closes what is left by stroking each tier in its own fill colour.
+Keep that stroke at 0.2 units and never past 0.3: covering the residue needs
+~0.9, which visibly bloats coastlines -- the Gulf fills in, Bahrain and Qatar
+lose their shape, Musandam merges toward the mainland. If seams reappear, the
+answer is source resolution, not a thicker stroke.
 
 Output is deterministic: same inputs produce a byte-identical SVG, so a diff on
 tools/generated/office-map.svg is meaningful.
@@ -44,8 +61,6 @@ BASE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/%s/geojso
 SOURCES = {
     '50m': (BASE + 'ne_50m_admin_0_countries.geojson',
             '3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb'),
-    '110m': (BASE + 'ne_110m_admin_0_countries.geojson',
-             '6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f'),
 }
 
 # Equirectangular window. Chosen to hold all six countries: Malawi at -13.9
@@ -204,19 +219,28 @@ def esc(s):
 
 
 def main():
-    fine = {f['properties']['NAME']: f for f in fetch('50m')['features']}
-    coarse = fetch('110m')['features']
+    # One source file for every tier -- see the note on seams in the module
+    # docstring. Iterate the feature list, not the dict, so the context order is
+    # the file's order and the output stays byte-stable.
+    features = fetch('50m')['features']
+    by_name = {f['properties']['NAME']: f for f in features}
 
-    missing = [n for n in HIGHLIGHT if n not in fine]
+    missing = [n for n in HIGHLIGHT if n not in by_name]
     if missing:
         raise SystemExit('Natural Earth 50m is missing: %s' % ', '.join(missing))
 
-    office_paths = [build_path(fine[n], 0.035, 0.01, 2) for n in OFFICES]
-    op_paths = [build_path(fine[n], 0.035, 0.01, 2) for n in OPERATIONS]
+    office_paths = [build_path(by_name[n], 0.035, 0.01, 2) for n in OFFICES]
+    op_paths = [build_path(by_name[n], 0.035, 0.01, 2) for n in OPERATIONS]
 
+    # 1:50m carries a few polygons 1:110m does not, so the context tier is 49
+    # rather than 48. The extra one is Siachen Glacier. That is intentional and
+    # settled: the site keeps Natural Earth's de-facto boundary treatment for
+    # India, and this tier draws no internal borders at all (Task 3 strokes each
+    # country in its own fill colour), so Siachen renders as undifferentiated
+    # background land like every other context country. Nothing to special-case.
     context = []
     excluded = set()
-    for f in coarse:
+    for f in features:
         name = f['properties']['NAME']
         if name in HIGHLIGHT:
             excluded.add(name)
@@ -225,13 +249,15 @@ def main():
         if d:
             context.append(d)
 
-    # The exclusion above is asymmetric: only the fine file's NAMEs were
-    # validated. If 1:110m ever spelled one of the six differently, that
-    # country would be drawn twice -- once in context, once in its own tier --
-    # and the only symptom would be a context count quietly off by one.
+    # Redundant while every tier reads one file -- the `missing` check above
+    # already proves the six are present. Kept because it costs nothing and
+    # re-arms the moment anyone points a tier at a second file, where a NAME
+    # spelled differently between resolutions would draw a country twice, once
+    # in context and once in its own tier, with the only symptom a context count
+    # quietly off by one.
     if len(excluded) != len(HIGHLIGHT):
         raise SystemExit(
-            'coarse file excluded %d of %d highlight countries; not matched by NAME: %s'
+            'context loop excluded %d of %d highlight countries; not matched by NAME: %s'
             % (len(excluded), len(HIGHLIGHT),
                ', '.join(sorted(set(HIGHLIGHT) - excluded))))
 
