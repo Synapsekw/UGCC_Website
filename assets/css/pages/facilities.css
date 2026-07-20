@@ -1,0 +1,223 @@
+/* UGCC facilities family — hub tiles, overview split, type lists, gallery
+   grids, continue-nav. Linked by the four facilities pages only, after
+   about-suite.css. Spec: docs/superpowers/specs/2026-07-20-facilities-family-design.md
+   Everything else on these pages is the about-suite kit or v2.css. */
+
+/* ---- fx-cols: the overview split (prose beside figure or type list).
+   1.05/.95 rather than 1/1 so the reading column keeps a slightly longer
+   measure than the media column at 1224px. */
+.fx-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  gap: 56px;
+  align-items: start;
+}
+.fx-cols .as-figure { margin: 0; }
+
+/* ---- fx-tiles: the hub directory, 2x2. Gap matches the projects grid
+   (28px row / 24px column) so the two grids read as one family. */
+.fx-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 24px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.fx-tile { min-width: 0; }
+.fx-tile__link { display: block; text-decoration: none; }
+.fx-tile__shot {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;              /* required for the zoom */
+  border-radius: 4px;            /* projects-card radius */
+  background: #0b2233;           /* reserves the box before decode — CLS 0 */
+}
+.fx-tile__shot img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fx-tile__shot img {
+    transition: transform .5s var(--v2-ease-out-quart), filter .5s var(--v2-ease-out-quart);
+  }
+  .fx-tile__link:hover .fx-tile__shot img,
+  .fx-tile__link:focus-visible .fx-tile__shot img {
+    transform: scale(1.05);
+    filter: brightness(1.06) saturate(1.05);
+  }
+}
+.fx-tile__label {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 18px 0 0;
+  /* V2 markup replaces .text-box, so the builder's heading scale never
+     reaches this h3 — declare the family or it falls back to Open Sans. */
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 21px;               /* the offices country-h3 size */
+  letter-spacing: .04em;
+  color: var(--v2-navy);
+  transition: color .25s var(--v2-ease-out-quart);
+}
+.fx-tile__num {
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--v2-red);          /* red index on light ground */
+}
+.fx-tile__link:hover .fx-tile__label,
+.fx-tile__link:focus-visible .fx-tile__label { color: var(--v2-red); }
+.fx-tile__desc {
+  margin: 8px 0 0;
+  font-size: 15px; line-height: 1.7;
+  color: rgba(0, 42, 65, .72);   /* the .wr-desc floor that clears 4.5:1 */
+  max-width: 54ch;
+}
+.fx-tile__more {
+  display: inline-block;
+  margin-top: 14px;
+  padding-bottom: 4px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--v2-navy);
+  border-bottom: 2px solid var(--v2-red);   /* the .v2-proj__all affordance */
+  transition: color .25s var(--v2-ease-out-quart);
+}
+.fx-tile__link:hover .fx-tile__more,
+.fx-tile__link:focus-visible .fx-tile__more { color: var(--v2-red); }
+
+/* ---- fx-types: numbered capability rows (no destination pages, so no
+   links and no arrows — this is a register, not a nav) */
+.fx-types { margin: 0; padding: 0; list-style: none; }
+.fx-type {
+  display: grid;
+  grid-template-columns: 28px 1fr;   /* the wr-row number gutter */
+  gap: 18px;
+  align-items: baseline;
+  padding: 15px 0;
+  border-bottom: .5px solid rgba(0, 42, 65, .16);
+}
+.fx-types > .fx-type:first-child { border-top: .5px solid rgba(0, 42, 65, .16); }
+.fx-type__num {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--v2-red);
+}
+.fx-type__name {
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: .02em;
+  color: var(--v2-navy);
+}
+.fx-type__note {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 13.5px;
+  color: rgba(0, 42, 65, .62);
+}
+
+/* ---- fx-gallery: the approved slide sets as a contained grid. Cards are
+   uniform 3:2 crops; the li owns overflow+radius so the zoom stays clipped. */
+.fx-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fx-gallery--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fx-gallery--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.fx-gallery > li {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0b2233;
+}
+.fx-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fx-gallery img { transition: transform .5s var(--v2-ease-out-quart), filter .5s var(--v2-ease-out-quart); }
+  .fx-gallery > li:hover img { transform: scale(1.05); filter: brightness(1.06) saturate(1.05); }
+}
+
+/* ---- fx-next: continue through the family, inside the closing navy
+   section. Hairline cards, red-text direction line (dark ground). */
+.fx-next {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+.fx-next a {
+  display: block;
+  padding: 22px 24px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 4px;
+  transition: background-color .25s var(--v2-ease-out-quart), border-color .25s var(--v2-ease-out-quart);
+}
+.fx-next a:hover,
+.fx-next a:focus-visible {
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .4);
+}
+.fx-next a:last-child { text-align: right; }
+.fx-next__dir {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--v2-red-text);     /* small red text on navy — never --v2-red */
+}
+.fx-next__name {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: .03em;
+  color: #fff;
+}
+
+/* ---- reveals: the .bl-tile pattern exactly (business-lines.css:169).
+   Inert unless about-suite.js adds BOTH gate classes; the reduced-motion
+   block guarantees visibility even if the UA flips preference mid-session. */
+.hero-motion.v2-reveal .fx-tile,
+.hero-motion.v2-reveal .fx-type,
+.hero-motion.v2-reveal .fx-gallery > li { opacity: 0; }
+.hero-motion.v2-reveal .fx-tile.is-in,
+.hero-motion.v2-reveal .fx-type.is-in,
+.hero-motion.v2-reveal .fx-gallery > li.is-in {
+  animation: as-fade-up .8s var(--v2-ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion.v2-reveal .fx-tile,
+  .hero-motion.v2-reveal .fx-type,
+  .hero-motion.v2-reveal .fx-gallery > li { opacity: 1; }
+}
+
+/* ---- responsive. 920 is the builder's own header breakpoint; 768 would
+   leave a dead 769-920 band (design-system rule). */
+@media (max-width: 920px) {
+  .fx-cols { grid-template-columns: 1fr; gap: 32px; }
+  .fx-tiles { grid-template-columns: 1fr; gap: 32px; }
+  .fx-gallery,
+  .fx-gallery--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}
+@media (max-width: 600px) {
+  .fx-gallery,
+  .fx-gallery--2,
+  .fx-gallery--4 { grid-template-columns: 1fr; }
+  .fx-next { grid-template-columns: 1fr; }
+  .fx-next a:last-child { text-align: left; }
+}
