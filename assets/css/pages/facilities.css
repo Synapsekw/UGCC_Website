@@ -28,7 +28,13 @@
 .fx-tile__link { display: block; text-decoration: none; }
 .fx-tile__shot {
   display: block;
-  aspect-ratio: 16 / 9;
+  /* 3:2, not 16:9 — the approved tile photos run 1.02:1–1.5:1, and a 16:9
+     window cover-cropped 20–42% of their height (worst: the near-square
+     workshops bench, zoomed 2.6x), which the client read as vertical
+     stretching (feedback 2026-07-20). 3:2 matches the plants/labs sources
+     almost exactly and is the fx-gallery card ratio, so the family shares
+     one photographic frame. */
+  aspect-ratio: 3 / 2;
   overflow: hidden;              /* required for the zoom */
   border-radius: 4px;            /* projects-card radius */
   background: #0b2233;           /* reserves the box before decode — CLS 0 */
