@@ -5,13 +5,13 @@
 // this repo has no package.json/node_modules (vitest runs from the npx cache),
 // so the bundled config cannot resolve the 'vitest' package at load time.
 
-// The include is anchored at <root>/tests, which is what keeps a root run out
-// of .claude/worktrees/*/tests. Do NOT add '**/.claude/**' to exclude: vitest
-// matches excludes against absolute paths, and inside a worktree (which lives
-// under .claude/worktrees/) that pattern excludes the worktree's own tests.
+// The root-anchored include is what keeps a run out of .claude/worktrees/*/
+// tests. The .claude exclude is belt-and-braces for any future un-anchored
+// include; verified inert inside a worktree (vitest 4.1.10 matches excludes
+// root-relatively, so a worktree's own tests are NOT self-excluded).
 export default {
   test: {
     include: ['tests/**/*.test.mjs'],
-    exclude: ['**/node_modules/**'],
+    exclude: ['**/node_modules/**', '**/.claude/**'],
   },
 };
