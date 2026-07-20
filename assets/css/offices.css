@@ -40,9 +40,15 @@
   margin-inline: auto;
   padding-block: 88px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   gap: 56px;
-  align-items: start;
+  /* stretch, NOT start. The map column is the shorter of the two by ~200px
+     with align-items:start, which left a slab of bare navy under the map.
+     Stretching lets the map panel end level with the register — see the note
+     on .off__col--map. 1.2fr rather than 1.05fr widens the map to 633px at
+     1280 while keeping the register above 420px, the width below which its
+     addresses start re-wrapping and it grows taller (measured; see below). */
+  align-items: stretch;
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
 }
 
@@ -87,15 +93,23 @@
   padding: 0;
 }
 
+/* Two columns, so every .off__line below can adopt them with subgrid and the
+   four label/value pairs line up on one axis. See .off__line. */
 .off__office {
   padding: 22px 0;
   border-top: 1px solid var(--off-hair);
   display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 10px;
 }
 
-.off__office:last-child {
-  border-bottom: 1px solid var(--off-hair);
+/* No border-bottom on the last office. .off__presence already draws a
+   border-top 30px below it, and the two hairlines with nothing between them
+   read as a doubled rule rather than as two dividers. One line, one meaning. */
+
+.off__country,
+.off__addr {
+  grid-column: 1 / -1;
 }
 
 .off__country {
@@ -129,6 +143,10 @@
   color: var(--off-body);
 }
 
+/* Fallback for browsers without subgrid: flex, with the label padded to the
+   rendered width of the widest label. "Telephone" measures 75.18px at this
+   size, so 68px did nothing and the values started 7px apart between the
+   phone and email rows. 76px is the smallest whole pixel that clears it. */
 .off__line {
   margin: 0;
   display: flex;
@@ -137,9 +155,26 @@
   flex-wrap: wrap;
 }
 
+/* The real fix. A per-line `grid-template-columns: max-content 1fr` would NOT
+   align anything: each .off__line is its own formatting context, so the
+   Telephone row would size its column to "Telephone" and the Email row to
+   "Email" — the exact 7px ragged edge being fixed, only now by a different
+   mechanism. The columns have to be shared, so they are declared once on
+   .off__office and adopted here with subgrid. That also survives a future
+   label longer than "Telephone" without anyone editing a magic number. */
+@supports (grid-template-columns: subgrid) {
+  .off__line {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    column-gap: 10px;
+    align-items: baseline;
+  }
+}
+
 .off__label {
   flex: none;
-  min-width: 68px;
+  min-width: 76px;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: .16em;
@@ -172,7 +207,10 @@
   border-top: 1px solid var(--off-hair);
   display: flex;
   align-items: baseline;
-  gap: 14px 30px;
+  /* 16px, not 30px: each item now carries its own bullet in flow (see
+     .off__presence-list li::before), so the optical gap is this value plus
+     the bullet's 7px box, which lands back on the ~30px it used to be. */
+  gap: 14px 16px;
   flex-wrap: wrap;
 }
 
@@ -186,7 +224,7 @@
 
 .off__presence-list {
   display: flex;
-  gap: 30px;
+  gap: 14px 16px;
   flex-wrap: wrap;
   list-style: none;
   margin: 0;
@@ -194,30 +232,51 @@
 }
 
 .off__presence-list li {
-  position: relative;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-size: 17px;
   color: var(--off-body);
 }
 
+/* An in-flow inline marker, NOT position:absolute; left:-17px. That put the
+   bullet 17px outside the list's own box, so whether it was visible depended
+   on how much space happened to sit to the list's left. At 920px and below
+   the list starts at x=16 and the first bullet landed at x=-1 — clipped by
+   the viewport edge. In flow it cannot escape its item at any width. */
 .off__presence-list li::before {
   content: "";
-  position: absolute;
-  left: -17px;
-  top: 50%;
+  display: inline-block;
   width: 5px;
   height: 5px;
+  margin-right: 9px;
+  /* Not `middle`, which centres on half the x-height (8.67px here) and lands
+     the dot 1.2px below the optical centre of these all-caps-height country
+     names. Hammersmith One's cap height at 17px measures 11.11px, so the cap
+     centre is 5.56px above the baseline; raising a 5px box by 0.18em (3.06px)
+     puts its centre at 5.56px. That is where the old absolutely-positioned
+     bullet sat, so this is position-preserving, not a new choice. */
+  vertical-align: .18em;
   border: 1px solid var(--v2-red-text, #e8635e);
   border-radius: 50%;
-  transform: translateY(-50%);
 }
 
 /* ---------- map ---------- */
 
+/* The map panel fills the column top to bottom, level with the register.
+   flex-basis 0 is load-bearing: it keeps the svg out of the column's
+   intrinsic height, so the grid row is sized by the register alone and the
+   map takes whatever is left after the key. Without it the two heights chase
+   each other. */
+.off__col--map {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .off__map {
   display: block;
   width: 100%;
-  height: auto;
+  flex: 1 1 0;
+  min-height: 0;
   background: #001b2a;
   border: 1px solid var(--off-hair);
 }
@@ -335,6 +394,17 @@
      screen reader; only the visual order changes. */
   .off__col--map {
     order: -1;
+    /* One column, so there is no second column to match: the map goes back to
+       its own aspect ratio. Capped because the window is 1.135 taller than it
+       is wide — at the full 888px available here that would be a 1,008px-tall
+       graphic before the register even starts. Left-aligned, not centred, so
+       it shares an edge with the text below it. */
+    max-width: 600px;
+  }
+
+  .off__map {
+    flex: none;
+    height: auto;
   }
 
   /* Illegible below roughly 2px rendered — the pins and tier fills still

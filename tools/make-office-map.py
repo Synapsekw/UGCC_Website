@@ -63,9 +63,53 @@ SOURCES = {
             '3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb'),
 }
 
-# Equirectangular window. Chosen to hold all six countries: Malawi at -13.9
-# sets the southern bound, India's east coast the eastern one.
-WIN = dict(lon0=26.0, lon1=95.0, lat0=41.0, lat1=-19.0)
+# ---------------------------------------------------------------------------
+# The window, and why it is this shape.
+#
+# The register column beside the map is portrait; a map holding Iraq, the Gulf,
+# India and Malawi is landscape. The previous window (26..95E by 41N..19S,
+# viewBox 100x87) therefore ended ~204 CSS px above the bottom of the register
+# at 1280px and left a slab of bare navy there. It also clipped India: the
+# 1:50m outline reaches 97.344E and the frame stopped at 95.0.
+#
+# Measured bounding box of the six countries, from the 1:50m data itself:
+#     lon  32.670E .. 97.344E   (span 64.674)
+#     lat  17.131S .. 37.372N   (span 54.503)
+#
+# The map panel now stretches to the register's height (offices.css), so the
+# window has to be cut to the aspect ratio the layout hands it. Measured:
+#     viewport 1280  -> svg content box 630.7 x 717.8  ->  h/w 1.1381
+#     viewport >=1288 -> 635.1 x 717.8                 ->  h/w 1.1302
+# Split the difference at 1.134 and the letterbox is under 3 px at both.
+#
+#     lon span 73.20  (28.4E .. 101.6E)   margins  4.27 W,  4.26 E
+#     lat span 83.00  (54.4N .. 28.6S)    margins 17.03 N, 11.47 S
+#     viewBox height = 100 * 83.00 / 73.20 = 113.4
+#
+# The extra latitude is biased north 17:11 because north of the six is land --
+# Turkey, the Caucasus, the Caspian, Kazakhstan -- while south of about 30S
+# there is nothing but Southern Ocean. Longitude is only widened enough to
+# clear India and Malawi with a margin; the horizontal scale is essentially
+# unchanged from the old window (8.62 px/deg vs 8.58), so nothing shrank. The
+# panel grew from 594x517 to 633x720.
+#
+# THE SVG IS RENDERED WITH preserveAspectRatio="xMidYMid meet", NOT "slice".
+# This is not a preference, it is forced. Between 921px (the narrowest
+# two-column viewport) and the 1224px cap, the column aspect ratio runs
+# 1.1302 to 1.7021, because the register grows taller as it narrows while the
+# map grows narrower. For `slice` to keep the six countries on screen at both
+# ends, the window's latitude span must be at least
+#     (64.674 + margin) * 1.7021  =  123.7 degrees
+# regardless of what aspect ratio you pick -- i.e. roughly 72N to 52S, Arctic
+# pack ice to the Southern Ocean. That is far worse than the gap being fixed,
+# so `meet` it is. `meet` letterboxes instead of cropping, and the bands are
+# invisible because .off__map's background is the same #001b2a the sea is
+# drawn in: they read as more ocean, not as empty layout.
+#
+# If you re-tighten this window, re-check it against the six-country bbox
+# above. Nothing in the harness will catch a crop.
+# ---------------------------------------------------------------------------
+WIN = dict(lon0=28.4, lon1=101.6, lat0=54.4, lat1=-28.6)
 W = 100.0
 H = round(W * (WIN['lat0'] - WIN['lat1']) / (WIN['lon1'] - WIN['lon0']), 1)
 
@@ -229,6 +273,27 @@ def main():
     if missing:
         raise SystemExit('Natural Earth 50m is missing: %s' % ', '.join(missing))
 
+    # The six must sit INSIDE the window with a real margin, measured against
+    # the source coordinates rather than eyeballed on the render. The old
+    # window failed this: it stopped at 95.0E and India reaches 97.344E, so
+    # Arunachal and Nagaland were cut off and nothing noticed for four tasks.
+    # 2 degrees is about 17 CSS px at the desktop scale -- enough that a
+    # country cannot appear welded to the frame edge.
+    margin = 2.0
+    tight = []
+    for n in HIGHLIGHT:
+        xs = [x for r in rings(by_name[n]['geometry']) for x, _ in r]
+        ys = [y for r in rings(by_name[n]['geometry']) for _, y in r]
+        for side, slack in (('west', min(xs) - WIN['lon0']),
+                            ('east', WIN['lon1'] - max(xs)),
+                            ('north', WIN['lat0'] - max(ys)),
+                            ('south', min(ys) - WIN['lat1'])):
+            if slack < margin:
+                tight.append('%s %s edge: %.3f deg of margin' % (n, side, slack))
+    if tight:
+        raise SystemExit('window does not clear the six countries by %.1f deg:\n  %s'
+                         % (margin, '\n  '.join(tight)))
+
     office_paths = [build_path(by_name[n], 0.035, 0.01, 2) for n in OFFICES]
     op_paths = [build_path(by_name[n], 0.035, 0.01, 2) for n in OPERATIONS]
 
@@ -280,7 +345,11 @@ def main():
     )
 
     out = []
-    out.append('<svg class="off__map" viewBox="0 0 %d %s" role="img" aria-labelledby="off-map-title">' % (W, H))
+    # meet, explicitly, not the default-by-omission. See the window comment at
+    # the top: `slice` cannot hold the six countries across the column aspect
+    # ratios this layout produces, and the letterbox `meet` leaves is invisible
+    # against .off__map's sea-coloured background.
+    out.append('<svg class="off__map" viewBox="0 0 %d %s" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="off-map-title">' % (W, H))
     out.append('<title id="off-map-title">%s</title>' % esc(title))
     out.append('<g class="off__map-ctx">' + ''.join('<path d="%s"/>' % d for d in context) + '</g>')
     out.append('<g class="off__map-op">' + ''.join('<path d="%s"/>' % d for d in op_paths) + '</g>')
