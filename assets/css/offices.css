@@ -1,0 +1,359 @@
+/* ==========================================================================
+   UGCC homepage — the offices block (#zrby1M), "Our offices and Branches".
+   Loaded only by index.html, after credentials.css.
+
+   Replaces a builder-exported absolute grid: 23 .layout-element divs on a
+   22-column / 32-row track list, over a map screenshot that had the section
+   heading baked into its pixels and omitted Malawi. See
+   docs/superpowers/specs/2026-07-20-offices-recompose-design.md.
+
+   No JavaScript, and deliberately none of the builder's .transition reveal
+   classes: those start at opacity 0 and depend on assets/js/main.js, so a
+   script failure would render this block blank.
+
+   The section previously carried block--mobile-hidden (display:none at
+   width<=920px). It is gone. Nothing in this file may reintroduce a rule
+   that hides the block at any width.
+   ========================================================================== */
+
+#zrby1M {
+  background: var(--v2-navy, rgb(0, 42, 65));
+  color: #fff;
+  /* Task 4 strips the section's inline --block-padding variables. main.css
+     still declares padding: var(--block-padding) on .block, which becomes an
+     invalid declaration once the variable is gone — the result is
+     browser-dependent rather than simply zero. Set it explicitly; .off owns
+     the block's spacing. */
+  padding: 0;
+  /* Local tokens. The hairline is reused by every divider in the block, so
+     changing the block's contrast is a one-line edit. */
+  --off-hair: rgba(255, 255, 255, .16);
+  --off-dim: rgba(255, 255, 255, .45);
+  --off-body: rgba(255, 255, 255, .82);
+}
+
+/* width: min(), not max-width + vw padding. box-sizing is border-box from
+   main.css's * reset, so viewport-proportional padding on a capped-width box
+   eats the cap. Matches #zZFMdo and #u7vIc0iRh. */
+.off {
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+  padding-block: 88px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 56px;
+  align-items: start;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+}
+
+/* ---------- heading ---------- */
+
+.off__eyebrow {
+  margin: 0 0 12px;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--v2-red-text, #e8635e);
+}
+
+/* font-family and weight are explicit: this heading lives outside .text-box,
+   so the builder's h2 custom properties do not reach it and it would
+   otherwise fall back to Open Sans Bold. See the note in sections.css. */
+.off__title {
+  margin: 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -.005em;
+  color: #fff;
+  text-wrap: balance;
+}
+
+.off__lede {
+  margin: 12px 0 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .66);
+}
+
+/* ---------- office register ---------- */
+
+.off__list {
+  list-style: none;
+  margin: 34px 0 0;
+  padding: 0;
+}
+
+.off__office {
+  padding: 22px 0;
+  border-top: 1px solid var(--off-hair);
+  display: grid;
+  gap: 10px;
+}
+
+.off__office:last-child {
+  border-bottom: 1px solid var(--off-hair);
+}
+
+.off__country {
+  margin: 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 21px;
+  letter-spacing: .01em;
+  color: #fff;
+}
+
+.off__hq {
+  display: inline-block;
+  vertical-align: 3px;
+  margin-left: 9px;
+  padding: 2px 6px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--v2-red, #d41c22);
+}
+
+.off__addr {
+  margin: 0;
+  font-style: normal; /* <address> italicises by default */
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--off-body);
+}
+
+.off__line {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.off__label {
+  flex: none;
+  min-width: 68px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--off-dim);
+}
+
+.off__link {
+  color: #fff;
+  font-size: 15px;
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid transparent;
+  transition:
+    color .25s var(--v2-ease-out-quart, ease),
+    border-color .25s var(--v2-ease-out-quart, ease);
+}
+
+.off__link:hover,
+.off__link:focus-visible {
+  color: var(--v2-red-text, #e8635e);
+  border-bottom-color: var(--v2-red-text, #e8635e);
+}
+
+/* ---------- presence tier ---------- */
+
+.off__presence {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--off-hair);
+  display: flex;
+  align-items: baseline;
+  gap: 14px 30px;
+  flex-wrap: wrap;
+}
+
+.off__presence-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--off-dim);
+}
+
+.off__presence-list {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.off__presence-list li {
+  position: relative;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-size: 17px;
+  color: var(--off-body);
+}
+
+.off__presence-list li::before {
+  content: "";
+  position: absolute;
+  left: -17px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--v2-red-text, #e8635e);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+/* ---------- map ---------- */
+
+.off__map {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #001b2a;
+  border: 1px solid var(--off-hair);
+}
+
+/* No internal borders in the background tier. The 48 context countries are
+   still separate <path> elements (the harness asserts ctx > 20), but the
+   stroke matches the fill, which closes the anti-aliasing seams between
+   adjacent polygons so they read as one continuous landmass.
+
+   This is deliberate and was the site owner's call. The background's job is
+   orientation, not geopolitics, and Natural Earth's default boundaries put
+   Israel, Palestine, N. Cyprus and Somaliland in frame as distinct outlined
+   entities. Drawing land-versus-sea only keeps the block out of every one of
+   those arguments, and costs nothing that the block needed.
+
+   Do not "fix" this by restoring a contrasting stroke.
+
+   0.2 is the measured knee of the curve, not a guess: below it the open-seam
+   share climbs steeply (13.6% at 0.10), above it you buy almost nothing
+   (7.4% -> 5.9% between 0.20 and 0.40) because the remainder are wide wedges,
+   not hairlines. Pure anti-aliasing needs only ~0.1, so this has real margin.
+
+   NEVER exceed 0.3. A stroke fattens every coastline into the sea by w/2. At
+   0.9 -- what it would take to close ~99% of gaps -- the Gulf between Qatar and
+   the UAE partly fills in, Bahrain and Qatar lose their shape, and Oman's
+   Musandam nub merges toward the mainland. If seams ever show, the fix is
+   source resolution in the generator, not a thicker stroke here. */
+.off__map-ctx path {
+  fill: #083c56;
+  stroke: #083c56;
+  stroke-width: .2;
+}
+
+.off__map-op path {
+  fill: #1c6d8f;
+  stroke: #2f88ad;
+  stroke-width: .16;
+}
+
+/* The navy stroke is not decoration. Filled solid without it, Kuwait, Saudi
+   Arabia and Oman merge into one red mass and the block appears to claim one
+   country instead of three. */
+.off__map-hq path {
+  fill: var(--v2-red, #d41c22);
+  stroke: var(--v2-navy, rgb(0, 42, 65));
+  stroke-width: .3;
+}
+
+.off__halo {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .3;
+  opacity: .9;
+}
+
+.off__pin {
+  fill: #fff;
+}
+
+.off__map-label {
+  fill: #fff;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 2.4px;
+  letter-spacing: .04px;
+}
+
+/* ---------- map key ---------- */
+
+/* Tier meaning is carried by this key as well as by colour, so the
+   office/operations distinction survives for a colour-blind reader. */
+.off__key {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: rgba(255, 255, 255, .5);
+}
+
+.off__key li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.off__key-swatch {
+  width: 9px;
+  height: 9px;
+  flex: none;
+}
+
+.off__key-swatch--office {
+  background: var(--v2-red, #d41c22);
+}
+
+.off__key-swatch--op {
+  background: #1c6d8f;
+}
+
+/* ---------- 920px: the builder's own breakpoint, and the width at which
+   this block used to vanish entirely ---------- */
+
+@media screen and (width <= 920px) {
+  .off {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding-block: 64px;
+    width: min(1224px, 100% - 32px);
+  }
+
+  /* Map above the register. Source order keeps the heading first for a
+     screen reader; only the visual order changes. */
+  .off__col--map {
+    order: -1;
+  }
+
+  /* Illegible below roughly 2px rendered — the pins and tier fills still
+     carry the map as a locator. */
+  .off__map-label {
+    display: none;
+  }
+
+  .off__list {
+    margin-top: 24px;
+  }
+
+  .off__line {
+    gap: 6px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .off__link {
+    transition: none;
+  }
+}
