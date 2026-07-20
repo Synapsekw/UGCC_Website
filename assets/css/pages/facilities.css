@@ -148,6 +148,12 @@
 .fx-gallery img {
   display: block;
   width: 100%;
+  /* height:auto is load-bearing: these imgs carry height="" attributes (CLS),
+     and the attribute's presentational hint is a definite height that defeats
+     aspect-ratio (which only applies when height computes to auto). Without
+     this line every gallery card renders at its attribute height — 285x768
+     vertical slivers on /equipment (client-reported 2026-07-20). */
+  height: auto;
   aspect-ratio: 3 / 2;
   object-fit: cover;
 }

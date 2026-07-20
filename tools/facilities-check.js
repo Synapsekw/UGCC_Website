@@ -88,6 +88,18 @@
        !!(img && img.getAttribute('width') && img.getAttribute('height') &&
           (img.getAttribute('alt') || '').length));
   });
+  /* rendered geometry, not just markup: the height="" attribute is a definite
+     height that defeats aspect-ratio unless the stylesheet declares
+     height:auto — when that regressed, every card rendered as a vertical
+     sliver at its attribute height while all the attribute checks above
+     still passed. Assert the box the visitor actually sees is 3:2. */
+  Array.prototype.forEach.call(document.querySelectorAll('.fx-gallery img'), function (img, i) {
+    var b = img.getBoundingClientRect();
+    var ratio = b.height > 0 ? b.width / b.height : 0;
+    ok('gallery: card ' + (i + 1) + ' renders 3:2', ratio > 1.45 && ratio < 1.55,
+       'got ' + ratio.toFixed(2) + ' (' + Math.round(b.width) + 'x' + Math.round(b.height) + ')');
+  });
+
   /* content photographs only — the builder header renders its logo twice
      (desktop + mobile layouts), which is chrome, not a photo placement */
   var seen = {}, dup = null;
