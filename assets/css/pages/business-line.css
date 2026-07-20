@@ -1,0 +1,162 @@
+/* Business-line sub-pages — shared by the seven discipline pages.
+   Loads after about-suite.css; everything else on these pages is kit.
+   Spec: docs/superpowers/specs/2026-07-20-business-line-subpages-design.md
+   Namespace: blp-. Only three components live here: the key-project rows,
+   the all-projects button row, and the client logo grid. If anything more
+   wants writing, the kit is wrong and that is a kit amendment. */
+
+/* ---- 1. Key-project rows ------------------------------------------------
+   Text-first contract rows modeled on the homepage's .wr-row: hairline
+   bottom border, zero-width inset red edge that transitions on hover (a
+   border-left would shift the row), arrow travelling inside its own column.
+   Track widths: 220px fits the longest client string ("Joint Operations,
+   Saudi Arabian Chevron" wraps to two 13px lines by design); 110px fits
+   "USD 487.2M"; 130px fits "Completed 2022". Re-measure before changing.
+   Fixed tracks + gaps = 580px minimum; the list must sit in the full-width
+   container above 920px — do not nest it in a split column. */
+.blp-proj {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.blp-proj__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px 110px 130px 24px;
+  align-items: baseline;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: .5px solid rgba(0, 42, 65, .16);
+  text-decoration: none;
+  box-shadow: inset 0 0 0 var(--v2-red, #d41c22);   /* zero-width at rest, so it transitions */
+  transition: background-color .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1)),
+              box-shadow .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1));
+}
+
+.blp-proj__item:first-child .blp-proj__row {
+  border-top: .5px solid rgba(0, 42, 65, .16);
+}
+
+/* Hover and focus share one rule so they cannot drift apart in a later edit.
+   Colour/background feedback sits outside the reduced-motion gate. */
+.blp-proj__row:hover,
+.blp-proj__row:focus-visible {
+  background-color: rgba(0, 42, 65, .07);
+  box-shadow: inset 3px 0 0 var(--v2-red, #d41c22);
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .blp-proj__row:focus-visible { outline: 2px solid CanvasText; }
+}
+@media (prefers-contrast: more) {
+  .blp-proj__row:focus-visible { outline: 2px solid var(--v2-navy, rgb(0,42,65)); outline-offset: -2px; }
+}
+
+/* Hammersmith One ships one weight; family AND weight declared because this
+   markup is outside .text-box and would otherwise fall back to Open Sans. */
+.blp-proj__name {
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--v2-navy, rgb(0,42,65));
+  text-wrap: balance;
+}
+
+/* .72 is the measured floor that clears 4.5:1 on light grounds (design
+   system, .wr-desc). Do not lighten. */
+.blp-proj__client,
+.blp-proj__status {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(0, 42, 65, .72);
+}
+
+.blp-proj__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--v2-navy, rgb(0,42,65));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Arrow rests at -4px and travels TO 0, so motion stays inside the 24px
+   column and the glyph is never clipped (homepage .wr-arrow pattern). */
+.blp-proj__arrow {
+  justify-self: end;
+  color: var(--v2-red, #d41c22);
+  font-size: 15px;
+  transform: translateX(-4px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .blp-proj__arrow { transition: transform .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1)); }
+}
+
+.blp-proj__row:hover .blp-proj__arrow,
+.blp-proj__row:focus-visible .blp-proj__arrow {
+  transform: translateX(0);
+}
+
+/* ---- 2. All-projects button row ---------------------------------------- */
+.blp-btnrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ---- 3. Client logo grid ------------------------------------------------
+   Fixed-height tiles so mixed logo aspect ratios (512x177 MPW vs 960x1187
+   KOC) read as one row. Logos contain, never crop. Not links. */
+.blp-clients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.blp-clients__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 170px;
+  height: 96px;
+  padding: 14px 20px;
+  background: #fff;
+  border: 1px solid var(--as-hair-light, rgba(0,42,65,.12));
+  border-radius: 4px;
+  /* 96px tile: KOC's portrait 960x1187 logo renders 52x64 height-bound; 64px
+     cap keeps wide logos (MPW 512x177 → 128x44) and tall logos on one visual
+     scale; border-box makes the content box 128x66. */
+}
+
+.blp-clients__item img {
+  max-width: 100%;
+  max-height: 64px;
+  width: auto;
+  height: auto;
+  object-fit: contain; /* inert today (width/height:auto + max constraints preserve ratio); guards a future explicit sizing. */
+}
+
+/* ---- 4. Responsive ------------------------------------------------------
+   920px is the builder's own breakpoint. There is no 768px breakpoint
+   anywhere in this codebase; do not add one. */
+@media (max-width: 920px) {
+  .blp-proj__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 16px;
+  }
+  .blp-proj__name   { grid-column: 1; grid-row: 1; }
+  .blp-proj__value  { grid-column: 2; grid-row: 1; justify-self: end; }
+  .blp-proj__client { grid-column: 1; grid-row: 2; }
+  .blp-proj__status { grid-column: 2; grid-row: 2; justify-self: end; }
+  .blp-proj__arrow  { display: none; }
+  /* .as-btn already goes full-width at this breakpoint; stack them */
+  .blp-btnrow { flex-direction: column; }
+}
+
+@media (max-width: 600px) {
+  .blp-clients__item { width: calc(50% - 8px); }
+}
