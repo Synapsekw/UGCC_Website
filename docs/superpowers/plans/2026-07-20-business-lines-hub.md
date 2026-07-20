@@ -1034,3 +1034,68 @@ rather than swapping the photograph.
 **One risk carried forward:** civil and water both have off-centre subjects, so
 the default centre crop will cut them badly. Task 1 Step 5 checks this
 explicitly. Everything else in the set crops cleanly from centre.
+
+---
+
+## Handover — 2026-07-20
+
+Branch `claude/business-lines-mosaic`, worktree `.claude/worktrees/business-lines`.
+**Not merged.** Merges cleanly into `V2` as of `dea56bc`.
+
+### Delivered
+
+| | |
+|---|---|
+| Harness | `tools/business-lines-check.js` — **96 assertions, 0 failures** at 1280 and 900 |
+| Tile imagery | 7 files, **790.5 KiB** combined, JPEG q70, verified artifact-free at 1:1 |
+| Console | no errors on the hub or on any of the five About-suite pages |
+| Files changed vs `V2` | 18 |
+| New JavaScript | none — the mosaic opts into the existing reveal contract |
+
+### Defects found during implementation, not anticipated by the plan
+
+1. **The mosaic was invisible.** `business-lines.css` hides `.bl-tile` behind
+   `.hero-motion.v2-reveal`, but Task 2 shipped that gate before Task 5 taught
+   `about-suite.js` to observe it. The script's fail-safe does not cover this —
+   it returns as soon as any one target reveals, and `.as-head` always
+   intersects. In any browser where IntersectionObserver works, all eight tiles
+   would have been hidden permanently. **Plan ordering defect:** never ship a
+   reveal gate before the script that satisfies it.
+
+2. **Two tiles shipped letterboxed.** `sips -Z` scales the longest side, so a
+   16:9 source resized for a 16:10 box came out 680×382 and `sips -c` padded it
+   with black. The dimension check passed because the files really were
+   680×425 — the padding is part of the image. Fixed with a cover-crop.
+
+3. **Every tile announced the photo, not the discipline.** Name-from-content
+   includes `<img alt>`, and the image precedes the text, so the accessible name
+   began with the photo description and ran ~30 words — failing SC 2.5.3.
+   Fixed with explicit `aria-label` per anchor. **The harness gave this a false
+   pass** because it checked `textContent`, which excludes alt.
+
+4. **The share card pointed at an unrelated credentials PNG**, with both
+   `og:image:alt` and `twitter:image:alt` empty.
+
+5. **The image budget was wrong.** 400 KB assumed a modern encoder; `sips`
+   needed quality 40 to reach it. Raised to 800 KiB with quality 70 as the floor.
+
+### Verification notes for whoever picks this up
+
+- **IntersectionObserver does not fire in the preview pane.** Every suite page
+  shows `hero-motion` without `v2-reveal` there, because the fail-safe fires.
+  That is the environment, not a regression — the untouched About page behaves
+  identically. It also means the pane *masks* defect 1. Check reveal wiring by
+  reading the CSS gate against the JS selector list, not by looking.
+- **Screenshots break after scrolling** in the pane. Use a tall viewport to
+  bring content into the initial view instead.
+- `grep -c` on these files always returns 1 — they are single-line minified.
+  Count occurrences in Python.
+
+### Not done
+
+- The seven sub-pages (spec §9). The spine is agreed; the content repairs owed
+  there are listed in §9.1 and include copy that is wrong, not merely weak.
+- **Copy is drafted, not client-approved.** Every string is replaceable without
+  touching CSS.
+- `oil-and-gas-current` still does not exist, so that tab is missing from every
+  current-projects filter row.
