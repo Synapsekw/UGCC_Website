@@ -82,7 +82,7 @@ sips -Z 1220 "639d396c-cairo-street-hd-final-v2_edit.mp4_20260404_151225.212-cop
 sips -c 686 1220 /tmp/bl-roads.png --out /tmp/bl-roads-c.png >/dev/null
 sips -s format jpeg -s formatOptions 82 /tmp/bl-roads-c.png --out v2/bl/roads.jpg >/dev/null
 
-sips -Z 1220 "1fcfa266-kp3-cns-301-6-Svi5dqP6cfg8u3aB.webp" \
+sips -Z 1220 "0af4cdfb-civil-infrastructure-1-bDchTHDP9wFTCaIk.png" \
      --out /tmp/bl-civil.png >/dev/null
 sips -c 686 1220 /tmp/bl-civil.png --out /tmp/bl-civil-c.png >/dev/null
 sips -s format jpeg -s formatOptions 82 /tmp/bl-civil-c.png --out v2/bl/civil.jpg >/dev/null
@@ -90,7 +90,7 @@ sips -s format jpeg -s formatOptions 82 /tmp/bl-civil-c.png --out v2/bl/civil.jp
 
 Note the output extension is `.jpg`, not `.webp`: `sips` on macOS cannot
 reliably **write** WebP. JPEG at quality 82 meets the budget. If the combined
-budget in Step 5 fails, revisit — do not chase WebP with a new dependency.
+budget in Step 6 fails, revisit — do not chase WebP with a new dependency.
 
 - [ ] **Step 3: Derive the five standard images at 680×425**
 
@@ -103,7 +103,7 @@ derive() {  # $1 = source, $2 = output name
 }
 derive "90e581cf-banner1-P9DJjSgxMdgIWaSl.jpg"        building
 derive "785ed39d-picture2-1-pzwOGcrJcMDwEAmw.jpg"     oilgas
-derive "823b1d5d-banner2-soD4LfkN9VD8kTHo.jpg"        water
+derive "264cfb29-banner1-1-d2fLiHtRPfmiLPjc.jpg"      water
 derive "7ed8b27e-banner1-2-7nJH1ii5XmyAwgxe.jpg"      electro
 derive "84b54fc2-banner2-nepTLLbb7J94Brvx.png"        tunnel
 ```
@@ -132,7 +132,40 @@ water.jpg      680 425
 If any row differs, the crop step failed for that file — re-run it. These
 numbers become the `width`/`height` attributes in Task 3 and must match.
 
-- [ ] **Step 5: Verify the combined budget**
+- [ ] **Step 5: Check the two off-centre crops visually**
+
+`sips -c` crops from the **centre**. Two frames in this set have their subject
+off-centre and will be cut badly by that default:
+
+- `civil.jpg` — the barrier line and gate structures run across the lower
+  two-thirds; the top of the frame is empty sky.
+- `water.jpg` — the pump line sits in the lower half.
+
+Open both and confirm the subject survived:
+
+```bash
+open assets/img/v2/bl/civil.jpg assets/img/v2/bl/water.jpg
+```
+
+If either lost its subject, re-derive that one biasing the crop downward — crop
+to full width at the target height from an offset rather than from centre:
+
+```bash
+cd assets/img
+sips -Z 1220 "0af4cdfb-civil-infrastructure-1-bDchTHDP9wFTCaIk.png" --out /tmp/c.png >/dev/null
+# resized height, then take the bottom 686px instead of the middle
+H=$(sips -g pixelHeight /tmp/c.png | awk '/pixelHeight/{print $2}')
+sips -c "$H" 1220 /tmp/c.png --out /tmp/c2.png >/dev/null
+sips --cropOffset $((H-686)) 0 -c 686 1220 /tmp/c2.png --out /tmp/c3.png >/dev/null
+sips -s format jpeg -s formatOptions 82 /tmp/c3.png --out v2/bl/civil.jpg >/dev/null
+```
+
+Re-run Step 4 afterwards to confirm dimensions are still exact.
+
+**Do not substitute a different photograph.** These seven are client-specified.
+If a crop genuinely cannot be made to work, stop and raise it.
+
+- [ ] **Step 6: Verify the combined budget**
 
 ```bash
 du -ch assets/img/v2/bl/*.jpg | tail -1
@@ -141,7 +174,7 @@ du -ch assets/img/v2/bl/*.jpg | tail -1
 Expected: **under 400K total**. If it exceeds, drop `formatOptions` to 75 and
 re-run Steps 2–3; do not reduce pixel dimensions.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add assets/img/v2/bl
@@ -464,7 +497,7 @@ Set `class="block as-section as-section--light"` on the section, then:
 
     <li class="bl-tile bl-tile--lead">
       <a class="bl-tile__link" href="/civil-infrastructure-kuwait">
-        <span class="bl-tile__shot"><img src="/assets/img/v2/bl/civil.jpg" alt="Aerial view of reinforcement and formwork laid out across the Mishref pump station site" width="1220" height="686" loading="lazy" decoding="async"></span>
+        <span class="bl-tile__shot"><img src="/assets/img/v2/bl/civil.jpg" alt="Completed access plaza with kerbed barrier line and gate structures built by UGCC" width="1220" height="686" loading="lazy" decoding="async"></span>
         <span class="bl-tile__body">
           <span class="bl-tile__name">Civil Infrastructure</span>
           <span class="bl-tile__desc">Water networks, sewerage and drainage, pumping stations, utility corridors, foundations and earthworks.</span>
@@ -990,6 +1023,11 @@ work and out of this plan's scope.
 fill tile uses `.bl-tile__plate` (not `__shot`) because it holds no image and
 must not inherit `overflow: hidden` or the zoom transition.
 
-**One risk carried forward:** the water image is 768px and derives to 680px with
-almost no headroom. It is correct at standard tile size and must not be promoted
-to a lead tile without re-sourcing. Recorded in spec §7.0.
+**Imagery is client-specified.** The seven sources in spec §7 are the client's
+selection and must not be substituted. This work re-encodes and crops them for
+delivery — it does not choose them. If a crop cannot be made to work, raise it
+rather than swapping the photograph.
+
+**One risk carried forward:** civil and water both have off-centre subjects, so
+the default centre crop will cut them badly. Task 1 Step 5 checks this
+explicitly. Everything else in the set crops cleanly from centre.

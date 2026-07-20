@@ -358,50 +358,46 @@ Sources exist at 1920px for all seven lines — the 768px variants currently use
 on the hub are downscaled copies and are **not** to be used, because a lead tile
 is ~605 CSS px and therefore 1210 px at 2×.
 
-Sources below are **post-audit**. All seven were inspected at size on
-2026-07-20; two of the original candidates were rejected and replaced.
+**These seven images are client-specified and are not to be substituted.** Each
+is the image already used for that line on the current site. Selection is the
+client's call, not a design decision available to this work.
 
-| Line | Source (`assets/img/`) | Source px | Frame |
-|---|---|---|---|
-| Roads | `639d396c-cairo-street-hd-final-v2_edit…-LzpQRTTKD9Mfji4x.jpg` | 1920×1080 | Aerial, multi-level interchange at dusk |
-| Civil | `1fcfa266-kp3-cns-301-6-Svi5dqP6cfg8u3aB.webp` | 2800 | Aerial, Mishref pump station under construction |
-| Building | `90e581cf-banner1-P9DJjSgxMdgIWaSl.jpg` | 1920×1080 | Completed institutional building, blue sky |
-| Oil and gas | `785ed39d-picture2-1-pzwOGcrJcMDwEAmw.jpg` | 1920×1267 | Process plant, vessels, crew for scale |
-| Water | `823b1d5d-banner2-soD4LfkN9VD8kTHo.jpg` | 768 | Modern pump hall, blue pipework |
-| Electro-mechanical | `7ed8b27e-banner1-2-7nJH1ii5XmyAwgxe.jpg` | 1920×1080 | Plant room, pipework, warm light |
-| Micro-tunnelling | `84b54fc2-banner2-nepTLLbb7J94Brvx.png` | 1920×1440 | Down a shaft onto the boring machine and crew |
+| Line | Source (`assets/img/`) | Source px |
+|---|---|---|
+| Roads | `639d396c-cairo-street-hd-final-v2_edit…-LzpQRTTKD9Mfji4x.jpg` | 1920×1080 |
+| Civil | `0af4cdfb-civil-infrastructure-1-bDchTHDP9wFTCaIk.png` | 2800 |
+| Building | `90e581cf-banner1-P9DJjSgxMdgIWaSl.jpg` | 1920×1080 |
+| Oil and gas | `785ed39d-picture2-1-pzwOGcrJcMDwEAmw.jpg` | 1920×1267 |
+| Water | `264cfb29-banner1-1-d2fLiHtRPfmiLPjc.jpg` | 1920×1254 |
+| Electro-mechanical | `7ed8b27e-banner1-2-7nJH1ii5XmyAwgxe.jpg` | 1920×1080 |
+| Micro-tunnelling | `84b54fc2-banner2-nepTLLbb7J94Brvx.png` | 1920×1440 |
 
-### 7.0 Audit findings — two rejections
+All seven are at least 1920px, so every one has ample headroom for both the
+1220px lead and the 680px standard derivation. Resolution is not a constraint
+anywhere in this set.
 
-**Civil.** `0af4cdfb-civil-infrastructure-1-…png` (2800px, 3.0 MB) is an empty
-checkpoint plaza — flat midday light, no depth, no activity, no legible subject
-beyond bollards. It cannot carry a lead tile. Replaced with the KP3-CNS-301
-aerial, which is also 2800px, shows heavy civil work in progress at scale, and
-is a real UGCC contract already on the site.
+### 7.0 Handling notes
 
-**Water.** `264cfb29-banner1-1-…jpg` is a scanned film print — visible grain,
-scan artefacts and a green/magenta cast. Beside the drone aerials it reads as
-broken rather than merely old, at any tile size. Replaced with
-`823b1d5d-banner2-…jpg`, a modern pump hall. At 768px it is sufficient for the
-680px standard tile but **must not** be promoted to a lead tile later without
-re-sourcing.
+Two frames need care in the crop, because their subject does not sit centre:
 
-**Noted for the record:** the strongest single frame in the set is
-micro-tunnelling — a top-down shot into a shaft with the machine and crew
-visible. It is not promoted to a lead tile because tile size encodes the
-discipline's weight in the business, not the quality of its photograph, and
-micro-tunnelling carries 5 contracts against civil's 16. If the lead pairing is
-ever revisited, this is the argument to weigh.
+- **Civil** (`0af4cdfb-…png`) is a wide plaza with the subject — the barrier
+  line and gate structures — running across the lower two-thirds. A centre crop
+  to 16:9 keeps it; do not crop from the top, which is empty sky.
+- **Water** (`264cfb29-…jpg`) is a pump hall shot with the pump line along the
+  lower half. Crop from the bottom of the frame, not the centre.
+
+Verify both crops visually at tile size before committing, rather than trusting
+the default centre crop.
 
 Derive into `assets/img/v2/bl/` as WebP, quality 82:
 
 - leads (`roads`, `civil`) at **1220×686** (16:9)
 - the other five at **680×425** (16:10)
 
-The micro-tunnelling source is a 541 KB PNG carrying photographic content and
-must be re-encoded — shipping a PNG of that size into a 333px tile is the
-largest performance defect available here. The water source is only 768px, so
-it is derived at 680px with no meaningful headroom; do not upscale it. Target
+Two sources are PNGs carrying photographic content — civil at 3.0 MB and
+micro-tunnelling at 541 KB. Both must be re-encoded; shipping a 3 MB PNG into a
+605px tile is the single largest performance defect available here. Re-encoding
+changes the file that is *served*, not the photograph the client chose. Target
 budget for all seven derived tiles combined: **under 400 KB**.
 
 `width` and `height` attributes are mandatory on every `<img>` and must match
