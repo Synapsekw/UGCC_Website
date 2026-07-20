@@ -188,7 +188,7 @@ They are the count of distinct project pages linked from that line's
 | # | Name | Cur | Comp | Count | Scope line |
 |---|---|---|---|---|---|
 | 01 | Roads and Bridges | 6 | 8 | **14** | Highways, interchanges, flyovers, bridge erection, asphalt paving and stormwater drainage. |
-| 02 | Civil Infrastructure | 4 | 12 | **16** | Water networks, sewerage and drainage, pumping stations, utility corridors, foundations and earthworks. |
+| 02 | Civil Infrastructure | 4 | 13 | **17** | Water networks, sewerage and drainage, pumping stations, utility corridors, foundations and earthworks. |
 | 03 | Building Construction | 2 | 5 | **7** | Structural and reinforced concrete, facades, steel roof systems, fit-out and turnkey delivery. |
 | 04 | Oil and Gas | 0 | 4 | **4** | Gathering centres, heavy civil foundations, pipe racks, tank farms and blast-resistant shelters. |
 | 05 | Water and Wastewater | 3 | 3 | **6** | Treatment plants, pumping stations, reservoirs, distribution mains and trunk sewers. |

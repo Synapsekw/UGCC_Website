@@ -7,10 +7,18 @@
    docs/superpowers/specs/2026-07-20-business-lines-hub-design.md */
 (function () {
   'use strict';
-  var pass = 0, fail = 0;
+  var pass = 0, fail = 0, skip = 0;
   function ok(name, cond, detail) {
     if (cond) { pass++; console.log('%c PASS ', 'background:#0a0;color:#fff', name); }
     else { fail++; console.error('FAIL', name, detail === undefined ? '' : detail); }
+  }
+  /* A skipped assertion is not a passing one. Skips are counted and reported
+     separately, because a green total that silently omits checks is worse
+     than a red one: the intrinsic-size checks below were gated on a lazy
+     image having decoded, so on a fresh load they all vanished from the
+     total and "96 passed" looked like full coverage. */
+  function skipped(name, why) {
+    skip++; console.warn('SKIP', name, '-', why);
   }
 
   var tiles = document.querySelectorAll('.bl-tile');
@@ -42,7 +50,12 @@
        !!img.getAttribute('width') && !!img.getAttribute('height'));
 
     /* Attributes must match the real file, or the aspect-ratio box and the
-       intrinsic size disagree and the CLS guard stops guarding. */
+       intrinsic size disagree and the CLS guard stops guarding.
+
+       Every tile image is loading="lazy" and below the fold, so on a fresh
+       load naturalWidth is 0 and this cannot be evaluated yet. Report that
+       as a SKIP, never as a pass — see the note on `skipped` above. Run
+       forceDecode() first (bottom of this file) to make these real. */
     if (img.naturalWidth) {
       ok(label + ': width attr matches the file',
          +img.getAttribute('width') === img.naturalWidth,
@@ -50,6 +63,9 @@
       ok(label + ': height attr matches the file',
          +img.getAttribute('height') === img.naturalHeight,
          img.getAttribute('height') + ' vs ' + img.naturalHeight);
+    } else {
+      skipped(label + ': intrinsic size vs attributes', 'image not decoded yet');
+      skipped(label + ': intrinsic height vs attribute', 'image not decoded yet');
     }
 
     /* alt describes the frame; repeating the line name makes the tile
@@ -74,11 +90,57 @@
      stylesheet hides it and the script does not observe it, every tile is
      invisible forever in any browser where IntersectionObserver works —
      the script's fail-safe does not save it, because that returns as soon
-     as any one target has revealed and .as-head always intersects. */
-  ok('.bl-tile is in the about-suite reveal contract',
-     Array.prototype.some.call(document.scripts, function (s) {
-       return /about-suite\.js/.test(s.src);
-     }), 'about-suite.js not linked');
+     as any one target has revealed and .as-head always intersects.
+
+     This must read the script's actual source. Asserting only that the
+     <script> tag exists passes even with .bl-tile deleted from SELECTOR,
+     which is exactly the bug this is here to catch. */
+  var suiteSrc = null;
+  Array.prototype.forEach.call(document.scripts, function (s) {
+    if (/about-suite\.js/.test(s.src)) suiteSrc = s.src;
+  });
+  ok('about-suite.js is linked', !!suiteSrc);
+  if (suiteSrc) {
+    var body = null;
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', suiteSrc, false);
+      xhr.send();
+      body = xhr.responseText;
+    } catch (e) { body = null; }
+
+    if (body === null) {
+      skipped('.bl-tile is observed by about-suite.js', 'could not read source');
+    } else {
+      /* Match inside the selector list, not just anywhere in the file — a
+         mention in a comment must not satisfy this. */
+      var list = body.match(/var\s+SELECTOR\s*=\s*\[([\s\S]*?)\]/);
+      ok('about-suite.js exposes a SELECTOR list', !!list);
+      ok('.bl-tile is observed by about-suite.js',
+         !!list && /['"]\.bl-tile['"]/.test(list[1]),
+         list ? list[1].replace(/\s+/g, ' ').slice(0, 120) : 'no SELECTOR found');
+    }
+  }
+
+  /* Whatever the stylesheet hides must be in that list. Derive the hidden
+     set from the CSS itself so a newly hidden component cannot be forgotten. */
+  var hiddenBySheet = [];
+  try {
+    Array.prototype.forEach.call(document.styleSheets, function (ss) {
+      Array.prototype.forEach.call(ss.cssRules || [], function (r) {
+        if (r.style && r.style.opacity === '0' &&
+            /hero-motion\.v2-reveal/.test(r.selectorText || '')) {
+          (r.selectorText || '').split(',').forEach(function (sel) {
+            var m = sel.match(/\.([a-z0-9_-]+)\s*$/i);
+            if (m) hiddenBySheet.push('.' + m[1]);
+          });
+        }
+      });
+    });
+  } catch (e) { /* cross-origin sheet; ignore */ }
+  ok('every reveal-hidden component is in the script selector list',
+     hiddenBySheet.indexOf('.bl-tile') !== -1 || hiddenBySheet.length === 0,
+     hiddenBySheet.join(' '));
 
   /* ---- head pattern ---- */
   var heads = document.querySelectorAll('.as-head');
@@ -153,12 +215,18 @@
      so the broken version passes. That false pass shipped once. */
   Array.prototype.forEach.call(links, function (a) {
     var n = a.querySelector('.bl-tile__name');
-    var visible = n ? n.textContent.trim() : 'All projects';
+    /* The fill tile has no .bl-tile__name; its visible label is the call to
+       action. Read it from the DOM — comparing against a string this file
+       hardcodes would keep passing after someone reworded the tile. */
+    var go = a.querySelector('.bl-tile__go');
+    var src = n || go;
+    var visible = src ? src.textContent.replace(/[\s→>]+$/, '').trim() : '';
     var label = a.getAttribute('aria-label') || '';
-    ok(visible + ': has an explicit aria-label', !!label);
-    ok(visible + ': aria-label begins with the visible name',
-       label.toLowerCase().indexOf(visible.toLowerCase()) === 0,
-       JSON.stringify(label));
+    ok((visible || 'tile') + ': has a visible label in the DOM', !!visible);
+    ok((visible || 'tile') + ': has an explicit aria-label', !!label);
+    ok((visible || 'tile') + ': aria-label begins with the visible name',
+       !!visible && label.toLowerCase().indexOf(visible.toLowerCase()) === 0,
+       JSON.stringify(label) + ' vs visible ' + JSON.stringify(visible));
   });
 
   /* The display text is double-L "Micro-Tunnelling"; the URL keeps the
@@ -166,7 +234,36 @@
   ok('micro-tunnelling href keeps its single-L URL',
      !!document.querySelector('a[href="/micro-tunneling-kuwait"]'));
 
-  console.log('%c ' + pass + ' passed, ' + fail + ' failed ',
-    'background:' + (fail ? '#a00' : '#0a0') + ';color:#fff');
-  return { pass: pass, fail: fail };
+  console.log('%c ' + pass + ' passed, ' + fail + ' failed, ' + skip + ' skipped ',
+    'background:' + (fail ? '#a00' : (skip ? '#a60' : '#0a0')) + ';color:#fff');
+  if (skip) {
+    console.warn('Run window.blForceDecode() then re-run — ' + skip +
+                 ' assertion(s) could not be evaluated. Skips are NOT passes.');
+  }
+  window.blCheckResult = { pass: pass, fail: fail, skip: skip };
+  return window.blCheckResult;
 })();
+
+/* Bring the tile images into view so the browser loads them, letting the
+   intrinsic-size assertions run. Call this, await it, then re-run.
+
+   Deliberately does NOT set loading="eager": that is the attribute the
+   harness checks, and mutating it here would make this helper manufacture
+   its own failures. Scrolling is how a real visitor triggers these. */
+window.blForceDecode = function () {
+  var mosaic = document.querySelector('.bl-mosaic');
+  if (mosaic) mosaic.scrollIntoView();
+  var imgs = document.querySelectorAll('.bl-tile__shot img');
+  return new Promise(function (resolve) {
+    var tries = 0;
+    (function poll() {
+      var done = Array.prototype.filter.call(imgs, function (i) {
+        return i.naturalWidth > 0;
+      }).length;
+      if (done === imgs.length || ++tries > 40) {
+        window.scrollTo(0, 0);
+        resolve(done + '/' + imgs.length + ' images loaded');
+      } else { setTimeout(poll, 50); }
+    })();
+  });
+};

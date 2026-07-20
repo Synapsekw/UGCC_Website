@@ -102,6 +102,12 @@
 }
 
 /* ---- 5. Fill tile ------------------------------------------------------- */
+/* --as-meta-light (#6b747c) is 4.76:1 on white but only 4.34:1 on --as-tint
+   (#f2f5f6), which fails AA for 10.5px text. The plate is the only place a
+   meta label sits on the tint, so it steps up to --as-muted-light (#5a6570):
+   5.95:1 on white, 5.43:1 on the tint. */
+.bl-tile--all .bl-tile__meta { color: var(--as-muted-light); }
+
 .bl-tile--all .bl-tile__plate {
   display: flex;
   flex-direction: column;
