@@ -1046,10 +1046,11 @@ Branch `claude/business-lines-mosaic`, worktree `.claude/worktrees/business-line
 
 | | |
 |---|---|
-| Harness | `tools/business-lines-check.js` — **96 assertions, 0 failures** at 1280 and 900 |
+| Harness | `tools/business-lines-check.js` — **121 pass / 0 fail / 0 skip** once images load; 107 pass / 14 skip on a cold load |
 | Tile imagery | 7 files, **790.5 KiB** combined, JPEG q70, verified artifact-free at 1:1 |
 | Console | no errors on the hub or on any of the five About-suite pages |
 | Files changed vs `V2` | 18 |
+| Merge state | merges cleanly into `V2` at `dea56bc` |
 | New JavaScript | none — the mosaic opts into the existing reveal contract |
 
 ### Defects found during implementation, not anticipated by the plan
@@ -1099,3 +1100,25 @@ Branch `claude/business-lines-mosaic`, worktree `.claude/worktrees/business-line
   touching CSS.
 - `oil-and-gas-current` still does not exist, so that tab is missing from every
   current-projects filter row.
+
+### Post-review corrections (final review, 2026-07-20)
+
+6. **Civil said 16 contracts; it is 17.** `civil-completed` lists 13 project
+   pages, not 12 — the original content inventory missed `zorepc0059`. All
+   seven lines were recounted from the listing pages; every other figure was
+   exact, which is what made this a real off-by-one rather than a bad method.
+
+7. **The harness reported green over 14 unexecuted assertions.** The
+   intrinsic-size checks were gated on a lazy, below-fold image having
+   decoded. Skips are now counted and reported separately — a skip is not a
+   pass. `window.blForceDecode()` loads the images by scrolling, deliberately
+   not by setting `loading="eager"`, since that is the attribute under test.
+
+8. **The assertion guarding defect 1 did not guard it.** It only checked that
+   the `<script>` tag existed, so it passed with `.bl-tile` deleted from
+   `SELECTOR`. It now reads the script source and matches inside the selector
+   list, and was negative-tested against a doctored copy.
+
+Standing lesson from 3, 7 and 8: **every one of these was an assertion that
+passed while the thing it named was broken.** When writing a check, ask what
+it would take for it to pass on a broken page — and try it.
