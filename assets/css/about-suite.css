@@ -1184,6 +1184,15 @@
   object-position: 50% 50%;
 }
 
+/* Videos keep their full frame — cropping a fixed band height hides the
+   motion (vehicles entering at the edges), so the band grows to the
+   video's own aspect ratio instead. */
+.as-band video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Optional navy wash, for a band that sits between two navy sections. */
 .as-band--wash::after {
   content: '';
