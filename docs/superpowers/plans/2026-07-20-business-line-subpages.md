@@ -2,6 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **⚠ Amendment A (end of this file) supersedes parts of Tasks 1, 4, 5 and
+> 7–12** — a customer text/image freeze arrived mid-execution. Read A before
+> executing anything below; the superseded blocks are marked at their sites.
+
 **Goal:** Rebuild the seven business-line discipline pages on the about-suite
 kit, implementing the §9 spine (spec:
 `docs/superpowers/specs/2026-07-20-business-line-subpages-design.md`) with the
@@ -122,6 +126,10 @@ EOF
 ```
 
 - [ ] **Step 2: Derive the seven bands**
+
+> **⚠ SUPERSEDED by Amendment A.2** — the `div-*.jpg` frames do not appear on
+> these pages and became ineligible under the customer image freeze. Do not
+> run the commands below; use A.2's on-page sources.
 
 Band ≠ cover on every page. Six lines use the existing `div-*.jpg` set;
 oil has no `div-` asset and uses a photograph already on its page.
@@ -762,6 +770,10 @@ git commit -m "feat(business-line-pages): table-driven console harness"
 
 ## Task 5: Reference page — Roads and Bridges
 
+> **⚠ Content strings superseded by Amendment A.4** (frozen copy extracted
+> from the page's own HTML; title-only heads; no drafted prose/ledes). The
+> markup STRUCTURE below remains authoritative.
+
 **Files:**
 - Modify: `roads-and-bridges-contractor-kuwait/index.html`
 
@@ -1145,6 +1157,10 @@ re-verify, then roll out.
 ---
 
 ## Tasks 7–12: The six rollout pages
+
+> **⚠ Content strings superseded by Amendment A.4** — prose/pills/ledes are
+> the pages' existing text, extracted verbatim. Structure, data tables and
+> mechanics below remain authoritative.
 
 Each task instantiates the **exact markup pattern of Task 5 Step 1** with the
 page's content block below, then repeats Task 5 Steps 2–7 with the page's own
@@ -1676,6 +1692,16 @@ Visually verify each, record what the frame shows, note intrinsic sizes for
 the markup, and record final per-slug byte totals. Commit:
 `fix(business-line-pages): bands re-derived from on-page photographs (customer image freeze)`.
 
+**A.2 addendum (as executed):** the first pass used the on-page `<img>`
+exports directly, which are small (375–768px). The builder exports the same
+frames at multiple sizes under different hashes, so a second pass
+(`c89c9f1`) re-derived the five bands from the largest same-frame copies
+(roads `84d1042f-…` 1920, civil `13be416c-…` 1440, building `3fc32749-…`
+2800→1920, water `6c2b7660-…` 1440, micro `c1bf5008-…` 1440). Same
+photographs, so the image freeze holds; shipped bands are 1440–1920 wide
+except electro (1024 native, no larger copy exists). The `sips` recipes above
+therefore do not reproduce the shipped files byte-for-byte.
+
 ### A.3 Harness change (Task 4)
 
 DATA gains `keyPills` per page: 1 for `micro-tunneling-kuwait`, 0 for the
@@ -1778,3 +1804,65 @@ Static tests (Task 3) are unchanged — the typo strings must still be absent
 coverage and sub-nav assertions stand. Add to each page's browser check: the
 retained paragraphs render (spot-check the first retained paragraph's
 opening words on each page).
+
+---
+
+## Handover — 2026-07-20
+
+Branch `claude/business-line-pages`, worktree
+`.claude/worktrees/business-line-pages`, cut from `V2` at `f667b00`.
+**Not merged** — the user decides (a `V2` push triggers a Netlify deploy).
+
+### Delivered
+
+| | |
+|---|---|
+| Pages rebuilt | all seven discipline pages on the §9 spine |
+| Console harness | `tools/business-line-check.js` — per page: roads 48 / civil 51 / building 49 / oil 47 / water 47 / electro 50 / micro 46 assertions passed, **0 failed, 0 skipped on every page** |
+| Negative tests | five broken-state scenarios each correctly fail the harness (incl. the duplicate-button masking case) |
+| Static suite | `npx --no-install vitest run` → **81/81** (58 business-line + 23 chat); `vitest.config.mjs` scopes the root run out of other sessions' worktrees |
+| Hub regression | `business-lines-check.js` on the hub: **121 / 0 / 0** — untouched and unbroken |
+| Link integrity | 66 unique internal URLs across the seven bodies — all resolve |
+| Imagery | 14 derived files in `assets/img/v2/blp/`; per-slug cover+band: roads 961 / civil 705 / building 650 / oil 1159 / water 912 / electro 589 / micro 1038 KiB (q70 floor precedence over the 800 KiB target, hub precedent; bands lazy-load) |
+| Shared files touched | **none** — no edit to v2.css, about-suite.css/js, v2.js, hub, listing or project pages |
+| Final review | whole-branch integrity review: ready for merge, scope-clean, drift-free |
+
+### The customer constraint (mid-execution)
+
+"Text and images must not be changed" arrived after Task 2. Confirmed
+interpretation and its consequences are recorded in the spec's constraint
+table and Amendment A here. Outcome: **all body copy is the pages' own
+existing text, verified byte-identical**, with exactly two in-string repairs
+(water's "GCC"→"UGCC"; micro's pill "Micro-tunneling"→"Micro-Tunnelling")
+plus the documented §9.1 omissions (building's wrong civil intro; the shared
+civil "Key Projects" boilerplate on five pages; electro's provably false
+"USD 358M" tiles — that figure now sits on Water, where it is true). All
+photographs are frames already on their pages (or the hub), optimized only.
+
+### Environment lessons (new this build)
+
+- `sips --cropOffset` is **silently ignored** on this macOS (26.5) — crops
+  via a scratch CoreGraphics/Swift one-off instead; verify any sips crop
+  actually happened.
+- The builder exports the same photograph under many hashed filenames at
+  multiple sizes — when an on-page image is small, search `assets/img/` by
+  basename for a larger same-frame export before giving up on resolution.
+- A buildless repo cannot `import 'vitest/config'` under npx-cache vitest —
+  export a plain config object.
+- The preview pane can report `window.innerWidth === 0` before a resize —
+  size the viewport before trusting any width-dependent assertion.
+
+### Not done / follow-ups
+
+- **Copy approval:** wording is now the customer's own existing text by
+  construction; the *structure* (new sections, stats, labels) is what needs
+  client sign-off before merge.
+- Listing-page rails: missing Oil and Gas tab on the current set,
+  non-canonical labels ("Micro-Tunneling", "Water & Waste Water"),
+  asymmetric All slugs (`all-project-current` vs `all-projects-completed`).
+- `qstsh15` value inconsistency (10.04M USD vs 31.9M KWD ≈ 104M USD).
+- Old builder duplicate assets orphaned by these rebuilds can be GC'd.
+- Electro's band is 1024px native (no larger frame exists in the asset set);
+  if the customer supplies the original photo it can be re-derived.
+- Merged worktree `.claude/worktrees/business-lines` + branch
+  `claude/business-lines-mosaic` remain removable.
