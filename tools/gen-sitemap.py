@@ -10,6 +10,7 @@ category listings > project detail pages > everything else.
 """
 import os
 import re
+import subprocess
 import sys
 
 ORIGIN = "https://ugcc.com"
@@ -39,6 +40,35 @@ def priority(slug):
     return "0.6"
 
 
+def lastmod(root, slug):
+    """Date of the last commit that touched this page, as YYYY-MM-DD.
+
+    Deliberately git's commit date and not the file's mtime. mtime records
+    when the working tree last wrote the file, which a branch switch or a
+    fresh clone rewrites wholesale — on 2026-07-20 a `git checkout` restamped
+    every page in this repo, which would have published a sitemap claiming
+    all 67 pages changed that day. The commit date is what actually happened
+    to the content.
+
+    Returns None for a page git does not know about (never committed, or no
+    git available); the caller then omits <lastmod> for that URL rather than
+    inventing one. An absent lastmod is ignored by crawlers; a wrong one
+    trains them to distrust the whole file.
+    """
+    path = os.path.join(slug, "index.html") if slug else "index.html"
+    try:
+        out = subprocess.run(
+            ["git", "-C", root, "log", "-1", "--format=%cs", "--", path],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    date = out.stdout.strip()
+    return date if re.fullmatch(r"\d{4}-\d{2}-\d{2}", date) else None
+
+
 def main(root):
     slugs = []
     for dirpath, dirnames, files in os.walk(root):
@@ -52,11 +82,15 @@ def main(root):
         slugs.append(slug)
     slugs.sort(key=lambda s: (priority(s), s))
 
-    urls = "".join(
-        f"  <url>\n    <loc>{ORIGIN}/{s}</loc>\n"
-        f"    <priority>{priority(s)}</priority>\n  </url>\n"
-        for s in slugs
-    )
+    def block(s):
+        lm = lastmod(root, s)
+        out = f"  <url>\n    <loc>{ORIGIN}/{s}</loc>\n"
+        if lm:
+            out += f"    <lastmod>{lm}</lastmod>\n"
+        out += f"    <priority>{priority(s)}</priority>\n  </url>\n"
+        return out
+
+    urls = "".join(block(s) for s in slugs)
     sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                f"{urls}</urlset>\n")
@@ -67,7 +101,8 @@ def main(root):
               "\n"
               f"Sitemap: {ORIGIN}/sitemap.xml\n")
     open(os.path.join(root, "robots.txt"), "w", encoding="utf-8").write(robots)
-    print(f"sitemap.xml: {len(slugs)} URLs\nrobots.txt: written")
+    dated = sum(1 for s in slugs if lastmod(root, s))
+    print(f"sitemap.xml: {len(slugs)} URLs ({dated} with lastmod)\nrobots.txt: written")
 
 
 if __name__ == "__main__":
