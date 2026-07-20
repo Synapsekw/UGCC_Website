@@ -37,10 +37,14 @@
 
   if (!('IntersectionObserver' in window)) return;
 
-  /* Exactly the seven component selectors about-suite.css hides. Kept as one
-     list so the two files can be diffed against each other by eye; if a
-     component is added to the stylesheet's reveal block it must be added
-     here too, or it will hide and never come back. */
+  /* Exactly the component selectors that are hidden by a reveal block. Kept as
+     one list so the stylesheets can be diffed against it by eye; if a
+     component is added to a stylesheet's reveal block it must be added
+     here too, or it will hide and never come back.
+
+     The first seven live in about-suite.css. .bl-tile lives in
+     pages/business-lines.css and is inert on every other page, since none of
+     them contains one. */
   var SELECTOR = [
     '.as-head',
     '.as-prose',
@@ -48,7 +52,8 @@
     '.as-ledger__row',
     '.as-acc',
     '.as-stat',
-    '.as-quote'
+    '.as-quote',
+    '.bl-tile'
   ].join(',');
 
   var targets = document.querySelectorAll(SELECTOR);
