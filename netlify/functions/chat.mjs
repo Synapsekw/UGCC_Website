@@ -12,7 +12,10 @@ const SYSTEM_PROMPT = `You are the assistant for United Gulf Construction Compan
 Answer ONLY using the "Knowledge base excerpts" provided in the user's message (about UGCC's projects, business lines, facilities, equipment, HSSE, quality, CSR, careers, and contact details).
 Reply in the user's language: Arabic for Arabic questions, otherwise English.
 If the excerpts do not contain the answer, say you don't have that information and suggest visiting the contact page. Be concise and professional. Never invent projects, numbers, or contacts.
-Write clean prose. Do NOT include citation markers, source numbers, footnotes, or bracketed references such as "(15)" or "【...】".`;
+Write clean prose. Do NOT include citation markers, source numbers, footnotes, or bracketed references such as "(15)" or "【...】".
+Excerpts may start with a marker like "[Source page: /some-page/]". When one or more of those pages are directly relevant to your answer (e.g. the project or topic the user asked about), add ONE final line in exactly this format:
+LINKS: /path/ | Page title; /other-path/ | Other title
+Use only paths that appear in the excerpts' Source page markers, at most 3, with a short human-friendly title in the user's language. If no page is clearly relevant, omit the line entirely. Never mention or explain the LINKS line in your prose — it is rendered separately as buttons.`;
 
 export function validate(body) {
   const message = (body?.message ?? "").toString().trim();
@@ -62,14 +65,59 @@ export function extractText(data) {
   return cleanText(parts.join("\n"));
 }
 
+// Corpus filenames mirror the site's directory slugs (see tools/knowledge/build.py):
+// "ra-200.txt" -> /ra-200/, "home.txt" -> /. Non-page sources (the company profile
+// PDF) and anything not shaped like a slug map to null.
+export function pagePathForFilename(filename) {
+  const m = /^([a-z0-9][a-z0-9-]*)\.txt$/i.exec(filename || "");
+  if (!m) return null;
+  const slug = m[1].toLowerCase();
+  if (slug === "company-profile") return null;
+  return slug === "home" ? "/" : `/${slug}/`;
+}
+
 // Concatenate vector-store search results into a grounded context string.
+// Each excerpt is tagged with the site page it came from so the model can offer
+// links, and the set of those page paths is returned as the link whitelist.
 export function formatSearchResults(data) {
   const chunks = [];
+  const paths = [];
   for (const item of data?.data || []) {
     const text = (item.content || []).map((c) => c?.text).filter(Boolean).join(" ").trim();
-    if (text) chunks.push(text);
+    if (!text) continue;
+    const path = pagePathForFilename(item.filename);
+    if (path) {
+      chunks.push(`[Source page: ${path}]\n${text}`);
+      if (!paths.includes(path)) paths.push(path);
+    } else {
+      chunks.push(text);
+    }
   }
-  return chunks.join("\n\n---\n\n").slice(0, 12000);
+  return { context: chunks.join("\n\n---\n\n").slice(0, 12000), paths };
+}
+
+// Pull the trailing "LINKS: /path/ | Title; ..." line out of the model's answer.
+// Only paths retrieved this turn survive, so the bot can never link to a page
+// it did not actually read about (no hallucinated URLs).
+export function extractLinks(text, allowedPaths) {
+  const m = /^\s*LINKS:\s*(.+)\s*$/m.exec(text);
+  if (!m) return { output: text.trim(), links: [] };
+  const output = text.replace(m[0], "").trim();
+  const allowed = new Set(allowedPaths || []);
+  const links = [];
+  for (const part of m[1].split(";")) {
+    const [rawPath, ...titleParts] = part.split("|");
+    if (!rawPath) continue;
+    let url = rawPath.trim();
+    if (url !== "/" && !url.endsWith("/")) url += "/";
+    if (!/^\/[a-z0-9-]*\/?$/i.test(url)) continue;
+    if (!allowed.has(url)) continue;
+    if (links.some((l) => l.url === url)) continue;
+    const title = titleParts.join("|").trim() || url;
+    links.push({ url, title });
+    if (links.length === 3) break;
+  }
+  return { output, links };
 }
 
 // Arabic -> concise English search keywords (best-effort; null on error).
@@ -99,10 +147,10 @@ async function retrieveContext(apiKey, vsId, query) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ query, max_num_results: 8 }),
     });
-    if (!r.ok) return "";
+    if (!r.ok) return { context: "", paths: [] };
     return formatSearchResults(await r.json());
   } catch {
-    return "";
+    return { context: "", paths: [] };
   }
 }
 
@@ -155,7 +203,7 @@ export default async (req) => {
       const en = await englishSearchTerms(apiKey, v.message);
       if (en) query = en;
     }
-    const context = await retrieveContext(apiKey, vsId, query);
+    const { context, paths } = await retrieveContext(apiKey, vsId, query);
 
     const input = [
       { role: "system", content: SYSTEM_PROMPT },
@@ -169,8 +217,8 @@ export default async (req) => {
     });
     if (!r.ok) return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });
     const data = await r.json();
-    const output = extractText(data) || "Sorry, I couldn't produce an answer.";
-    return new Response(JSON.stringify({ output }), { status: 200, headers });
+    const { output, links } = extractLinks(extractText(data), paths);
+    return new Response(JSON.stringify({ output: output || "Sorry, I couldn't produce an answer.", links }), { status: 200, headers });
   } catch {
     return new Response(JSON.stringify({ error: "Upstream error." }), { status: 502, headers });
   }
