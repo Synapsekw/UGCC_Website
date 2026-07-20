@@ -203,9 +203,15 @@
                      ' off by ' + Math.round(off) + 'px' };
   });
 
-  check('h1 accessible name is exactly WE BUILD BETTER', function () {
-    var h1 = document.querySelector('#aCqA2TkE7 h1');
-    if (!h1) return { ok: false, detail: 'no h1 in hero' };
+  /* Selected by class, not by tag. The hero line is a <p>, not the <h1>:
+     the page's single h1 is the about statement, which carries the topical
+     terms the title and description assert. The slogan keeps the visual
+     weight but not the heading rank. Everything below still applies — the
+     line is the page's most prominent text and must reach the a11y tree
+     intact — so only the selector changed. */
+  check('hero line accessible name is exactly WE BUILD BETTER', function () {
+    var h1 = document.querySelector('#aCqA2TkE7 .hero-title');
+    if (!h1) return { ok: false, detail: 'no .hero-title in hero' };
 
     function isAriaHiddenTrue(el) {
       var v = el.getAttribute && el.getAttribute('aria-hidden');
@@ -293,8 +299,8 @@
   });
 
   check('headline has no hardcoded inline colour', function () {
-    var h1 = document.querySelector('#aCqA2TkE7 h1');
-    if (!h1) return { ok: false, detail: 'no h1 in hero' };
+    var h1 = document.querySelector('#aCqA2TkE7 .hero-title');
+    if (!h1) return { ok: false, detail: 'no .hero-title in hero' };
     /* Use the parsed el.style.color property, not a [style*="color"]
        attribute-substring selector — the latter also false-matches
        background-color. Scan the h1 itself AND every descendant, since

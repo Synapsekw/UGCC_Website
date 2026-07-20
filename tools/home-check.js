@@ -98,15 +98,25 @@
     return { ok: s.offsetHeight < 1000, detail: s.offsetHeight + 'px (was 1394px)' };
   });
 
-  check('one h1, and both new sections use h2', function () {
+  /* The about statement is the h1, not the hero slogan. "WE BUILD BETTER"
+     carries no topical signal, while the title tag, meta description and
+     JSON-LD all assert a Kuwait/GCC construction contractor — so the h1 is
+     the line that corroborates them. The slogan keeps the visual weight as
+     a <p>; hero-check.js still asserts its accessible name and prominence.
+     The hero tag is pinned here so a future edit cannot quietly restore a
+     second h1 on the page. */
+  check('one h1, on the about statement, and the hero slogan is not a heading', function () {
     var h1 = document.querySelectorAll('h1').length;
     var a = document.querySelector(ABOUT + ' .about-statement');
     var w = document.querySelector(WHO + ' .wr-title');
+    var hero = document.querySelector('#aCqA2TkE7 .hero-title');
     var aTag = a ? a.tagName : 'MISSING';
     var wTag = w ? w.tagName : 'MISSING';
+    var heroTag = hero ? hero.tagName : 'MISSING';
     return {
-      ok: h1 === 1 && aTag === 'H2' && wTag === 'H2',
-      detail: 'h1 count=' + h1 + '; about=' + aTag + '; who=' + wTag
+      ok: h1 === 1 && aTag === 'H1' && wTag === 'H2' && heroTag === 'P',
+      detail: 'h1 count=' + h1 + '; about=' + aTag + '; who=' + wTag +
+              '; hero=' + heroTag
     };
   });
 

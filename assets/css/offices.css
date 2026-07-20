@@ -124,7 +124,11 @@
 .off__hq {
   display: inline-block;
   vertical-align: 3px;
-  margin-left: 9px;
+  /* A literal space precedes this badge in the markup so the heading's text
+     content reads "Kuwait Head office" rather than "KuwaitHead office" for
+     crawlers and screen readers. The space renders ~6px at 21px, so the
+     margin only tops it up to the intended 9px gap. */
+  margin-left: 3px;
   padding: 2px 6px;
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 9.5px;
