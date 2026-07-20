@@ -1,0 +1,191 @@
+/* Business Lines hub — the weighted mosaic.
+   Loads after about-suite.css. Everything else on the page is kit.
+   Spec: docs/superpowers/specs/2026-07-20-business-lines-hub-design.md */
+
+/* ---- 1. Cover title override -------------------------------------------
+   .as-cover__title is clamp(40px, 5.2vw, 68px) + uppercase, tuned for the
+   suite's one-word titles ("ABOUT"). This page's h1 is 44 characters; in
+   caps at 68px it runs four lines and overflows the 524px cover. 18ch is
+   the measure that breaks the line after "services" at desktop. */
+.as-cover__title {
+  font-size: clamp(30px, 3.4vw, 46px);
+  max-width: 18ch;
+}
+
+/* ---- 2. Grid ------------------------------------------------------------ */
+.bl-mosaic {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 28px 24px;            /* matches .v2-proj__grid on the landing page */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* min-width:0 is the grid-blowout guard; overflow-wrap does not substitute */
+.bl-tile {
+  min-width: 0;
+  display: flex;
+}
+
+.bl-tile--lead { grid-column: span 3; }
+.bl-tile:not(.bl-tile--lead) { grid-column: span 2; }
+
+.bl-tile__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---- 3. Shot ------------------------------------------------------------ */
+.bl-tile__shot {
+  display: block;
+  overflow: hidden;          /* required for the zoom to clip */
+  border-radius: 4px;
+  background: #0b2233;       /* reserves the box while loading -> CLS 0 */
+}
+
+.bl-tile--lead .bl-tile__shot { aspect-ratio: 16 / 9; }
+.bl-tile:not(.bl-tile--lead) .bl-tile__shot { aspect-ratio: 16 / 10; }
+
+.bl-tile__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- 4. Body ------------------------------------------------------------ */
+.bl-tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Hammersmith One ships one weight; family AND weight declared explicitly
+   because this markup is outside .text-box and would otherwise silently
+   fall back to Open Sans Bold. */
+.bl-tile__name {
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--v2-navy);
+  text-wrap: balance;
+  transition: color .25s var(--v2-ease-out-quart);
+}
+
+.bl-tile--lead .bl-tile__name { font-size: 21px; }
+
+.bl-tile__desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--as-muted-light);
+}
+
+.bl-tile__meta {
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--as-meta-light);
+}
+
+.bl-tile__count {
+  font-weight: 600;
+  color: var(--v2-red);      /* light ground -> --v2-red, never --v2-red-text */
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 5. Fill tile ------------------------------------------------------- */
+.bl-tile--all .bl-tile__plate {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  aspect-ratio: 16 / 10;
+  padding: 0 20px;
+  background: var(--as-tint);
+  border: 1px solid var(--as-hair-light);
+  border-radius: 4px;
+}
+
+.bl-tile__figure {
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--v2-navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.bl-tile__go {
+  margin-top: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--v2-red);
+}
+
+/* ---- 6. Hover and focus -------------------------------------------------
+   One rule carries both states so they cannot drift apart in a later edit. */
+.bl-tile__link:hover .bl-tile__name,
+.bl-tile__link:focus-visible .bl-tile__name {
+  color: var(--v2-red);      /* outside the motion gate: reduced-motion
+                                visitors still get feedback */
+}
+
+.bl-tile__link:focus-visible {
+  outline-offset: 5px;
+  border-radius: 4px;        /* ring wraps the whole tile, as .v2-proj__card */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bl-tile__shot img {
+    transition: transform .5s var(--v2-ease-out-quart),
+                filter .5s var(--v2-ease-out-quart);
+  }
+  .bl-tile__link:hover .bl-tile__shot img,
+  .bl-tile__link:focus-visible .bl-tile__shot img {
+    transform: scale(1.05);
+    filter: brightness(1.06) saturate(1.05);
+  }
+}
+
+/* ---- 7. Reveal ----------------------------------------------------------
+   Opts into the existing about-suite.js contract. Double-gated, so a script
+   failure leaves every tile visible. */
+.hero-motion.v2-reveal .bl-tile { opacity: 0; }
+.hero-motion.v2-reveal .bl-tile.is-in {
+  animation: as-fade-up .8s var(--v2-ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ---- 8. Responsive ------------------------------------------------------
+   920px is the builder's own breakpoint, where the header swaps to mobile.
+   There is no 768px breakpoint anywhere in this codebase; do not add one. */
+@media (max-width: 920px) {
+  .bl-mosaic {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
+  }
+  .bl-tile--lead,
+  .bl-tile:not(.bl-tile--lead) { grid-column: span 1; }
+  /* ranks converge: a double-width lead cannot exist at two columns, and
+     unequal heights here would read as inconsistency, not hierarchy */
+  .bl-tile--lead .bl-tile__shot { aspect-ratio: 16 / 10; }
+  .bl-tile--lead .bl-tile__name { font-size: 16px; }
+}
+
+@media (max-width: 600px) {
+  .bl-mosaic { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion.v2-reveal .bl-tile { opacity: 1; }
+}
