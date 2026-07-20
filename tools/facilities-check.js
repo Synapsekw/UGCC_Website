@@ -88,8 +88,10 @@
        !!(img && img.getAttribute('width') && img.getAttribute('height') &&
           (img.getAttribute('alt') || '').length));
   });
+  /* content photographs only — the builder header renders its logo twice
+     (desktop + mobile layouts), which is chrome, not a photo placement */
   var seen = {}, dup = null;
-  Array.prototype.forEach.call(document.querySelectorAll('img'), function (img) {
+  Array.prototype.forEach.call(document.querySelectorAll('.as-cover img, .as-section img'), function (img) {
     var src = img.getAttribute('src');
     if (seen[src]) dup = src; else seen[src] = true;
   });
