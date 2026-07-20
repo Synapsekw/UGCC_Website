@@ -366,6 +366,73 @@
   width: min(880px, 100% - 64px);
 }
 
+/* Two-column reading sections: head in a left column, prose in a right one.
+   Opt-in via the modifier, NOT structural (:has), so the seven business-line
+   pages that share this kit keep their stacked intro sections untouched.
+   Above 920px only — below that the grid degrades to the normal stack.
+
+   Column split is 4/7 of the full 1224px measure (~419px / ~733px at full
+   width): the head's clamp()ed title wraps to two lines in the left column,
+   and the prose's 68ch cap (~640px) sits inside the right column with room
+   to spare, so the reading measure is unchanged.
+
+   Placement contract:
+     - .as-head -> left column, top-aligned;
+     - .as-prose, and the blocks that continue its reading flow (.as-pills,
+       .as-figure) -> right column, stacking under one another;
+     - everything else (.as-cards, .as-ledger, .as-stats, quotes) -> full
+       span on its own row, exactly as wide as before. */
+@media (min-width: 921px) {
+  .as-section__inner--split {
+    /* Releases --narrow when the two modifiers meet: split sections always
+       run the full measure, the two-column shape IS their narrowing. */
+    width: min(1224px, 100% - 64px);
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .as-section__inner--split > * { grid-column: 1 / -1; }
+
+  .as-section__inner--split > .as-head {
+    grid-column: 1;
+    /* The 40px head margin is a stacked-flow gap; in the grid the column gap
+       owns the separation and the margin would only stretch row one. */
+    margin-bottom: 0;
+  }
+
+  .as-section__inner--split > .as-prose,
+  .as-section__inner--split > .as-pills,
+  .as-section__inner--split > .as-figure,
+  .as-section__inner--split > .as-accordion {
+    grid-column: 2;
+  }
+
+  /* Align the right column's first line with the TITLE, not the head's top
+     edge: without this the prose starts level with the 12px eyebrow (or the
+     bare margin above a title-first head) and reads as floating above the
+     heading beside it. The title always carries a 14px top margin; heads
+     with an eyebrow add its 12px line box on top, hence 14px / 26px. These
+     out-rank .as-pills' own stacked-flow margin (28px), which must not
+     apply in the grid. */
+  .as-section__inner--split > .as-head + :is(.as-prose, .as-pills, .as-accordion) {
+    margin-top: 14px;
+  }
+
+  .as-section__inner--split > .as-head:has(.as-head__eyebrow) + :is(.as-prose, .as-pills, .as-accordion) {
+    margin-top: 26px;
+  }
+
+  /* A full-span block after the two-column row needs its row gap restated:
+     .as-cards declares margin:0 and the per-page .as-prose + .as-cards rules
+     are calibrated for the stacked flow. One kit value keeps the five pages
+     in step. */
+  .as-section__inner--split > .as-prose ~ .as-cards {
+    margin-top: 44px;
+  }
+}
+
 .as-section--light { background: #fff; }
 .as-section--tint  { background: var(--as-tint); }
 .as-section--navy  { background: var(--v2-navy, #002a41); }
