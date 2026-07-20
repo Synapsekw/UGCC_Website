@@ -74,7 +74,13 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
   });
 
   it('ships no desktop/mobile duplicate images in the rebuilt body', () => {
-    expect(doc()).not.toContain('image-wrapper--mobile');
+    // Scope to the rebuilt body: the frozen builder footer (id="FUdf9w9dXZ",
+    // kept verbatim on every kit page) legitimately carries one
+    // image-wrapper--mobile logo duplicate.
+    const d = doc();
+    const start = d.indexOf('as-cover');
+    const body = d.slice(start < 0 ? 0 : start, d.indexOf('id="FUdf9w9dXZ"'));
+    expect(body).not.toContain('image-wrapper--mobile');
   });
 
   it('contains none of the known typo strings', () => {
