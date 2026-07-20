@@ -44,7 +44,8 @@
 
      The first seven live in about-suite.css. .bl-tile lives in
      pages/business-lines.css and is inert on every other page, since none of
-     them contains one. */
+     them contains one. The last three (.fx-tile, .fx-type, .fx-gallery > li)
+     live in pages/facilities.css and are inert on every other page. */
   var SELECTOR = [
     '.as-head',
     '.as-prose',
@@ -53,7 +54,10 @@
     '.as-acc',
     '.as-stat',
     '.as-quote',
-    '.bl-tile'
+    '.bl-tile',
+    '.fx-tile',
+    '.fx-type',
+    '.fx-gallery > li'
   ].join(',');
 
   var targets = document.querySelectorAll(SELECTOR);
