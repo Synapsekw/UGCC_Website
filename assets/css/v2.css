@@ -26,10 +26,15 @@
   color: #fff;
 }
 
+/* Focus ring: red alone is only 2.76:1 on the navy surface (WCAG 2.2 SC 1.4.11
+   needs 3:1), so pair it with a white ring that sits both inside and outside it.
+   On navy the white ring carries the contrast (14.9:1); on light surfaces the
+   white ring vanishes and the red outline carries it (5.4:1 on white). */
 :focus-visible {
   outline: 2px solid var(--v2-red);
   outline-offset: 3px;
   border-radius: 2px;
+  box-shadow: 0 0 0 7px #fff;
 }
 
 /* ---------- sticky header: solid state after scrolling ---------- */
@@ -103,6 +108,13 @@
   transform: translateY(0) scale(.98);
   box-shadow: 0 4px 10px -6px rgba(0, 21, 33, .4) !important;
   transition-duration: .1s;
+}
+
+/* Same reason, and it must come after the rules above: a focused button that is
+   also hovered would otherwise lose its focus ring to the lift shadow. */
+.grid-button--primary:focus-visible,
+.grid-button--secondary:focus-visible {
+  box-shadow: 0 0 0 7px #fff !important;
 }
 
 /* ---------- linked images: quiet zoom, invitation to click ---------- */
