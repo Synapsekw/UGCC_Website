@@ -92,12 +92,16 @@ Scripts at end of `<body>`, all deferred:
 `about-suite.js` is referenced at its **current** version (`?v=2`); the file is
 not edited, so no bump and no other page is touched.
 
-Builder `<section class="block" id="…">` shells are kept and re-filled, exactly
-as on the hub. Each page needs as many shells as it has sections; where the
-builder page has fewer shells than the template has sections, hand-authored
-`<section>` elements in the same style are appended between the last kept shell
-and the footer block — the `as-band` figures sit between sections as direct
-children of the page body, per the kit. The builder footer block and header are
+Body structure follows the **About-suite precedent, not the hub's
+shell-keeping**: everything between the builder header and the footer block
+`#FUdf9w9dXZ` is replaced wholesale with hand-authored, readable markup. The
+cover keeps the load-bearing four classes plus `data-v-3ffce944`
+(`<section class="block block--desktop-first-visible block--mobile-first-visible
+as-cover" data-v-3ffce944>`); every other section is a plain
+`<section class="as-section as-section--…">` with no builder ID and no inline
+style; `as-band` figures sit between sections as direct children of the body.
+The five builder content shells per page (and their inline custom properties)
+are deleted, as they were on all five About-suite pages. Header and footer are
 untouched.
 
 ## 4. The template — ten sections, one order, all seven pages
