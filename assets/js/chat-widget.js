@@ -91,7 +91,7 @@ class GlassChatWidget {
             this._history.push({ role: 'assistant', content: botReply });
 
             this.hideTyping();
-            this.addMessage(botReply, 'bot');
+            this.addMessage(botReply, 'bot', data.links);
 
         } catch (error) {
             console.error('Widget Error:', error);
@@ -100,13 +100,35 @@ class GlassChatWidget {
         }
     }
 
-    addMessage(text, sender) {
+    addMessage(text, sender, links) {
         const div = document.createElement('div');
         div.className = `message ${sender}`;
         const formattedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
         div.innerHTML = `<div class="bubble">${formattedText}</div>`;
+        const linksEl = this.buildLinks(links);
+        if (linksEl) div.appendChild(linksEl);
         this.elements.messages.appendChild(div);
         this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
+    }
+
+    /* Server-validated page suggestions rendered as same-tab navigation chips.
+       Only same-site paths ("/slug/") are accepted as a client-side belt-and-braces. */
+    buildLinks(links) {
+        if (!Array.isArray(links)) return null;
+        const safe = links.filter(l => l && typeof l.url === 'string' && /^\/[a-z0-9-]*\/?$/i.test(l.url));
+        if (!safe.length) return null;
+        const wrap = document.createElement('div');
+        wrap.className = 'bubble-links';
+        for (const link of safe.slice(0, 3)) {
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = link.url;
+            a.textContent = String(link.title || link.url);
+            a.insertAdjacentHTML('beforeend',
+                '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.4 1.4L16.2 11H4v2h12.2l-5.6 5.6L12 20l8-8z"/></svg>');
+            wrap.appendChild(a);
+        }
+        return wrap;
     }
 
     showTyping() { 
@@ -206,6 +228,18 @@ class GlassChatWidget {
             .bubble { padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.5; color: white; }
             .message.user .bubble { background: linear-gradient(135deg, var(--primary), #a00f1c); border-bottom-right-radius: 4px; }
             .message.bot .bubble { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.05); border-bottom-left-radius: 4px; }
+
+            .bubble-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+            .page-link {
+                display: inline-flex; align-items: center; gap: 6px;
+                padding: 8px 14px; border-radius: 999px;
+                font-size: 13px; font-weight: 600; text-decoration: none;
+                color: #fff; background: rgba(211, 18, 37, 0.18);
+                border: 1px solid rgba(211, 18, 37, 0.55);
+                transition: background 0.2s ease, transform 0.2s ease;
+            }
+            .page-link:hover { background: var(--primary); transform: translateY(-1px); }
+            .page-link svg { flex: none; opacity: 0.85; }
 
             .typing-indicator { display: none; gap: 6px; padding: 12px 18px; background: rgba(255,255,255,0.05); border-radius: 20px; width: fit-content; margin-left: 24px; margin-bottom: 12px; }
             .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.6); border-radius: 50%; animation: bounce 1.4s infinite; }
