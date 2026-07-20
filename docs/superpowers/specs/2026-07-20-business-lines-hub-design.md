@@ -157,8 +157,8 @@ comment recording the measurement, per the "comment the why" rule.
 <section class="block as-section as-section--light">
   <div class="as-section__inner">
     <header class="as-head">
-      <p class="as-head__eyebrow">Seven disciplines</p>
-      <h2 class="as-head__title">Choose a discipline</h2>
+      <p class="as-head__eyebrow">What we do</p>
+      <h2 class="as-head__title">Multidisciplinary contracting</h2>
       <span class="as-head__rule" aria-hidden="true"></span>
       <p class="as-head__lede">Each line carries its own capabilities, plant and
         client base. Every page links through to that discipline's live and

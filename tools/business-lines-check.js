@@ -77,11 +77,46 @@
     ok(label + ': is lazy', img.getAttribute('loading') === 'lazy');
   });
 
-  /* ---- never hide in CSS and reveal in JS ---- */
+  /* ---- never hide in CSS and reveal in JS ----
+
+     A bare "opacity !== 0" here is wrong, and false-failed on correct code:
+     when the reveal is working, tiles below the fold sit at opacity 0 until
+     they are scrolled to. That is the feature, not the bug.
+
+     What must actually hold:
+       - with the reveal gate OFF (no JS, or the fail-safe fired), nothing
+         may be hidden at all;
+       - with it ON, any tile that has ALREADY entered the viewport must
+         have revealed. A tile still below the fold is legitimately pending.
+     Whether it will ever reveal is a separate, stronger check — the
+     SELECTOR assertion below. */
+  var revealGateOn = document.documentElement.classList.contains('v2-reveal') &&
+                     document.documentElement.classList.contains('hero-motion');
+
   Array.prototype.forEach.call(tiles, function (tile, i) {
-    ok('tile ' + i + ' is not hidden',
-       getComputedStyle(tile).opacity !== '0',
-       'opacity ' + getComputedStyle(tile).opacity);
+    var hidden = getComputedStyle(tile).opacity === '0';
+    var box = tile.getBoundingClientRect();
+    var hasEnteredView = box.top < window.innerHeight;
+
+    if (!revealGateOn) {
+      /* No gate: opacity is the whole truth, and anything hidden here is
+         the permanent-hide bug. */
+      ok('tile ' + i + ' is not hidden (reveal gate off)', !hidden,
+         'opacity 0 with no reveal gate — this is the permanent-hide bug');
+    } else if (hasEnteredView) {
+      /* Gate on: assert the STATE CLASS, not opacity. A tile that has just
+         revealed still computes opacity 0 for the length of its stagger
+         delay (as-fade-up runs `both`, delayed up to --i * 60ms), so an
+         opacity check here fails on a perfectly healthy page. `.is-in` is
+         the invariant the observer actually establishes. */
+      ok('tile ' + i + ' has .is-in after entering the viewport',
+         tile.classList.contains('is-in'),
+         'top at ' + Math.round(box.top) + ', opacity ' +
+         getComputedStyle(tile).opacity);
+    } else {
+      skipped('tile ' + i + ' reveal', 'still below the fold; scroll to it first');
+    }
+
     ok('tile ' + i + ' has exactly one anchor',
        tile.querySelectorAll('a').length === 1);
   });
