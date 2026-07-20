@@ -104,6 +104,8 @@
       ok(String(cover.naturalWidth) === cover.getAttribute('width') &&
          String(cover.naturalHeight) === cover.getAttribute('height'),
          'cover width/height match intrinsic size');
+    } else if (cover.complete) {
+      ok(false, 'cover image failed to load (naturalWidth 0)');
     } else { skipped('cover intrinsic size (not decoded — scroll/reload, do not set eager)'); }
   }
 
@@ -140,6 +142,7 @@
     ok(href === D.proj[r], 'row ' + (r + 1) + ' href is ' + D.proj[r] + ' (got ' + href + ')');
     var label = rows[r].getAttribute('aria-label') || '';
     var visible = txt(rows[r].querySelector('.blp-proj__name'));
+    ok(visible.length > 0, 'row ' + (r + 1) + ' has a visible name');
     ok(label.indexOf(visible) === 0, 'row ' + (r + 1) + ' aria-label begins with its visible name');
   }
 
@@ -152,7 +155,9 @@
     var h = b.getAttribute('href');
     ok(expected.hasOwnProperty(h), 'listing button href ' + h + ' expected');
     ok(txt(b).indexOf('(' + expected[h] + ')') !== -1, 'button "' + txt(b) + '" carries count ' + expected[h]);
+    delete expected[h];
   });
+  ok(Object.keys(expected).length === 0, 'every expected listing href present');
   if (slug === 'oil-and-gas-construction-kuwait') {
     ok(!document.querySelector('a[href="/oil-and-gas-current"]'), 'no link to nonexistent oil-and-gas-current');
   }
@@ -167,7 +172,8 @@
   /* 8. Nothing hidden */
   var hidden = 0;
   Array.prototype.forEach.call(document.querySelectorAll('.as-section *, .blp-proj *'), function (el) {
-    if (getComputedStyle(el).opacity === '0') hidden++;
+    var cs = getComputedStyle(el);
+    if (cs.opacity === '0' || cs.visibility === 'hidden') hidden++;
   });
   ok(hidden === 0, 'no element computes to opacity 0 (' + hidden + ' found)');
 
@@ -178,7 +184,8 @@
   /* 10. No horizontal overflow */
   ok(document.documentElement.scrollWidth <= window.innerWidth + 1, 'no horizontal overflow');
 
-  console.log('business-line-check [' + slug + ']: ' +
+  console[(fail || skip) ? 'error' : 'log']('business-line-check [' + slug + ']: ' +
     pass + ' passed, ' + fail + ' failed, ' + skip + ' skipped' +
+    ((fail || skip) ? ' — NOT CLEAN' : '') +
     (failures.length ? '\n - ' + failures.join('\n - ') : ''));
 })();
