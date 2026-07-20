@@ -3,9 +3,21 @@
   "configurations": [
     {
       "name": "ugcc-static",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8747"],
       "port": 8747
+    },
+    {
+      "name": "ugcc-static-alt",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8751"],
+      "port": 8751
+    },
+    {
+      "name": "ugcc-business-lines",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8759", "--directory", ".claude/worktrees/business-lines"],
+      "port": 8759
     }
   ]
 }
