@@ -29,8 +29,10 @@ const TABS = [
 
 const TYPOS = [
   'stream flood', 'sever network', 'tankge', 'Duqum',
-  'GCC has tremendous', // missing-U variant; "UGCC has tremendous" is fine
 ];
+// Missing-U variant only — "UGCC has tremendous" is fine, so a plain
+// substring check would false-positive on the repaired text.
+const GCC_TYPO = /(?<!U)GCC has tremendous/;
 
 const html = {};
 for (const slug of Object.keys(PAGES)) {
@@ -85,6 +87,7 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
 
   it('contains none of the known typo strings', () => {
     for (const t of TYPOS) expect(doc()).not.toContain(t);
+    expect(doc()).not.toMatch(GCC_TYPO);
   });
 
   it('every img in the body carries a non-empty alt', () => {
