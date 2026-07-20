@@ -89,20 +89,17 @@ is what binds it). H1s stay the builder's short caps — they are approved copy:
 
 All four images are already referenced by their pages today.
 
-### 4.2 `fx-subnav` — the family strip
+### 4.2 The family strip — reuse the shipped `.v2-subnav`
 
-Directly under the cover on all four pages. A `<nav aria-label="Facilities">`
-holding the four existing labels: Facilities / Plants / Laboratories /
-Equipment, linking to the four real URLs. Current page gets
-`aria-current="page"`.
+**Discovery at planning time:** all four pages already carry the shipped
+navy `.v2-subnav` (`v2.css:306`) with exactly the four family links and
+`.is-active` on the current page — the same component the about-suite pages
+use. It is kept **unchanged in place** directly under the new cover; no
+`fx-subnav` is built. The mockups' white strip is superseded by this shipped
+component (same links, same position; navy ground).
 
-- White ground, full-width, 1px bottom hairline `rgba(0,42,65,.12)`.
-- Inner rail `width: min(1224px, 100% - 64px)`, `display: flex`, `gap: 34px`,
-  `overflow-x: auto` (it must scroll, not wrap, at phone widths).
-- Links: Open Sans 12px/700, `letter-spacing: .14em`, uppercase,
-  `rgba(0,42,65,.62)`; hover/focus-visible → `--v2-navy` (one rule, both
-  states); current → `--v2-navy` + `border-bottom: 2px solid var(--v2-red)`.
-- Padding `17px 0 15px` (the 2px underline keeps total height even).
+One a11y addition: the `.is-active` link also gets `aria-current="page"`
+(class stays — the stylesheet keys off it).
 
 ### 4.3 `fx-next` — family continue-nav
 
@@ -175,12 +172,12 @@ Non-linked — these categories have no destination pages.
 Tile imagery (hub's own slides; the hub gets no separate gallery — these ARE
 its slideshow):
 
-| Tile | Image |
+| Tile | Image (largest repo copy of the approved photo — see §6) |
 |---|---|
-| 01 PLANTS | `21693cde-bannerslide1-AMqDLlRxzXInk443.jpg` (asphalt plant) |
-| 02 LABORATORIES | `3e586c36-bannerslide5-fdkqtCNKUhxe7XZ7.jpg` (technician) |
-| 03 EQUIPMENT | `024803e2-bannerslide14-YewugA06yhf9oVJA.jpg` (excavators) |
-| 04 WORKSHOPS | `a8a85746-bannerslide2-bHbn5ovp26CWQnkK.jpg` (test bench) |
+| 01 PLANTS | `a375c78c-bannerslide1-AMqDLlRxzXInk443.jpg` 1024×683 (asphalt plant) |
+| 02 LABORATORIES | `12503e0b-bannerslide5-fdkqtCNKUhxe7XZ7.jpg` 1024×708 (technician) |
+| 03 EQUIPMENT | `7cd93d95-bannerslide14-YewugA06yhf9oVJA.jpg` 2800×1575 (excavators) |
+| 04 WORKSHOPS | `a7ab7cdc-bannerslide2-bHbn5ovp26CWQnkK.jpg` 1440×1406 (test bench) |
 
 `b7916ad6-mainbanner_overview…jpg` is the one hub slide left unused; it may be
 dropped from the page (an image not rendered is not removed photography).
@@ -196,8 +193,11 @@ dropped from the page (an image not rendered is not removed photography).
 4. `--tint`: head "Plant Locations and Capacities" + PLANT/LOCATION/CAPACITY
    table, 6 rows verbatim. `CAPACITY` cells get `font-variant-numeric:
    tabular-nums`.
-5. `--light`: `fx-gallery fx-gallery--2` — slides `04b8df07-bannerslide2`,
-   `3f3a92a2-bannerslide5`, `e96ca71c-bannerslide6`, `a82d0c16-bannerslide8`.
+5. `--light`: `fx-gallery fx-gallery--2` — slides (largest copies, §6):
+   `1b6ba9ff-bannerslide2-d95Zw7k3ePTgXN6l.jpg` 1024×683,
+   `2e32cc34-bannerslide5-YX4jJa313ohyLXRn.jpg` 1024×684,
+   `1f7b5437-bannerslide6-A0xv71ReJ4Sb4e4N.jpg` 1024×683,
+   `56fc8feb-bannerslide8-mk34pqb8OyfVX0pO.jpg` 1024×606.
 6. `--navy`: `as-quote` (the closing repeat of the overview line) + `fx-next`
    (← FACILITIES / LABORATORIES →).
 
@@ -205,7 +205,8 @@ dropped from the page (an image not rendered is not removed photography).
 
 1. Cover. 2. Subnav.
 3. `--light`: head "Overview"; `fx-cols` = first four verbatim paragraphs
-   beside `as-figure` `994b69d9-bannerslide2` (the AMPT tester).
+   beside `as-figure` `a7ab7cdc-bannerslide2-bHbn5ovp26CWQnkK.jpg` 1440×1406
+   (the AMPT tester; largest copy, §6).
 4. `--tint`: head — eyebrow "Asphalt · Bitumen", title "Analysis and Testing"
    (both existing page words); `fx-cols` of two `as-prose` columns: left the
    bitumen + SuperPave paragraphs, right the aggregate paragraph + the
@@ -214,9 +215,15 @@ dropped from the page (an image not rendered is not removed photography).
 5. `--light`: head "Tests and Analysis Details" + the TEST AND
    ANALYSIS/AGGREGATES table, 7 rows verbatim (including the repeated
    Moisture Evaluation row).
-6. `--tint`: `fx-gallery` (3-col) — slides `fc00da8d-bannerslide1`,
-   `2fee1bd6-bannerslide3`, `1fa5a890-bannerslide5`, `9a1347de-bannerslide6`,
-   `407d90df-bannerslide7`. bannerslide2 is excluded — it is the §3 figure.
+6. `--tint`: `fx-gallery` (3-col) — slides (largest copies, §6):
+   `6fd5fe2f-bannerslide1-5plCBZWEwdyB3l2D.jpg` 1440×957,
+   `750c616d-bannerslide3-8FKHjAkdbSiDfJ9N.jpg` 2800×1591,
+   `12503e0b-bannerslide5-fdkqtCNKUhxe7XZ7.jpg` 1024×708,
+   `1af51961-bannerslide6-8zTmuWUEZvCliFN8.jpg` 1024×604,
+   `0fc729e2-bannerslide7-KeDi4Y9GQWyA9qea.jpg` 1024×683.
+   bannerslide2 is excluded — it is the §3 figure. bannerslide5 also serves
+   as the hub's LABORATORIES tile; cross-page repetition is fine (the rule is
+   per-page only).
 7. `--navy`: `as-quote` ("The UGCC Central Testing Laboratory is a leading
    facility in the asphalt industry testing and analysis") + `fx-next`
    (← PLANTS / EQUIPMENT →).
@@ -228,19 +235,35 @@ dropped from the page (an image not rendered is not removed photography).
    "Middle Eas") beside `fx-types` of the seven fleet categories 01–07.
 4. `--tint`: head "Equipment Details" + EQUIPMENT TYPE/DETAILS table, 7 rows
    verbatim.
-5. `--light`: `fx-gallery fx-gallery--4` — the twelve slides:
-   bannerslides 1, 2, 4, 5, 7, 8, 9, 11, 12, 13, 14 + `8731e40d-mainbanner`
-   (full hashed names in the mockup, carried over as-is).
+5. `--light`: `fx-gallery fx-gallery--4` — the twelve slides (largest
+   copies, §6; ten are square 768×768 exports, cropped 3:2 by the grid):
+   `f52f4a4b-bannerslide1-kxomI3O2BG0kODWb.jpg`,
+   `b0f172f8-bannerslide2-pOxpZ0UwQkf7zgmB.jpg`,
+   `ea330e3d-bannerslide4-QRaqZAbHjDkEH2qY.jpg`,
+   `f995e6ee-bannerslide5-lYx2kDYILzvtu06m.jpg`,
+   `38013849-bannerslide7-bnn8lIXgg9jkfpdW.jpg`,
+   `094397a5-bannerslide8-gbcVdxokP8e4Jbkl.jpg`,
+   `203820af-bannerslide9-tckM6gALWSyO2pJ2.jpg`,
+   `8b7ea221-bannerslide11-FEXuXJL9O4Ss1mtq.jpg`,
+   `46b1701a-bannerslide12-x1WIOUlKly76caXd.jpg`,
+   `a27581d9-bannerslide13-A6njwNEdUiObYJZn.jpg`,
+   `7cd93d95-bannerslide14-YewugA06yhf9oVJA.jpg` 2800×1575,
+   `dea701e5-mainbanner-lbuG6SZifrV436Oj.jpg` 768×768.
 6. `--navy`: no closing statement exists on this page, so no quote —
    `fx-next` only (← LABORATORIES / FACILITIES →).
 
 ## 6. Imagery rules
 
-- Every rendered image already appears on its page today; the only *new
+- Every rendered photograph already appears on its page today; the only *new
   placements* are covers reusing the staged `v2/` files their pages already
   load.
-- The builder's duplicated mobile/desktop copies of each slide (two hashes,
-  one photograph) collapse to one `<img>` per photo.
+- The builder exports each photograph at several sizes under different hash
+  prefixes; the **content suffix** (e.g. `-fdkqtCNKUhxe7XZ7`) identifies the
+  photo. **Always use the largest copy in `assets/img` for that suffix**
+  (measured at planning time; the chosen filenames are in §5). Same approved
+  photo, best available pixels — mobile 375px copies must not ship in
+  600px-wide slots.
+- The builder's duplicated copies collapse to one `<img>` per photo.
 - Descriptive `alt` on every content image (new alt text is required a11y
   metadata, not copy). Cover alts describe the photograph, not the page.
 - `width`/`height` attributes from each file's intrinsic pixels — measure at
@@ -272,8 +295,8 @@ outside the gate.
 - Hub tile anchors: whole-card anchors would otherwise announce image alt +
   blurb as one long accname, so each carries an `aria-label` that begins with
   the visible tile name (SC 2.5.3) and stops there — e.g. `"PLANTS"`.
-- `fx-subnav`: `aria-current="page"`; scrollable at narrow widths, not
-  wrapped, and focus-visible must be visible within the scroll row.
+- `.v2-subnav`: `aria-current="page"` added beside `.is-active`; the shipped
+  component already scrolls rather than wraps at narrow widths.
 - Galleries: `role="group"` + `aria-label`; images carry real `alt`.
 - Hover states duplicated on `:focus-visible` in the same rule, kit-style.
 - Tables keep `<thead>`/`<tbody>` and header cells as `<th>`.
@@ -286,7 +309,9 @@ on):
 
 1. Cover contract: `data-v-3ffce944` present, `alt` non-empty, rendered
    height 524.
-2. Subnav: four links, exactly one `aria-current`, labels in family order.
+2. Subnav: the shipped `.v2-subnav` present with four links in family order;
+   exactly one link carries both `.is-active` and `aria-current="page"`, and
+   it matches the page URL.
 3. Hub: exactly 3 tile anchors + 1 non-anchor tile; every anchor `aria-label`
    starts with its visible `<h3>` text; tile 04 contains no `<a>`.
 4. Galleries: expected card count per page (plants 4, labs 5, equipment 12);
