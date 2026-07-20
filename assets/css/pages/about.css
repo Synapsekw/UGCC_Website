@@ -1,0 +1,84 @@
+/* ==========================================================================
+   /about-contractor-kuwait — page-specific rules only
+   ==========================================================================
+   Linked after about-suite.css. Everything this page renders comes from the
+   kit (.as-cover, .as-section, .as-head, .as-prose, .as-cards, .as-stats,
+   .as-band); nothing here restyles a kit component. Two things are genuinely
+   local to this page and have no kit equivalent:
+
+     1. the company-profile CTA group — a brochure cover beside a download
+        button. It is the only such pairing in the suite, so it is not a kit
+        component;
+     2. a cap on the expertise grid, because this page is the only one with a
+        three-tile row.
+
+   The cover's geometry is deliberately absent: its height, padding and type
+   are the kit's contract and must be identical on all five pages.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Company-profile CTA
+   --------------------------------------------------------------------------
+   Brochure cover and download button on one row, wrapping to a stack when the
+   cover can no longer hold its measure. `align-items: center` rather than
+   `flex-end`, because the button is a pill and reads as floating when its
+   baseline is pinned to the bottom edge of a 517px-tall image crop. */
+
+.about-profile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 32px 40px;
+}
+
+/* 420px: the brochure screenshot is a 1024x517 crop of a landscape spread, so
+   at the full 1224px measure it would out-shout the section head it sits
+   under. 420px renders it at roughly the width of the button plus its own
+   caption-free margin. */
+.about-profile__shot {
+  flex: 0 1 420px;
+  min-width: 0;
+}
+
+.about-profile__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  /* The standard image placeholder navy, so the box is never a white hole on
+     the tint ground while the PNG decodes. */
+  background: #0b2233;
+}
+
+/* The download button uses the kit's own .as-btn / .as-btn--on-light. It was
+   briefly restated here, before the kit had a button component; that rule has
+   been removed in favour of the shared one so this page and /credentials
+   cannot drift apart. See about-suite.css, "Buttons". */
+
+
+
+
+/* --------------------------------------------------------------------------
+   Expertise tiles
+   --------------------------------------------------------------------------
+   The kit's .as-cards--3 is `repeat(auto-fit, minmax(260px, 1fr))`, which on
+   this page's full 1224px measure is already three tracks. This only stops a
+   very wide window from stretching the three portrait crops: past ~1500px the
+   4/3 shot boxes grow faster than the photographs' useful subject area. */
+
+.about-expertise {
+  max-width: 1100px;
+}
+
+
+@media (max-width: 920px) {
+  .about-profile {
+    gap: 24px;
+  }
+
+  .about-profile__shot {
+    flex: 1 1 100%;
+  }
+
+}

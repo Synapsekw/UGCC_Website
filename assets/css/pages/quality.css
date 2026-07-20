@@ -1,0 +1,56 @@
+/* ==========================================================================
+   quality.css — page-specific rules for /quality
+   ==========================================================================
+   Loaded after about-suite.css. Everything /quality renders is a kit
+   component; this file only supplies the two adjacency gaps the kit does not
+   yet declare, both of which are noted to the kit session as candidates for
+   about-suite.css. Nothing here restyles a component's own look — no colours,
+   no type, no radii, no cover geometry.
+
+   The cover's height contract (524px, every page, every breakpoint) is owned
+   entirely by about-suite.css. This file deliberately declares nothing that
+   could move it.
+   ========================================================================== */
+
+
+/* 1. Prose immediately followed by the ISO card grid
+   --------------------------------------------------------------------------
+   .as-head owns its 40px bottom margin and .as-cards declares `margin: 0`,
+   so a card grid placed directly after a .as-prose intro (the shape the
+   Quality Assurance section takes) has no separation at all — the first card
+   border sits on the last line of the paragraph above it.
+
+   36px, not the head's 40px: this is a gap between a paragraph and the grid
+   it introduces, which is a tighter relationship than head-to-content, and
+   .as-prose's 1.75 line-height already contributes descender space above it.
+   At <=920px it drops in step with the kit's other 40->32 reductions. */
+.as-prose + .as-cards {
+  margin-top: 36px;
+}
+
+@media (max-width: 920px) {
+  .as-prose + .as-cards {
+    margin-top: 28px;
+  }
+}
+
+
+/* 2. A figure following prose inside a --narrow section
+   --------------------------------------------------------------------------
+   .as-prose caps its measure at 68ch (~640px at 17px Open Sans), but
+   .as-section__inner--narrow is 880px, and .as-figure is a sibling of the
+   prose rather than a child of it — the kit lists <h3>/<h4>/<p>/<ul>/<ol>/
+   <strong>/<a> as the only supported descendants, so the figure cannot go
+   inside. Left alone the photograph runs 240px wider than the column of text
+   it illustrates and the left edge is the only thing the two share.
+
+   Matching the prose measure exactly (68ch, same unit, so the two track each
+   other if the body size ever changes) keeps the Competence section a single
+   reading column with an image in it, which is what it is.
+
+   as-prose--wide is NOT the alternative here: the kit forbids it on a
+   standalone reading column, and widening 300 words of body copy to 880px to
+   suit one photograph is the wrong trade. */
+.as-section__inner--narrow > .as-prose + .as-figure {
+  max-width: 68ch;
+}

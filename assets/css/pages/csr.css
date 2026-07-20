@@ -1,0 +1,24 @@
+/* /csr — page-specific rules.
+   ==========================================================================
+   The CSR page is built entirely from about-suite.css components: .as-cover,
+   two .as-section grounds (light -> tint), one .as-head per section, the
+   six-item .as-accordion (class-based, driven by the existing v2.js binding)
+   and one .as-quote on navy. Every visual decision it needs is already in the
+   kit, so this file deliberately declares nothing.
+
+   It exists because the five About-family pages all link a per-page sheet in
+   the same slot, and because the next page-specific rule should land here
+   rather than in the shared kit.
+
+   Two observations that belong to the KIT, not here, and are reported rather
+   than overridden:
+
+   1. .as-quote__text caps its measure at 26ch (22ch <=920px) on the assumption
+      of a short statement. This page's banner sentence, which must be carried
+      over verbatim, is 145 characters and sets uppercase over roughly six
+      lines. A longer-statement variant is a kit amendment.
+
+   2. .as-acc__content-pad releases the .as-prose 68ch measure inside a panel
+      (max-width: none). At the 880px --narrow inner that is ~100ch of running
+      text in the panels that are prose rather than lists (items 1, 4, 5, 6).
+      If a cap is wanted it belongs on the component, not on this page. */

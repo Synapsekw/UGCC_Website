@@ -1,0 +1,44 @@
+/* ==========================================================================
+   /hse (HSSE) — page-specific rules
+   ==========================================================================
+   Loaded after about-suite.css. Everything structural on this page comes from
+   the kit; this file exists for one thing only, documented below.
+
+   Deliberately NOT here:
+   - No cover geometry. The cover's height (524px), padding and inner width are
+     the kit's and are the deliverable — all five pages must diff identically.
+   - No .as-head / .as-prose / .as-pills / .as-quote / .as-band overrides. If
+     this page ever appears to need one, that is a kit amendment, not a page
+     override.
+   - No 768px breakpoint. 920px is the kit's only breakpoint.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Cover crop
+   --------------------------------------------------------------------------
+   The kit's default `object-position: 50% 40%` is a sensible average across
+   five different photographs; it is not correct for this one.
+
+   hero-hsse.jpg is 1672x941 and is composed low: the sheet-piled retaining
+   wall and the sand berm occupy the upper ~50% of the frame, and the subject —
+   a crew standing for a toolbox talk — sits between roughly 50% and 88% of the
+   image height. The cover renders a 524px slice of a ~1080px-tall cover-scaled
+   image, i.e. it shows only 48% of the picture. At 40% that slice runs from
+   21% to 70% of the image and cuts the crew off at chest height, leaving an
+   HSSE cover that is mostly empty formwork.
+
+   Shifting to 55% moves the slice to 28%-77%: the wall still reads as context
+   at the top, and the crew — the only thing on the page that depicts health
+   and safety — is fully in frame above the scrim's heaviest band, where the
+   H1 sits.
+
+   This changes WHICH PIXELS are shown, not the size of the box. The section's
+   height, padding, inner width and stacking are untouched, so the five covers
+   still diff identically. Scoped by src so it cannot leak to a sibling page if
+   this file is ever linked more widely.
+   -------------------------------------------------------------------------- */
+
+.as-cover__media[src$="hero-hsse.jpg"] {
+  object-position: 50% 55%;
+}

@@ -1,0 +1,1599 @@
+/* ==========================================================================
+   UGCC "About suite" kit — the shared vocabulary for the five inner pages:
+
+     /about-contractor-kuwait   /credentials   /hse   /quality   /csr
+
+   Loaded by those five pages only, AFTER v2.css (it deliberately overrides
+   a handful of .v2-* rules — see "Accordion" below). It is not linked from
+   index.html and owns nothing on the landing page.
+
+       <link rel="stylesheet" href="/assets/css/about-suite.css?v=1">
+
+   Namespace: every class here is `as-` (about-suite). Nothing collides with
+   the existing `v2-*`, `cred__*` or `off__*` families. The one deliberate
+   exception is the accordion, which must ALSO carry the `v2-acc*` classes —
+   see below.
+
+   --------------------------------------------------------------------------
+   JAVASCRIPT: NONE IS REQUIRED. NOTHING NEW MUST BE WRITTEN.
+   --------------------------------------------------------------------------
+   assets/js/v2.js (already linked on all five pages) contains:
+
+       document.querySelectorAll('.v2-acc__btn').forEach(function (btn) {
+         btn.addEventListener('click', function () {
+           var acc = btn.closest('.v2-acc');
+           var open = acc.classList.toggle('is-open');
+           btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+         });
+       });
+
+   That is the whole accordion contract, and it keys off `.v2-acc__btn` and
+   `.v2-acc`. Rather than ask for a second script that does the same thing,
+   `.as-acc` is defined as a *restyling* of that contract: every accordion
+   element carries BOTH classes (`class="as-acc v2-acc"`,
+   `class="as-acc__btn v2-acc__btn"`, …). v2.js keeps working untouched; the
+   `as-` rules below sit at the same specificity as the `v2-` rules they
+   replace and win purely on load order. If this file is ever loaded BEFORE
+   v2.css the accordion reverts to the v2 look — it still functions.
+
+   Everything else in this kit is CSS-only. No block depends on a script for
+   layout or for visibility (§7.3 of the design system).
+
+   --------------------------------------------------------------------------
+   REVEALS
+   --------------------------------------------------------------------------
+   The spec's opt-in contract is reused verbatim: rules are double-gated on
+   `.hero-motion` AND `.v2-reveal`, both on <html>, and the state class is
+   `.is-in` with an inline `--i` stagger index. Neither gate class is added by
+   any script these five pages currently load (sections.js and hero.js are
+   index-only), so today every reveal rule here is inert and all content is
+   visible on load. That is the correct failure mode and it must stay that
+   way: NEVER hide anything in CSS that JS has to un-hide.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   0. Kit-local tokens
+   ==========================================================================
+   Block-local custom properties, in the style of offices.css's --off-*, so
+   the whole suite's contrast and geometry are one-line edits. Declared on
+   :root because the five pages share them across unrelated sections. */
+
+:root {
+  /* --- the cover contract (see §1 for the derivation) --- */
+  --as-cover-h: 524px;
+
+  /* Header reservation. NOT measured at runtime on these pages — see §1.2. */
+  --as-header-h: 118px;
+  --as-header-h-mobile: 95.5px;
+
+  /* --- surfaces --- */
+  /* A navy-tinted near-white, not a neutral grey: every other light ground in
+     the system (#fff) sits beside navy, and a neutral grey reads green next
+     to rgb(0,42,65). #33424e body copy computes 9.3:1 on it. */
+  --as-tint: #f2f5f6;
+
+  /* --- hairlines --- */
+  --as-hair-light: rgba(0, 42, 65, .12);   /* on white / tint */
+  --as-hair-dark: rgba(255, 255, 255, .16); /* on navy */
+
+  /* --- body text --- */
+  --as-body-light: #33424e;                /* 10.3:1 on #fff, 9.3:1 on --as-tint */
+  --as-muted-light: #5a6570;               /* 5.95:1 on #fff */
+  --as-meta-light: #6b747c;                /* 4.76:1 on #fff — do not lighten */
+  --as-body-dark: rgba(255, 255, 255, .82); /* 10.4:1 on navy */
+  --as-muted-dark: rgba(255, 255, 255, .66);/* 7.2:1 on navy */
+}
+
+
+/* ==========================================================================
+   1. .as-cover — the unified page cover
+   ==========================================================================
+   Replaces the builder hero block on all five pages. The client requirement
+   is that the cover is THE SAME SIZE on every page, so the height is a fixed
+   number, not a min-height and not content-derived.
+
+   1.1 WHY 524px, AT EVERY BREAKPOINT
+   ----------------------------------
+   All five builder heroes today declare, identically:
+
+       --block-min-height:   524px    (desktop)
+       --t-block-min-height: 742px    (tablet)
+       --m-block-min-height: auto     (mobile, with 112px/34px block padding)
+
+   524px is therefore already the rendered desktop height of every one of the
+   five pages — adopting it as the single figure is a zero-pixel change on the
+   viewport the client reviews and signs off on, which is the whole point of
+   deriving rather than inventing.
+
+   The 742px tablet figure is NOT a second design intent. It is the sum of the
+   builder's `--t-grid-template-rows`
+   (minmax(224px,auto) + minmax(156px,auto) + minmax(2px,auto)
+    + minmax(47px,auto) + 1fr), a five-row grid whose first 224px row exists
+   only to push the text below the builder's tablet header. This kit does not
+   use that grid — the header reservation is explicit (§1.2) and the text is
+   bottom-anchored — so carrying 742px forward would reserve 218px of empty
+   scrim on tablet for no reason, and would break the "same size everywhere"
+   requirement the moment a visitor rotated a device.
+
+   The mobile `auto` was never a height at all; it resolved to roughly
+   62.22vw + rows + 146px of block padding (~810px on a 390px-wide phone),
+   i.e. the cover ate two thirds of a phone screen. 524px is a reduction there
+   and a deliberate one.
+
+   So: ONE number, 524px, everywhere. It is stated once, as --as-cover-h.
+
+   1.2 WHY THE HEADER RESERVATION IS STATIC HERE
+   ---------------------------------------------
+   The design system warns (hazard 9) that header height is measured, not
+   hardcoded — but that measurement lives in assets/js/hero.js, which opens
+   with `var hero = document.getElementById('aCqA2TkE7'); if (!hero) return;`.
+   It is the landing page's hero id. hero.js is not linked on these five pages
+   and, if it were, it would return on the first line. Nothing measures the
+   header here, and this file may not add JS.
+
+   Two options were on the table:
+
+     (a) leave main.css to use the builder's inline `--header-height:123px`;
+     (b) override the property with the value hero.css measured (118px /
+         95.5px) and reserve exactly that.
+
+   (b) is chosen. 123px is a stale bake — hero.css:44-61 records the real
+   header at 117.3px before the nav rework and ~118px after, and documents the
+   6px sliver the mismatch caused on the landing page. Using 123px here would
+   pull each cover 5px above the viewport top and leave a 5px sliver of the
+   sub-nav under the header, i.e. reproduce a bug that was already fixed once.
+
+   The override is written the same way hero.css writes it (author !important
+   beats the non-important inline declaration), so main.css's own matched pair
+
+       padding-top: var(--header-height)
+       margin-top:  calc(-1 * var(--header-height))
+
+   lands on the real height. Consequence to remember: because box-sizing is
+   border-box (main.css `*` reset), that padding-top is INSIDE --as-cover-h.
+   524px is the full box, header reservation included — exactly as
+   --block-min-height:524px behaved. Touching the nav's height means changing
+   --as-header-h here, in one place.
+
+   1.3 WHY THE H1 CANNOT DRIVE THE HEIGHT
+   --------------------------------------
+   `height`, not `min-height`. A one-word H1 ("CSR") and a four-word H1
+   ("About United Gulf Construction") therefore render an identical box. The
+   content is bottom-anchored inside that box, so a second title line grows
+   upward into the scrim instead of downward into the page.
+   Headroom check at the tightest case (mobile, 524 - 95.5 header - 48 bottom
+   pad = 380.5px of content area): two H1 lines at the 44px mobile size and
+   1.06 line-height is 93px, plus a three-line lede at 15/1.65 is 74px — 167px
+   used of 380px. Nothing can overflow with the copy these five pages carry. */
+
+.as-cover {
+  /* Header reservation — see §1.2. Literal values, matching hero.css. */
+  --header-height: 118px !important;
+  --header-height-mobile: 95.5px !important;
+
+  position: relative;
+  /* The builder's .block is `display:grid; grid-template-rows:100%` with its
+     track sizing supplied by inline properties that no longer exist once the
+     contents are replaced (hazard 3). Re-declare the display mode. */
+  display: flex;
+  /* Bottom-anchored: the title sits on the lower third of the frame, where
+     the scrim is heaviest and the contrast measurements below apply. */
+  align-items: flex-end;
+  height: var(--as-cover-h);
+  overflow: hidden;
+  /* Explicit, because `padding: var(--block-padding)` becomes an invalid
+     declaration once the builder's inline properties are gone — the result is
+     browser-dependent, not zero (hazard 3). main.css supplies the header
+     padding-top on top of this; that is why only the bottom is set here. */
+  padding: 0 0 72px;
+  /* Below the photo the ground is brand navy, so a slow-loading or missing
+     image degrades to a navy plate rather than to white-on-white. */
+  background: var(--v2-navy, #002a41);
+  /* .block-background renders at z-index 13 and .block-layout lifts content to
+     14. This kit drops .block-layout, so the stacking context is owned here
+     (hazard 2). */
+  isolation: isolate;
+}
+
+/* The photograph. object-fit:cover with a 50% 40% origin: every one of the
+   five hero images has its subject above the horizontal midline, and the
+   bottom third is where the title sits, so biasing the crop upward keeps the
+   subject in frame as the box narrows. */
+.as-cover__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+  /* Matches .v2-careers: the photo is desaturated a touch so the red rule and
+     any red eyebrow stay the warmest thing in the frame. */
+  filter: saturate(.9);
+}
+
+/* The scrim.
+   The builder's overlay is `background-color:#1d1e20` at `opacity:0.61`
+   (`--v3f9ca25a:0.61` on all five). This reproduces that *weight* while
+   changing the *hue* from the builder's neutral charcoal to brand navy, which
+   is the tone every other dark surface in the V2 layer uses. A flat 0.61 navy
+   base carries the tone match; a bottom-weighted second stop buys the title
+   its contrast without hazing the middle of the frame.
+
+   Measured, worst case (a pure-white pixel in the photograph, i.e. the
+   brightest ground the scrim can ever sit on):
+     - middle of the frame, base stop only ....... #637d8b, white = 4.33:1
+     - the bottom band where all text lives ...... #2d4451, white = 10.2:1
+   The middle band carries no text by construction (align-items:flex-end plus
+   the 72px bottom pad put the lede's top edge at ~150px above the bottom
+   edge, inside the second stop's 46% ramp). Every real hero photograph is
+   darker than white, so 10.2:1 is a floor, not an estimate. */
+.as-cover__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(0, 21, 33, .55) 0%, rgba(0, 21, 33, 0) 46%),
+    rgba(0, 42, 65, .61);
+}
+
+/* width: min(), not max-width + vw padding — box-sizing:border-box means
+   proportional padding on a capped box eats the cap and the column *shrinks*
+   as the viewport grows (credentials.css:18 measures it: 1054px at 1920). */
+.as-cover__inner {
+  position: relative;
+  z-index: 2;
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+}
+
+/* Optional. Uppercase red-on-photo: --v2-red-text, never --v2-red (3.09:1 on
+   a dark ground and fails AA). On the measured #2d4451 title band
+   --v2-red-text computes 4.6:1 — AA for normal text. */
+.as-cover__eyebrow {
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--v2-red-text, #e8635e);
+}
+
+.as-cover__eyebrow::before {
+  content: '';
+  flex: none;
+  width: 30px;
+  height: 2px;
+  background: var(--v2-red, #d41c22);
+}
+
+/* Hammersmith One ships a single weight, so 400 is both correct and the only
+   option — and it must be declared here, because this markup replaces
+   .text-box and would otherwise silently fall back to Open Sans Bold
+   (hazard 4).
+
+   Size: the builder's H1 element declared a 135px-wide / 78-156px-tall box at
+   the builder's own scale. clamp(40px, 5.2vw, 68px) lands on 63.6px at
+   1224px, which is a shade under the old rendered size and keeps a
+   four-word title on two lines at every width. 10.2:1 white on the scrim. */
+.as-cover__title {
+  margin: 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(40px, 5.2vw, 68px);
+  line-height: 1.06;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: #fff;
+}
+
+/* One line of lede, capped at 60ch so it never runs the full 1224px measure.
+   rgba(255,255,255,.9) on the measured title band = 8.6:1. */
+.as-cover__lede {
+  margin: 16px 0 0;
+  max-width: 60ch;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .9);
+}
+
+/* 920px, not 768px: the builder's own breakpoint and the width at which the
+   header swaps to its mobile layout. 768 would leave a dead 769-920 band with
+   a mobile header and a desktop cover. The HEIGHT does not change here — that
+   is the entire point of the contract. Only the gutter and the type do. */
+@media (max-width: 920px) {
+  .as-cover {
+    padding: 0 0 48px;
+  }
+
+  .as-cover__inner {
+    width: calc(100% - 32px);
+  }
+
+  .as-cover__title {
+    /* 5.2vw at 920px is exactly 47.8px, so capping the mobile size at 44px
+       keeps the ramp continuous rather than stepping *up* as the window
+       narrows past the breakpoint. */
+    font-size: clamp(34px, 6.4vw, 44px);
+  }
+
+  .as-cover__lede {
+    font-size: 15px;
+  }
+}
+
+
+/* ==========================================================================
+   2. Surfaces — .as-section and its three grounds
+   ==========================================================================
+   The landing page alternates dark -> dark -> light -> dark -> dark -> light.
+   These five pages are text-led rather than image-led, so the rhythm inverts:
+   light is the default and navy is the punctuation. The rule for page agents
+   is in the kit doc; what this file guarantees is that EVERY component below
+   inverts correctly when it is placed inside `.as-section--navy`.
+
+   Vertical padding is the canonical 88px -> 64px from the design system. */
+
+.as-section {
+  position: relative;
+  /* Required whenever .block-layout is dropped, or the content renders behind
+     .block-background at z-index 13 (hazard 2). Harmless when the section is
+     a plain <section> with no builder background. */
+  z-index: 14;
+  padding: 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+}
+
+.as-section__inner {
+  width: min(1224px, 100% - 64px);
+  margin-inline: auto;
+  padding-block: 88px;
+}
+
+/* A narrower measure for reading-led sections. 880px matches .v2-prose__inner
+   in v2.css, so a page that mixes the two does not step. */
+.as-section__inner--narrow {
+  width: min(880px, 100% - 64px);
+}
+
+.as-section--light { background: #fff; }
+.as-section--tint  { background: var(--as-tint); }
+.as-section--navy  { background: var(--v2-navy, #002a41); }
+
+/* Consecutive sections on the same ground would show a seam only where the
+   two are both light; a hairline restores the beat without a colour change. */
+.as-section--light + .as-section--light > .as-section__inner,
+.as-section--tint + .as-section--tint > .as-section__inner {
+  border-top: 1px solid var(--as-hair-light);
+}
+
+/* Tighter top padding when a section leads directly with a full-bleed band,
+   which already supplies its own visual break. */
+.as-section--flush > .as-section__inner { padding-top: 0; }
+
+@media (max-width: 920px) {
+  .as-section__inner,
+  .as-section__inner--narrow {
+    width: calc(100% - 32px);
+    padding-block: 64px;
+  }
+}
+
+
+/* ==========================================================================
+   3. .as-head — the eyebrow -> title -> rule -> lede unit
+   ==========================================================================
+   DIALECT C (design system §2.3), the Credentials/About dialect: the rule is
+   a standalone decorative <span> between the title and the lede.
+
+   Why C and not A, B or D:
+     - The unit's required order in this kit is literally eyebrow -> h2 ->
+       rule -> lede, which is C's order. A puts the rule *inside* the eyebrow;
+       B has no rule mark at all and uses a full-width hairline under a
+       two-column grid; D has no rule.
+     - A and B are both horizontal layouts (flex row / two-column grid) whose
+       right-hand slot holds an exit link or a control. Not one of the five
+       pages has a per-section exit link or control, so both dialects would
+       collapse to a single column at every width and the extra machinery
+       would be dead weight.
+     - C inverts onto navy by changing exactly one value (the rule's colour),
+       which is what makes the surface utilities in §2 cheap.
+     - /credentials already renders the C head in the landing page's cred
+       block; using it here keeps the two continuous.
+
+   Design system rule 5 — ONE horizontal rule per head. This dialect uses the
+   short red mark, so no head in this kit ever also gets a full-width
+   hairline. Do not add one. */
+
+.as-head {
+  margin: 0 0 40px;
+  max-width: 720px;
+}
+
+/* Eyebrow is a <p>, never a heading. --v2-red on light grounds; the
+   --on-navy override below swaps it. 5.26:1 on #fff, 5.0:1 on --as-tint. */
+.as-head__eyebrow {
+  margin: 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--v2-red, #d41c22);
+}
+
+/* Explicit family + weight (hazard 4). clamp() ceiling 40px rather than the
+   credentials block's 44px: these heads repeat three to six times down a
+   page, where 44px reads as a series of competing titles. */
+.as-head__title {
+  margin: 14px 0 0;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(26px, 2.8vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -.005em;
+  text-wrap: balance;
+  color: var(--v2-navy, #002a41);
+}
+
+/* A <span aria-hidden="true">, never an <hr>: an <hr> announces a thematic
+   break that is not there. 34x2 is the credentials measure — it stands alone
+   under the title rather than beside eyebrow text, so it needs more weight
+   than the 26x1 inline mark used in dialect A. */
+.as-head__rule {
+  display: block;
+  width: 34px;
+  height: 2px;
+  margin: 20px 0;
+  background: var(--v2-red, #d41c22);
+}
+
+/* 46ch, the design system's cap for a section lede (54ch is reserved for the
+   longer projects intro). 5.95:1 on white. */
+.as-head__lede {
+  margin: 0;
+  max-width: 46ch;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--as-muted-light);
+}
+
+/* ---- inverted onto navy ---- */
+
+/* --v2-red-text, not --v2-red: small red text on a dark ground is 3.09:1 with
+   --v2-red and fails AA. --v2-red-text is 4.53:1 on rgb(0,42,65). Getting
+   this backwards is invisible in a screenshot, which is why it is a rule. */
+.as-section--navy .as-head__eyebrow { color: var(--v2-red-text, #e8635e); }
+.as-section--navy .as-head__title   { color: #fff; }            /* 14.9:1 */
+.as-section--navy .as-head__lede    { color: var(--as-muted-dark); } /* 7.2:1 */
+
+/* The rule keeps the solid brand red on both grounds — it is a fill, not
+   text, so the 3:1 non-text threshold applies and --v2-red is 3.5:1 on navy.
+   About's navy variant lifts it to --v2-red-text at 48x2; that variant exists
+   for a rule standing alone above a statement with no eyebrow, which is not
+   this unit. */
+.as-section--navy .as-head__rule { background: var(--v2-red, #d41c22); }
+
+@media (max-width: 920px) {
+  .as-head { margin-bottom: 32px; }
+}
+
+
+/* ==========================================================================
+   4. .as-prose — the body text column
+   ==========================================================================
+   The reading column. Applied to the wrapper, not to individual paragraphs,
+   so page agents write plain <h3>/<p>/<ul> inside it and never a class.
+
+   68ch, not a px cap: the measure should track the font size, and at 17px
+   Open Sans 68ch is ~640px — inside the Bringhurst 45-75 band at every
+   breakpoint. The container in §2 still owns the page gutter; this only caps
+   the line length. */
+
+.as-prose {
+  max-width: 68ch;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--as-body-light);
+}
+
+/* Full-width variant for prose that sits beside or above a grid. */
+.as-prose--wide { max-width: none; }
+
+/* Headings inside prose re-declare family and weight (hazard 4). h3 is the
+   in-section level; the section's own title is the h2 in .as-head. */
+.as-prose h3 {
+  margin: 36px 0 12px;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 1.3;
+  color: var(--v2-navy, #002a41);
+}
+
+.as-prose h4 {
+  margin: 28px 0 10px;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: .01em;
+  color: var(--v2-navy, #002a41);
+}
+
+/* First child never carries top margin — the head above already set the gap. */
+.as-prose > :first-child { margin-top: 0; }
+.as-prose > :last-child { margin-bottom: 0; }
+
+.as-prose p {
+  margin: 0 0 18px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--as-body-light);
+}
+
+.as-prose strong { font-weight: 700; }
+
+.as-prose a {
+  color: var(--v2-navy, #002a41);
+  text-decoration: none;
+  border-bottom: 1px solid var(--v2-red, #d41c22);
+  transition: color .25s var(--v2-ease-out-quart),
+              border-color .25s var(--v2-ease-out-quart);
+}
+
+.as-prose a:hover,
+.as-prose a:focus-visible {   /* one rule, both states, so they cannot drift */
+  color: var(--v2-red, #d41c22);
+}
+
+/* ---- lists ----
+   /csr alone carries 10 <ul> and 32 <li>, several of them two lines long, so
+   these are styled as a first-class component rather than as a browser
+   default. list-style is replaced by a drawn marker: the default disc sits on
+   the text baseline and drifts on a wrapped item, and its size is not
+   controllable. A ::marker would be, but Safari still ignores font-size on
+   ::marker for <li> in a <ul>. */
+
+.as-prose ul,
+.as-prose ol {
+  margin: 0 0 20px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  list-style: none;
+}
+
+.as-prose li {
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 22px;
+}
+
+.as-prose ul > li::before {
+  content: '';
+  position: absolute;
+  /* 0.85em, not 50%: the marker must align to the FIRST line's optical centre,
+     which is where the eye expects it on a two-line item. A percentage would
+     centre it on the whole wrapped block and float it into the gap. */
+  top: .85em;
+  left: 2px;
+  width: 5px;
+  height: 5px;
+  background: var(--v2-red, #d41c22);   /* square, per the radii table: 0 */
+}
+
+/* Ordered lists keep real numerals; counters so the number can be typed. */
+.as-prose ol { counter-reset: as-ol; }
+
+.as-prose ol > li {
+  counter-increment: as-ol;
+  padding-left: 28px;
+}
+
+.as-prose ol > li::before {
+  content: counter(as-ol) '.';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--v2-red, #d41c22);
+}
+
+/* Nesting. /csr's Code of Conduct nests one level; two is the supported
+   depth. The nested list tightens and its marker becomes a hollow square so
+   the two levels are distinguishable without colour alone. */
+.as-prose li > ul,
+.as-prose li > ol {
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.as-prose li > ul > li::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--v2-red, #d41c22);
+}
+
+.as-prose li:last-child { margin-bottom: 0; }
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-prose,
+.as-section--navy .as-prose p     { color: var(--as-body-dark); }   /* 10.4:1 */
+.as-section--navy .as-prose h3,
+.as-section--navy .as-prose h4    { color: #fff; }                  /* 14.9:1 */
+.as-section--navy .as-prose ul,
+.as-section--navy .as-prose ol    { color: var(--as-body-dark); }
+.as-section--navy .as-prose a     { color: #fff; }
+.as-section--navy .as-prose a:hover,
+.as-section--navy .as-prose a:focus-visible { color: var(--v2-red-text, #e8635e); }
+/* The marker keeps the solid red fill: 3.5:1 on navy clears the 3:1 non-text
+   threshold, and --v2-red-text at 5px square would read pink. */
+
+@media (max-width: 920px) {
+  .as-prose,
+  .as-prose p { font-size: 16px; }
+  .as-prose h3 { font-size: 19px; }
+}
+
+
+/* ==========================================================================
+   5. .as-cards — the responsive card grid
+   ==========================================================================
+   Two call sites: /quality's two ISO cards and /about's three expertise
+   tiles. One grid, two modifiers.
+
+   auto-fit + minmax(260px, 1fr), NOT a fixed column count: two cards on
+   /quality and three on /about would otherwise need two different grids, and
+   a fixed `repeat(3, …)` leaves /quality with a hole. 260px is the measured
+   floor at which the ISO card's longest body line ("...certification for the
+   competence of the UGCC Central Testing Laboratory") still breaks to five
+   lines rather than six at 15px. */
+
+.as-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cap the track count where the content is a known trio, so a 1600px window
+   does not put three expertise tiles on one 500px-wide row each. */
+.as-cards--3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); max-width: 1224px; }
+.as-cards--2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.as-card {
+  /* min-width:0 is the grid-blowout guard: a grid item's default min-width is
+     auto, so one long unbroken token widens the whole track. */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--as-hair-light);
+  border-radius: 14px;   /* the large-surface radius */
+  padding: 28px;
+  transition: transform .3s var(--v2-ease-out-quart),
+              box-shadow .3s var(--v2-ease-out-quart);
+}
+
+.as-card:hover,
+.as-card:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 38px -20px rgba(0, 21, 33, .4);
+}
+
+/* Image tile variant (About's ENGINEERING / CONSTRUCTION / PROCUREMENT).
+   The card loses its padding and border; the shot owns the top. */
+.as-card--tile {
+  padding: 0;
+  border: 0;
+  overflow: hidden;   /* required for the zoom to be clipped */
+  background: transparent;
+}
+
+/* aspect-ratio reserves the box before the image decodes, so CLS is 0. */
+.as-card__shot {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #0b2233;   /* the standard image placeholder navy */
+}
+
+.as-card__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .5s var(--v2-ease-out-quart),
+              filter .5s var(--v2-ease-out-quart);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .as-card--tile:hover .as-card__shot img,
+  .as-card--tile:focus-within .as-card__shot img {
+    transform: scale(1.05);
+    filter: brightness(1.06) saturate(1.05);
+  }
+}
+
+/* A tile is not a lifting card — the zoom is the feedback. */
+.as-card--tile:hover,
+.as-card--tile:focus-within {
+  transform: none;
+  box-shadow: none;
+}
+
+/* --v2-red at 19px on white is 5.26:1. */
+.as-card__title {
+  margin: 0 0 10px;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.3;
+  color: var(--v2-red, #d41c22);
+}
+
+/* The tile caption is navy and uppercase, not red — it labels a photograph
+   rather than heading a body of text. */
+.as-card--tile .as-card__title {
+  margin: 14px 0 0;
+  font-size: 15px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--v2-navy, #002a41);
+}
+
+.as-card p {
+  margin: 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--as-body-light);
+}
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-card {
+  background: rgba(255, 255, 255, .04);
+  border-color: var(--as-hair-dark);
+}
+
+/* --v2-red-text, 4.53:1 on navy. --v2-red here would be 3.09:1 and fail. */
+.as-section--navy .as-card__title { color: var(--v2-red-text, #e8635e); }
+.as-section--navy .as-card--tile .as-card__title { color: #fff; }
+.as-section--navy .as-card p { color: var(--as-body-dark); }
+.as-section--navy .as-card--tile { background: transparent; }
+
+@media (max-width: 920px) {
+  .as-cards,
+  .as-cards--2,
+  .as-cards--3 { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .as-card { padding: 24px; }
+}
+
+
+/* ==========================================================================
+   6. .as-ledger — the dated credential register (/credentials)
+   ==========================================================================
+   A page-scale sibling of credentials.css's .cred__ledger. That block is a
+   five-row summary in a 1.15fr column beside a claim; this is the full
+   register and owns the whole measure, so the tracks are wider and each row
+   carries a description that runs to two or three lines.
+
+   Structure, and why:
+     <dl class="as-ledger">
+       <div class="as-ledger__row">        <- the pairing guarantee
+         <dt class="as-ledger__term">
+           <time class="as-ledger__year">  <span class="as-ledger__name">
+         <dd class="as-ledger__desc">
+
+   THE BUG THIS FIXES. The builder's certification grid on /credentials places
+   the five headings at mobile grid rows 6,8,10,12,14 and all five bodies at
+   rows 16,18,20,22,24 — every heading is detached from its body at narrow
+   widths. That is only possible because heading and body are independent grid
+   items positioned by absolute row number. Here the <div class="as-ledger__row">
+   wrapper (valid inside a <dl> since HTML 5.2) makes the pair a single grid
+   item at every width: there is no arrangement of tracks, and no breakpoint,
+   that can separate them. `break-inside: avoid` additionally keeps the pair
+   together in print and in a multicolumn context.
+
+   Two nested grids, not one three-column grid: a single grid would require
+   the <time> to be a sibling of the <dt>, which is invalid inside a <dl>. */
+
+.as-ledger {
+  margin: 0;
+  border-top: 1px solid #e6e8ea;
+}
+
+.as-ledger__row {
+  display: grid;
+  /* 236px, not `auto`: the widest term is "ISO 17025:2017" at 15/600, which
+     measures 118px, plus the 64px year track and its 14px gap = 196px. 236
+     leaves 40px of webfont headroom, the same allowance the landing page's
+     `28px 224px 1fr 24px` row makes for a measured 211px minimum. `auto auto`
+     would rag the em-dash row (Grade I has no year) left of the four above. */
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 20px;
+  align-items: baseline;
+  padding: 22px 0;
+  border-bottom: 1px solid #e6e8ea;
+  break-inside: avoid;
+}
+
+.as-ledger__term {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+  margin: 0;
+}
+
+/* <time datetime="2004"> — tabular numerals so the year column is a true
+   column and not four glyph widths. #6b747c is 4.76:1 on white; #8a929a was
+   tried on the landing block and computes 3.15:1, which fails. */
+.as-ledger__year {
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--as-meta-light);
+}
+
+.as-ledger__name {
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: .02em;
+  color: var(--v2-navy, #002a41);   /* 12.9:1 on white */
+}
+
+.as-ledger__desc {
+  margin: 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--as-muted-light);     /* 5.95:1 on white */
+}
+
+/* Optional trailing status chip, e.g. "Maintained". Square, per the radii
+   table — badges are deliberately 0. */
+.as-ledger__status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--v2-navy, #002a41);
+  background: rgba(0, 42, 65, .06);
+  border: 1px solid rgba(0, 42, 65, .14);
+}
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-ledger,
+.as-section--navy .as-ledger__row { border-color: var(--as-hair-dark); }
+.as-section--navy .as-ledger__name { color: #fff; }                  /* 14.9:1 */
+.as-section--navy .as-ledger__desc { color: var(--as-body-dark); }   /* 10.4:1 */
+/* rgba(255,255,255,.6) computes 6.1:1 on navy — the same role as #6b747c's
+   4.76:1 on white, with headroom. */
+.as-section--navy .as-ledger__year { color: rgba(255, 255, 255, .6); }
+.as-section--navy .as-ledger__status {
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  border-color: var(--as-hair-dark);
+}
+
+@media (max-width: 920px) {
+  /* One column. The description takes the full width instead of sharing a row
+     with the term — and because the pair is one grid item, the description
+     lands directly under ITS OWN term, which is the whole fix. */
+  .as-ledger__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 18px 0;
+  }
+
+  /* Still a fixed first track, narrowed. `auto auto` would size the year
+     column per row, and the row whose year is an em-dash would start its name
+     ~16px left of the rows above it — ragged on exactly the row the fixed
+     track exists to keep in line. */
+  .as-ledger__term {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .as-ledger__name { font-size: 15px; }
+  .as-ledger__desc { font-size: 14px; }
+}
+
+
+/* ==========================================================================
+   7. .as-accordion — /csr's six-item CSR Code
+   ==========================================================================
+   Progressive enhancement: with JS disabled the panels are closed and the
+   buttons do nothing, which would hide content — so the no-JS case is handled
+   by <details>/<summary> instead. TWO MARKUP OPTIONS, both supported here:
+
+     (a) button + panel, carrying the v2-acc classes so assets/js/v2.js drives
+         it (no new JS). Preferred, because it matches the existing site.
+     (b) <details class="as-acc"><summary class="as-acc__btn"> — zero JS, open
+         by default if the author sets `open`.
+
+   Option (a) closed-by-default is acceptable here specifically because
+   `.as-acc__panel` uses `grid-template-rows: 0fr` + `overflow: hidden` rather
+   than `display:none`: the text remains in the accessibility tree and in the
+   DOM for find-in-page and for crawlers. It is collapsed, not hidden. If a
+   page needs the content unconditionally visible without JS, use (b).
+
+   Specificity note: each rule below matches the v2.css rule it supersedes
+   exactly (`.as-acc` vs `.v2-acc` = 0,1,0; `.as-acc.is-open .as-acc__panel`
+   vs `.v2-acc.is-open .v2-acc__panel` = 0,3,0), so this file must be linked
+   AFTER v2.css. It is; see the <link> order in the kit doc. */
+
+.as-accordion {
+  margin: 0;
+}
+
+.as-acc {
+  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid var(--as-hair-light);
+  border-radius: 12px;   /* the accordion radius from the radii table */
+  overflow: hidden;
+  transition: box-shadow .3s var(--v2-ease-out-quart),
+              border-color .3s var(--v2-ease-out-quart);
+}
+
+.as-acc:last-child { margin-bottom: 0; }
+
+.as-acc.is-open,
+.as-acc[open] {
+  box-shadow: 0 14px 30px -22px rgba(0, 21, 33, .4);
+  border-color: rgba(0, 42, 65, .18);
+}
+
+.as-acc__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.3;
+  color: var(--v2-navy, #002a41);
+  transition: background-color .22s var(--v2-ease-out-quart);
+}
+
+/* <summary> needs the marker removed in both spellings, and list-item display
+   overridden, before flex applies. */
+.as-acc__btn::-webkit-details-marker { display: none; }
+.as-acc__btn { list-style: none; }
+
+/* One rule, both states, so a later edit cannot let them drift apart. */
+.as-acc__btn:hover,
+.as-acc__btn:focus-visible { background: rgba(0, 42, 65, .045); }
+
+/* Chevron. Drawn from two borders rather than shipped as an SVG: it is two
+   declarations, it inherits nothing that can go stale, and it rotates. */
+.as-acc__btn::after {
+  content: '';
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: -4px;   /* optical: a rotated square hangs low against the cap */
+  border-right: 2px solid var(--v2-red, #d41c22);
+  border-bottom: 2px solid var(--v2-red, #d41c22);
+  transform: rotate(45deg);
+  transition: transform .3s var(--v2-ease-out-quint);
+}
+
+.as-acc.is-open .as-acc__btn::after,
+.as-acc[open] .as-acc__btn::after { transform: rotate(225deg); }
+
+/* grid-template-rows 0fr -> 1fr animates a height the browser computes, so
+   the panel needs no measured max-height and no JS to size it. */
+.as-acc__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .4s var(--v2-ease-out-quint);
+}
+
+.as-acc.is-open .as-acc__panel { grid-template-rows: 1fr; }
+
+/* A <details> panel is only in the box tree when open, so it needs no 0fr
+   state — but it does need the 1fr so the inner overflow:hidden resolves. */
+.as-acc[open] .as-acc__panel { grid-template-rows: 1fr; }
+
+.as-acc__content { overflow: hidden; }
+
+.as-acc__content-pad { padding: 4px 24px 24px; }
+
+/* Prose inside an accordion runs the panel's width; the 68ch cap would leave
+   a ragged right edge inside a 12px-radius box. */
+.as-acc__content-pad .as-prose { max-width: none; }
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-acc {
+  background: rgba(255, 255, 255, .04);
+  border-color: var(--as-hair-dark);
+}
+.as-section--navy .as-acc__btn { color: #fff; }                       /* 14.9:1 */
+.as-section--navy .as-acc__btn:hover,
+.as-section--navy .as-acc__btn:focus-visible { background: rgba(255, 255, 255, .07); }
+.as-section--navy .as-acc__btn::after {
+  border-color: var(--v2-red-text, #e8635e);   /* 3:1+ on navy as a 2px mark */
+}
+
+@media (max-width: 920px) {
+  .as-acc__btn { padding: 18px 18px; font-size: 16px; }
+  .as-acc__content-pad { padding: 2px 18px 20px; }
+}
+
+
+/* ==========================================================================
+   8. .as-pills — HSSE's tag groups
+   ==========================================================================
+   A <ul> of <li>, not a row of <span>: three named commitments are a list and
+   should announce as one. They are not links and must not be given hover
+   affordances that suggest they are — so the landing page's .v2-pill lift is
+   deliberately NOT reproduced here. */
+
+.as-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.as-pill {
+  padding: 10px 20px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--v2-navy, #002a41);          /* 12.9:1 on white */
+  background: rgba(0, 42, 65, .06);
+  border: 1px solid rgba(0, 42, 65, .14);
+  border-radius: 999px;                    /* the pill radius */
+}
+
+/* Red-keyed variant for a group that names a policy rather than a topic. */
+.as-pill--key {
+  color: var(--v2-red, #d41c22);           /* 5.26:1 on white */
+  background: rgba(212, 28, 34, .06);
+  border-color: rgba(212, 28, 34, .28);
+}
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-pill {
+  color: #fff;                             /* 14.9:1 */
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .28);
+}
+
+.as-section--navy .as-pill--key {
+  color: var(--v2-red-text, #e8635e);      /* 4.53:1 */
+  background: rgba(232, 99, 94, .1);
+  border-color: rgba(232, 99, 94, .4);
+}
+
+@media (max-width: 920px) {
+  .as-pills { gap: 10px; }
+  .as-pill { padding: 9px 16px; font-size: 14px; }
+}
+
+
+/* ==========================================================================
+   9. .as-figure and .as-band — captioned images and full-bleed bands
+   ==========================================================================
+   .as-figure is an in-column image with a caption.
+   .as-band is the full-bleed photographic break About uses twice. */
+
+.as-figure {
+  margin: 32px 0;
+}
+
+.as-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  background: #0b2233;   /* placeholder ground while the image decodes */
+}
+
+/* Fixed-ratio variant, for a row of figures that must line up. */
+.as-figure--ratio img {
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+/* The caption's red bar is the same 2px mark the rail's tag uses, so a
+   caption reads as part of the same family across the site. */
+.as-figure__cap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 12px 0 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--as-meta-light);   /* 4.76:1 on white */
+}
+
+.as-figure__cap::before {
+  content: '';
+  flex: none;
+  align-self: center;
+  width: 2px;
+  height: 11px;
+  background: var(--v2-red, #d41c22);
+}
+
+/* ---- the full-bleed band ----
+   left/right: calc(50% - 50vw), NOT width: 100vw — 100vw includes the
+   scrollbar gutter and overflows the document by its width on every desktop
+   browser that reserves one. The band is a <figure> with no caption; the
+   builder's two versions carried no text and hardcoded 800px/827px desktop
+   heights, which is over a full screen of decoration.
+
+   Height: clamp(240px, 34vw, 420px). 34vw lands on 420px at 1235px and holds
+   there — roughly half the builder's 800px, which is what a decorative break
+   between two reading sections is worth. */
+.as-band {
+  position: relative;
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  overflow: hidden;
+  background: var(--v2-navy, #002a41);
+}
+
+.as-band img {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 34vw, 420px);
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* Optional navy wash, for a band that sits between two navy sections. */
+.as-band--wash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(0, 42, 65, .28);
+}
+
+@media (max-width: 920px) {
+  .as-figure { margin: 24px 0; }
+  .as-band img { height: clamp(200px, 46vw, 300px); }
+}
+
+
+/* ==========================================================================
+   10. .as-stats — the figure trio (About's history block)
+   ==========================================================================
+   Founding year and counts. flex + wrap rather than a three-track grid: the
+   three figures are of very different widths ("1975", "6", "50+") and equal
+   tracks would leave the short ones swimming. */
+
+.as-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px 56px;
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.as-stat {
+  display: flex;
+  flex-direction: column;
+  /* A hairline lead-in rather than a box: these are figures in running text,
+     not cards. */
+  padding-left: 16px;
+  border-left: 2px solid var(--v2-red, #d41c22);
+}
+
+/* Hammersmith One 400, declared (hazard 4). 44px against the landing block's
+   38px: there the stats sit inside a .85fr column beside a ledger, here they
+   own the full 1224px measure and three of them across it need the weight. */
+.as-stat__figure {
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--v2-navy, #002a41);   /* 12.9:1 on white */
+}
+
+/* #6b747c, not a lighter grey: at 11px these labels are what make the bare
+   figures mean anything and they are normal text for contrast purposes.
+   4.76:1 on white. #8a929a computes 3.15:1 and fails. */
+.as-stat__unit {
+  margin-top: 8px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--as-meta-light);
+}
+
+/* ---- inverted onto navy ---- */
+.as-section--navy .as-stat__figure { color: #fff; }                  /* 14.9:1 */
+/* rgba(255,255,255,.66) is 7.2:1 — the dark-ground counterpart of #6b747c's
+   4.76:1, with room to spare at 11px. */
+.as-section--navy .as-stat__unit { color: var(--as-muted-dark); }
+
+@media (max-width: 920px) {
+  .as-stats { gap: 28px 32px; }
+  .as-stat { padding-left: 12px; }
+  .as-stat__figure { font-size: 32px; }
+}
+
+
+/* ==========================================================================
+   11. .as-quote — the centred uppercase pull-quote banner
+   ==========================================================================
+   Supersedes .v2-banner. Differences, all deliberate:
+     - it is a <blockquote>, so the quotation is marked up as one;
+     - the type is capped by ch rather than px, so the measure holds at any
+       font size;
+     - it carries a red rule above the text, which is the only thing that
+       distinguishes it from a navy section with a centred h2;
+     - the 48px top margin .v2-banner hardcodes is gone: spacing belongs to
+       the section, and a banner that sets its own outer margin cannot be
+       placed adjacent to anything predictably.
+
+   Ground: brand navy. White at 26px Hammersmith = 14.9:1. */
+
+.as-quote {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.as-quote::before {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 2px;
+  /* 48x2, the About dialect's measure: this rule stands entirely alone above
+     a statement with no eyebrow beside it, so it needs the extra weight to
+     register. --v2-red-text rather than --v2-red for the same reason About
+     lifts it — the mark is the only red on a large navy field. */
+  margin: 0 auto 28px;
+  background: var(--v2-red-text, #e8635e);
+}
+
+.as-quote__text {
+  margin: 0 auto;
+  max-width: 26ch;   /* ~3 lines at the clamp ceiling; a pull-quote, not prose */
+  font-family: var(--font-primary, 'Hammersmith One', sans-serif);
+  font-weight: 400;
+  font-size: clamp(22px, 2.4vw, 34px);
+  line-height: 1.4;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: #fff;
+}
+
+/* Optional attribution. rgba(255,255,255,.66) = 7.2:1 on navy. */
+.as-quote__cite {
+  display: block;
+  margin: 20px 0 0;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--as-muted-dark);
+}
+
+/* On a light ground the quote inverts to navy text. Used sparingly — the
+   banner's job is to be the dark beat in a light page. */
+.as-section--light .as-quote__text,
+.as-section--tint .as-quote__text { color: var(--v2-navy, #002a41); } /* 12.9:1 */
+.as-section--light .as-quote::before,
+.as-section--tint .as-quote::before { background: var(--v2-red, #d41c22); }
+.as-section--light .as-quote__cite,
+.as-section--tint .as-quote__cite { color: var(--as-meta-light); }    /* 4.76:1 */
+
+@media (max-width: 920px) {
+  .as-quote::before { margin-bottom: 20px; }
+  .as-quote__text { max-width: 22ch; }
+  .as-quote__cite { font-size: 11px; }
+}
+
+
+/* ==========================================================================
+   12. Reveals — the existing opt-in contract, reused
+   ==========================================================================
+   Double-gated on .hero-motion AND .v2-reveal, both on <html>. Neither class
+   is added by any script these pages currently load, so these rules are inert
+   today and every element below is fully visible. If a future script adopts
+   the sections.js pattern (IntersectionObserver, threshold 0.2, unobserve
+   after the first intersection, `.is-in` on the element, inline `--i`), the
+   entrances turn on with no CSS change.
+
+   NOTHING is hidden outside the gates. A script failure must degrade to
+   visible content, not to a blank section. */
+
+.hero-motion.v2-reveal .as-head,
+.hero-motion.v2-reveal .as-prose,
+.hero-motion.v2-reveal .as-card,
+.hero-motion.v2-reveal .as-ledger__row,
+.hero-motion.v2-reveal .as-acc,
+.hero-motion.v2-reveal .as-stat,
+.hero-motion.v2-reveal .as-quote {
+  opacity: 0;
+}
+
+.hero-motion.v2-reveal .as-head.is-in,
+.hero-motion.v2-reveal .as-prose.is-in,
+.hero-motion.v2-reveal .as-card.is-in,
+.hero-motion.v2-reveal .as-ledger__row.is-in,
+.hero-motion.v2-reveal .as-acc.is-in,
+.hero-motion.v2-reveal .as-stat.is-in,
+.hero-motion.v2-reveal .as-quote.is-in {
+  /* hero-fade-up is defined in hero.css, which these pages do NOT link. A
+     local copy under a distinct name avoids linking an index-only stylesheet
+     for one keyframe, and avoids two different definitions of one name. */
+  animation: as-fade-up .8s var(--v2-ease-out-expo, cubic-bezier(.16, 1, .3, 1)) both;
+}
+
+/* The stagger the contract specifies: inline `--i` (integer, positional)
+   multiplied by 60ms. Applied only to repeated items. */
+.hero-motion.v2-reveal .as-card.is-in,
+.hero-motion.v2-reveal .as-ledger__row.is-in,
+.hero-motion.v2-reveal .as-acc.is-in,
+.hero-motion.v2-reveal .as-stat.is-in {
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes as-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The cover NEVER reveals. It is the first thing on the page, above the fold,
+   and fading in the H1 delays LCP for no benefit. It is also the element a
+   reduced-motion or no-JS visitor is most likely to see first. */
+
+/* Backstop. v2.css already carries the global reduced-motion override, but
+   this kit's entrances are declared here and are gated here too, belt and
+   braces — and it also neutralises the stagger, which the global rule does
+   not touch. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-motion.v2-reveal .as-head,
+  .hero-motion.v2-reveal .as-prose,
+  .hero-motion.v2-reveal .as-card,
+  .hero-motion.v2-reveal .as-ledger__row,
+  .hero-motion.v2-reveal .as-acc,
+  .hero-motion.v2-reveal .as-stat,
+  .hero-motion.v2-reveal .as-quote {
+    opacity: 1;
+    animation: none;
+    animation-delay: 0s;
+  }
+
+  .as-card,
+  .as-card:hover,
+  .as-card:focus-within {
+    transform: none;
+  }
+}
+
+
+/* ==========================================================================
+   13. Accessibility backstops
+   ==========================================================================
+   The global focus ring in v2.css is inherited unchanged:
+
+     :focus-visible { outline: 2px solid var(--v2-red); outline-offset: 3px;
+                      border-radius: 2px; box-shadow: 0 0 0 7px #fff; }
+
+   On navy the white halo carries the 3:1 non-text contrast (14.9:1); on white
+   the red outline carries it (5.26:1). Nothing here overrides it. Two local
+   adjustments only: */
+
+/* The accordion button fills its rounded card, so a 3px-offset ring would be
+   clipped by the card's `overflow: hidden`. Pull it inside instead. */
+.as-acc__btn:focus-visible {
+  outline-offset: -3px;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+/* On navy the white halo would draw a bright box over the panel; the red
+   outline alone is 3.5:1 there, which clears SC 1.4.11 for a focus indicator. */
+.as-section--navy .as-acc__btn:focus-visible {
+  outline-color: var(--v2-red-text, #e8635e);
+}
+
+/* Where the platform asks for its own indicator, give it a real one rather
+   than the designed treatment. */
+@media (forced-colors: active) {
+  .as-acc__btn:focus-visible { outline: 2px solid CanvasText; }
+  .as-cover__scrim { display: none; }   /* forced colours flatten the photo */
+  .as-head__rule,
+  .as-quote::before { forced-color-adjust: none; }
+}
+
+@media (prefers-contrast: more) {
+  .as-head__lede,
+  .as-ledger__desc { color: #2b3843; }        /* 11.2:1 on white */
+  .as-ledger__year,
+  .as-stat__unit,
+  .as-figure__cap { color: #4d565e; }         /* 7.6:1 on white */
+  .as-section--navy .as-head__lede,
+  .as-section--navy .as-ledger__desc { color: #fff; }
+}
+
+/* Utility: visually hidden but announced. Used for the <dl>'s implicit
+   caption on the register, and for any heading a layout does not show. */
+.as-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Buttons — .as-btn
+   ==========================================================================
+   Added after the five pages were first built, because two of them needed a
+   button and, with no kit component to reach for, solved it two different
+   ways: /about restated the design system's values under a page-local
+   `.about-profile__cta`, and /credentials fell back to a plain inline link
+   for its cross-reference to the About page. Two treatments for one job is
+   exactly the inconsistency this suite exists to remove, so the component
+   belongs here.
+
+   Why not just link sections.css and use `.v2-btn`? Because that file is
+   loaded by index.html ONLY, and says so in its own header: its `v2-` prefix
+   is homepage-scoped, unlike the site-wide tokens in v2.css. Linking a
+   homepage stylesheet onto five inner pages to borrow one rule would pull in
+   the whole About/Who-are-we block with it.
+
+   And why not the builder's `.grid-button--primary`? Because it is only ever
+   painted by rules scoped to the builder's `[data-v-297de5e8]` attribute. On
+   hand-authored markup it renders as bare unstyled text.
+
+   So the geometry, type and transition below are `.v2-btn`'s values copied
+   verbatim from sections.css, and the two ground variants keep their
+   homepage names (`--on-dark` / `--on-light`) and their exact colours. A
+   button in this suite and a button on the landing page are the same object.
+
+   Deliberately NOT copied: `.v2-btn--on-dark`'s ::after shine sweep. Per its
+   own comment in sections.css it is white-on-white and has never actually
+   rendered; reproducing a no-op here would only carry the confusion forward. */
+
+.as-btn {
+  display: inline-block;
+  padding: 15px 32px;
+  border-radius: 999px;
+  font-family: var(--font-secondary, 'Open Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  /* Explicit, because .as-prose sets line-height 1.75 on its descendants and a
+     button placed in prose would otherwise be 5px taller than the same button
+     outside it — measured 58px vs 53px before this line. */
+  line-height: 1.5;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform .25s var(--v2-ease-out-quart),
+    background-color .25s var(--v2-ease-out-quart),
+    box-shadow .25s var(--v2-ease-out-quart),
+    color .25s var(--v2-ease-out-quart);
+}
+
+/* Every variant below is written `.as-btn.as-btn--x`, doubling the class, so it
+   scores 0,2,0. A plain `.as-btn--x` scores 0,1,0 and LOSES to `.as-prose a`
+   (0,1,1) — which is not hypothetical: /credentials puts its cross-link button
+   inside .as-prose, and with the single class it rendered navy-on-navy, an
+   invisible label. Raising specificity here rather than adding a
+   `.as-prose .as-btn` exception keeps the fix in one place and makes the
+   component safe in any container. */
+
+/* Navy pill, for light and tint grounds. #fff on rgb(0,42,65) is 12.9:1. */
+.as-btn.as-btn--on-light {
+  background: var(--v2-navy, #002a41);
+  color: #fff;
+}
+
+/* rgb(0,42,65) lifted ~8% toward white — the smallest step that reads as a
+   state change without the pill starting to look grey. */
+.as-btn.as-btn--on-light:hover,
+.as-btn.as-btn--on-light:focus-visible {
+  background: #063a56;
+  color: #fff;
+}
+
+/* White pill, for navy grounds and over photography. #101010 on #fff is
+   18.9:1. */
+.as-btn.as-btn--on-dark {
+  background: #fff;
+  color: #101010;
+}
+
+.as-btn.as-btn--on-dark:hover,
+.as-btn.as-btn--on-dark:focus-visible {
+  background: #f1f4f6;
+  color: #101010;
+}
+
+/* Outlined. Dark grounds only — the border and label are both white, so on a
+   light ground this is invisible. */
+.as-btn.as-btn--ghost {
+  border-color: rgba(255, 255, 255, .5);
+  color: #fff;
+}
+
+.as-btn.as-btn--ghost:hover,
+.as-btn.as-btn--ghost:focus-visible {
+  background: rgba(255, 255, 255, .12);
+  border-color: #fff;
+  color: #fff;
+}
+
+.as-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--v2-shadow-lift, 0 14px 28px -12px rgba(0, 21, 33, .35));
+}
+
+.as-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px -6px rgba(0, 21, 33, .4);
+}
+
+/* The homepage convention at the narrow breakpoint: every CTA goes full-width
+   and centres its label. 920px is the canonical breakpoint for this codebase
+   — it is the builder's own, and the header switches to its mobile subtree
+   there. */
+@media (max-width: 920px) {
+  .as-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+}
