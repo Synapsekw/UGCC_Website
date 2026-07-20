@@ -209,9 +209,11 @@ dropped from the page (an image not rendered is not removed photography).
    (the AMPT tester; largest copy, §6).
 4. `--tint`: head — eyebrow "Asphalt · Bitumen", title "Analysis and Testing"
    (both existing page words); `fx-cols` of two `as-prose` columns: left the
-   bitumen + SuperPave paragraphs, right the aggregate paragraph + the
-   four-item test list (`<ul>`: Quality Test of Aggregates / of Polymer
-   Modified Bitumen (PMB) / of Hot Mix Asphalt (HMA) / Compaction Test).
+   bitumen + SuperPave paragraphs, right the aggregate paragraph, then the
+   line "Tests and analysis conducted at the UGCC Central Testing
+   Laboratory", then the four-item test list (`<ul>`: Quality Test of
+   Aggregates / of Polymer Modified Bitumen (PMB) / of Hot Mix Asphalt
+   (HMA) / Compaction Test).
 5. `--light`: head "Tests and Analysis Details" + the TEST AND
    ANALYSIS/AGGREGATES table, 7 rows verbatim (including the repeated
    Moisture Evaluation row).

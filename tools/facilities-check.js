@@ -17,7 +17,7 @@
   /* djb2 of the page's locked copy, recorded after the pages were built and
      visually signed off. null = not recorded yet (harness warns instead of
      failing, so the harness can be written before the pages). */
-  var COPY = { hub: 'b265c23', plants: '1a804c6f', labs: 'a6f729e5', equipment: 'b03c6930' };
+  var COPY = { hub: 'b265c23', plants: '1a804c6f', labs: 'a944e186', equipment: 'b03c6930' };
 
   var failures = [], passes = 0;
   function ok(name, cond, detail) {
