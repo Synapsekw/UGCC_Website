@@ -2093,7 +2093,17 @@ Expected: the Tests workflow appears and completes green. **If it fails, fix bef
 
 ---
 
-### Task 16: Measure the result
+### Task 16: Measure the result — ✅ DONE (`9fc257b`)
+
+> Results written to [`2026-07-21-performance-results.md`](2026-07-21-performance-results.md).
+>
+> **Homepage first view: 10,100 KB → 143 KB.** Excluding video, 771 → 143 KB. LCP image 617 KB → 38 KB.
+>
+> **Writing it exposed a live bug.** Verifying the claim "0 unreferenced images" turned up 277 — 248 of them the SOURCE images named by `tools/responsive-manifest.tsv`, which the scanner did not read. `--delete` would have destroyed every input the AVIF pipeline builds from. The same gap had already cost 23 projects-hub sources in Task 3 (site unaffected, but the hub could not be rebuilt); all restored from history. Scanner now reads `.tsv`.
+>
+> **All six phases complete.** Remaining open items are external: the autoplay spot-check on the Netlify preview, GitHub's default branch still pointing at `master`, and the deliberate `noindex` until domain handover.
+
+### Task 16 (original steps)
 
 The plan claims an 85% reduction. Verify it rather than asserting it.
 
