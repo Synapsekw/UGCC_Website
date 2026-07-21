@@ -20,12 +20,19 @@ import sys
 
 SKIP_DIRS = {'node_modules', '.git', '.claude', '.superpowers'}
 
-# .sh/.py are scanned as well as the runtime formats. The tools/make-*.sh
-# generators name their SOURCE images, and a source is typically referenced by
-# nothing else — only its derivative reaches a page. Scanning them keeps those
-# sources alive automatically, so regenerating a derivative stays possible.
-# Without this, 7 build sources (2.4 MB) were in scope for deletion.
-SCAN_EXT = ('.html', '.css', '.js', '.mjs', '.sh', '.py')
+# More than the runtime formats are scanned, because a SOURCE image is
+# typically referenced by nothing a browser ever loads — only its derivative
+# reaches a page.
+#
+#   .sh/.py  the tools/make-*.sh generators name their inputs directly.
+#            Without this, 7 build sources (2.4 MB) were deletable.
+#   .tsv     tools/responsive-manifest.tsv lists the source of every AVIF/JPEG
+#            derivative. Without this, 248 sources (82 MB) were deletable and
+#            `npm run build:images` could never have been re-run.
+#
+# Both were found the same way: by checking what --delete would actually
+# remove before trusting it. Anything that records a build input belongs here.
+SCAN_EXT = ('.html', '.css', '.js', '.mjs', '.sh', '.py', '.tsv')
 REF = re.compile(r'assets/((?:img|video)/[A-Za-z0-9._\-/]+)')
 KEEP_FILE = 'tools/orphan-keep.txt'
 

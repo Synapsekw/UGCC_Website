@@ -119,7 +119,7 @@ class ImgScanner(HTMLParser):
 
 
 def stem_for(src):
-    """assets/img/ab12-cover-XY.jpg -> ab12-cover-XY.
+    """<hash>-cover-<id>.jpg -> <hash>-cover-<id>.
 
     The builder's hash prefix is already unique per file, and v3/ names are
     hand-authored and distinct, so the basename alone will not collide.
