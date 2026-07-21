@@ -1749,6 +1749,22 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
+> ## Phase 3 — ✅ COMPLETE (Tasks 9-11, `6b99328`..`9fa1108`)
+>
+> | | Before | After |
+> | --- | --- | --- |
+> | `main.css` | 350.3 KB raw / 36.9 KB gz | **139.2 KB / 9.5 KB** |
+> | Fonts on first paint | 59.9 KB, 5 files | **38.6 KB, 3 files** |
+> | `fonts.css` | 28.6 KB, 55 `@font-face` | 6.9 KB, 16 |
+>
+> **Task 9 was the plan's highest-risk step and came through clean**, because it was verified empirically rather than by reasoning. Computed styles for 31 properties on every element were captured under `main.css`, the stylesheet hot-swapped to the subset, and captured again: **12 pages at 1280px and 6 at 390px, 3,669+ elements, zero differences.** Interactive states were A/B'd the same way, including a real burger click. The two apparent diffs on the first run were marquee tracks mid-animation, so `transform` was excluded from the comparison.
+>
+> The keep-set unioning JS string literals was not optional: `burger--open`, `dot--current`, `loaded` and `video__frame` appear in no `class` attribute. A markup-only keep-set would have deleted every interactive state's styling, and nothing would have failed until a user clicked something.
+>
+> **Task 10's premise in the spec was wrong.** All 55 `@font-face` rules already carried `unicode-range`, so browsers never downloaded the Devanagari/Hebrew/Greek/Cyrillic subsets — pruning them saves repo weight, not bandwidth. The real win was elsewhere: Chrome was fetching Open Sans 600 in the **math and symbols** subsets, 21.3 KB, despite no codepoint on any page falling in either range. Removing those took 5 files to 3.
+>
+> **Task 11** corrected a README that documented a Hostinger upload, a 758 MB footprint and 63 pages — all three wrong — and added the launch checklist for the deliberate `noindex`.
+
 # Phase 4 — Video
 
 `ffmpeg` is absent, so re-encoding the 26.7 MB of MP4 is out of scope. What is achievable is stopping them competing with the LCP.
