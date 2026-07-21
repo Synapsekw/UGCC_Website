@@ -1,0 +1,404 @@
+#!/usr/bin/env node
+/* tools/projects-hub-check.js — frozen-content + perf-contract checks for
+   the redesigned projects hub. Node, zero dependencies.
+   Usage: node tools/projects-hub-check.js
+
+   Reads: construction-projects-kuwait/index.html (the page under test),
+          tools/projects-hub-manifest.tsv, the 30 project detail pages
+          (<slug>/index.html), and the AVIF derivatives on disk. Git
+          history is NOT consulted — files on disk only.
+
+   Plain string/regex parsing is the house style for these checkers (see
+   tools/projects-check.js and tools/business-lines-check.js) — no DOM, no
+   deps. The production page HTML is minified onto very long lines, so
+   every extraction below is regex- or split-based rather than line-based.
+
+   Exit 0 + "OK: all projects-hub checks passed" on success.
+   Exit 1 + a bulleted failure list on any failure. */
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+const root = path.join(__dirname, '..');
+const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+const exists = (p) => fs.existsSync(path.join(root, p));
+
+const PAGE_PATH = 'construction-projects-kuwait/index.html';
+const page = read(PAGE_PATH);
+
+const failures = [];
+let checkNo = 0;
+function check(ok, msg) {
+  checkNo++;
+  if (!ok) failures.push(msg);
+}
+
+/* ---------------------------------------------------------------------
+   Manifest
+   --------------------------------------------------------------------- */
+const manifestRaw = read('tools/projects-hub-manifest.tsv').replace(/\r\n/g, '\n').trim();
+const manifestLines = manifestRaw.split('\n').filter(Boolean);
+const manifest = manifestLines.map((line) => {
+  const [slug, status, lines, src] = line.split('\t');
+  return { slug, status, lines: (lines || '').split(' ').filter(Boolean), src };
+});
+const manifestBySlug = new Map(manifest.map((m) => [m.slug, m]));
+
+/* 1. Manifest shape: 30 rows, 14 current / 16 completed. */
+{
+  const nCurrent = manifest.filter((m) => m.status === 'current').length;
+  const nCompleted = manifest.filter((m) => m.status === 'completed').length;
+  check(manifest.length === 30,
+    '1. manifest has ' + manifest.length + ' rows, want 30');
+  check(nCurrent === 14,
+    '1. manifest has ' + nCurrent + ' current rows, want 14');
+  check(nCompleted === 16,
+    '1. manifest has ' + nCompleted + ' completed rows, want 16');
+}
+
+/* ---------------------------------------------------------------------
+   Locate the card grid <ul> and split it into per-card fragments.
+   Cards are <li class="as-card ...">...</li>; the kit uses "as-card" only
+   for grid tiles, so scoping to that class also scopes to "the grid".
+   --------------------------------------------------------------------- */
+const gridMatch = page.match(/<ul[^>]*class="[^"]*as-cards[^"]*"[^>]*>([\s\S]*?)<\/ul>/);
+const gridHtml = gridMatch ? gridMatch[1] : '';
+check(!!gridMatch, '2. no <ul class="as-cards..."> grid found on the page');
+
+function extractCards(html) {
+  if (!html) return [];
+  const pieces = html.split(/(?=<li class="as-card\b)/).filter((p) => p.indexOf('<li class="as-card') === 0);
+  return pieces.map((p) => {
+    const end = p.indexOf('</li>');
+    return end === -1 ? p : p.slice(0, end + '</li>'.length);
+  });
+}
+const cardFragments = extractCards(gridHtml);
+
+function attr(tag, name) {
+  const m = tag.match(new RegExp(name + '="([^"]*)"'));
+  return m ? m[1] : null;
+}
+
+const cards = cardFragments.map((frag) => {
+  const hrefMatch = frag.match(/<a[^>]*\shref="([^"]*)"/);
+  const href = hrefMatch ? hrefMatch[1] : null;
+  const slug = href && href.charAt(0) === '/' ? href.slice(1) : href;
+  const titleMatch = frag.match(/<h3 class="as-card__title">([\s\S]*?)<\/h3>/);
+  const titleStripped = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '') : null;
+  const dataStatus = attr(frag, 'data-status');
+  const dataLines = attr(frag, 'data-lines');
+  return { frag, href, slug, titleStripped, dataStatus, dataLines };
+});
+
+/* 2. Every manifest slug appears exactly once as a card link href="/<slug>"
+   within the grid; no grid card href outside the 30. */
+{
+  const hrefCounts = new Map();
+  cards.forEach((c) => {
+    if (!c.href) return;
+    hrefCounts.set(c.href, (hrefCounts.get(c.href) || 0) + 1);
+  });
+  const missing = [];
+  const wrongCount = [];
+  manifest.forEach((m) => {
+    const want = '/' + m.slug;
+    const n = hrefCounts.get(want) || 0;
+    if (n === 0) missing.push(m.slug);
+    else if (n !== 1) wrongCount.push(m.slug + ' (' + n + 'x)');
+  });
+  const extraneous = [...hrefCounts.keys()].filter((h) => {
+    const slug = h.charAt(0) === '/' ? h.slice(1) : h;
+    return !manifestBySlug.has(slug);
+  });
+  check(missing.length === 0,
+    '2. ' + missing.length + ' manifest slug(s) missing from the grid: ' + missing.join(', '));
+  check(wrongCount.length === 0,
+    '2. slug(s) appearing other than once: ' + wrongCount.join(', '));
+  check(extraneous.length === 0,
+    '2. grid card href(s) outside the 30-slug manifest: ' + extraneous.join(', '));
+}
+
+/* 3. Zero occurrences of the string "ugcc.com/project" anywhere in the page. */
+{
+  const n = (page.match(/ugcc\.com\/project/g) || []).length;
+  check(n === 0, '3. found ' + n + ' occurrence(s) of "ugcc.com/project" in the page');
+}
+
+/* 4. Frozen titles: each card's stripped <h3 class="as-card__title"> text
+   must be a byte-exact substring of that slug's detail page (<slug>/index.html).
+   Entities are left as-is — no decoding. */
+{
+  const detailCache = new Map();
+  const badTitles = [];
+  cards.forEach((c) => {
+    if (!c.slug || !manifestBySlug.has(c.slug)) return;
+    if (!c.titleStripped) { badTitles.push(c.slug + ': no <h3 class="as-card__title"> found'); return; }
+    if (!detailCache.has(c.slug)) {
+      const detailPath = c.slug + '/index.html';
+      detailCache.set(c.slug, exists(detailPath) ? read(detailPath) : null);
+    }
+    const detailHtml = detailCache.get(c.slug);
+    if (detailHtml === null) { badTitles.push(c.slug + ': detail page ' + c.slug + '/index.html missing'); return; }
+    if (!detailHtml.includes(c.titleStripped)) {
+      badTitles.push(c.slug + ': card title not found byte-exact in detail page');
+    }
+  });
+  check(badTitles.length === 0,
+    '4. frozen-title mismatch(es): ' + badTitles.join('; '));
+}
+
+/* 5. Frozen hero subtitle: the cover lede must byte-contain this exact
+   constant string. */
+const FROZEN_HERO_SUBTITLE = 'Building resilient, high-quality infrastructure that strengthens connectivity and supports national development.';
+check(page.includes(FROZEN_HERO_SUBTITLE),
+  '5. frozen hero subtitle not found byte-exact on the page: ' + JSON.stringify(FROZEN_HERO_SUBTITLE));
+
+/* 6. Each card's data-status equals the manifest status; each card's
+   data-lines token set equals the manifest set (order-insensitive). */
+{
+  const bad = [];
+  cards.forEach((c) => {
+    if (!c.slug || !manifestBySlug.has(c.slug)) return;
+    const m = manifestBySlug.get(c.slug);
+    if (c.dataStatus !== m.status) {
+      bad.push(c.slug + ': data-status="' + c.dataStatus + '" vs manifest "' + m.status + '"');
+    }
+    const cardLines = (c.dataLines || '').split(' ').filter(Boolean);
+    const wantSet = new Set(m.lines);
+    const gotSet = new Set(cardLines);
+    const sameSize = wantSet.size === gotSet.size;
+    const sameMembers = [...wantSet].every((l) => gotSet.has(l));
+    if (!sameSize || !sameMembers) {
+      bad.push(c.slug + ': data-lines="' + (c.dataLines || '') + '" vs manifest "' + m.lines.join(' ') + '"');
+    }
+  });
+  check(bad.length === 0, '6. data-status/data-lines mismatch(es): ' + bad.join('; '));
+}
+
+/* 7. The stats block contains figures 30, 14, and 7. */
+{
+  const statsMatch = page.match(/<ul[^>]*class="[^"]*as-stats[^"]*"[^>]*>([\s\S]*?)<\/ul>/);
+  const statsHtml = statsMatch ? statsMatch[1] : '';
+  check(!!statsMatch, '7. no <ul class="as-stats..."> block found on the page');
+  const figures = [...statsHtml.matchAll(/<span class="as-stat__figure">([^<]*)<\/span>/g)].map((m) => m[1]);
+  ['30', '14', '7'].forEach((want) => {
+    check(figures.includes(want), '7. stats block missing figure "' + want + '" (found: ' + figures.join(', ') + ')');
+  });
+}
+
+/* ---------------------------------------------------------------------
+   8. Every image URL referenced by the page in src, srcset, or
+      imagesrcset resolves to an existing file on disk. Card srcset
+      descriptors may only be 440w/880w; hero/band descriptors only
+      960w/1440w/1920w.
+   --------------------------------------------------------------------- */
+function resolveToDisk(url) {
+  let u = url.split('#')[0].split('?')[0];
+  try { u = decodeURIComponent(u); } catch (e) { /* leave as-is */ }
+  if (u.charAt(0) === '/') return u.slice(1);
+  return path.posix.join('construction-projects-kuwait', u);
+}
+function classifyForDescriptor(url) {
+  if (/\/v2\/proj\//.test(url)) return { kind: 'card', allowed: ['440w', '880w'] };
+  if (/hero-projects-|hero-current-/.test(url)) return { kind: 'hero', allowed: ['960w', '1440w', '1920w'] };
+  return null;
+}
+function parseSrcset(val) {
+  return val.split(',').map((entry) => {
+    const parts = entry.trim().split(/\s+/);
+    return { url: parts[0], descriptor: parts[1] || null };
+  }).filter((e) => e.url);
+}
+
+const imgTags = page.match(/<img\b[^>]*>/g) || [];
+const sourceTags = page.match(/<source\b[^>]*>/g) || [];
+const preloadTags = (page.match(/<link\b[^>]*>/g) || []).filter((t) => /rel="preload"/.test(t) && /as="image"/.test(t));
+
+const missingFiles = [];
+const badDescriptors = [];
+
+function checkCandidate(url, descriptor, tagLabel) {
+  const rel = resolveToDisk(url);
+  if (!exists(rel)) missingFiles.push(tagLabel + ': ' + url + ' -> ' + rel);
+  if (descriptor) {
+    const cls = classifyForDescriptor(url);
+    if (cls && cls.allowed.indexOf(descriptor) === -1) {
+      badDescriptors.push(tagLabel + ': ' + url + ' has descriptor "' + descriptor + '", allowed [' + cls.allowed.join(', ') + ']');
+    }
+  }
+}
+
+imgTags.forEach((tag) => {
+  const src = attr(tag, 'src');
+  if (src) checkCandidate(src, null, 'img src');
+  const srcset = attr(tag, 'srcset');
+  if (srcset) parseSrcset(srcset).forEach((c) => checkCandidate(c.url, c.descriptor, 'img srcset'));
+});
+sourceTags.forEach((tag) => {
+  const srcset = attr(tag, 'srcset');
+  if (srcset) parseSrcset(srcset).forEach((c) => checkCandidate(c.url, c.descriptor, 'source srcset'));
+  const src = attr(tag, 'src');
+  if (src) checkCandidate(src, null, 'source src');
+});
+preloadTags.forEach((tag) => {
+  const imagesrcset = attr(tag, 'imagesrcset');
+  if (imagesrcset) parseSrcset(imagesrcset).forEach((c) => checkCandidate(c.url, c.descriptor, 'link imagesrcset'));
+});
+
+check(missingFiles.length === 0,
+  '8. ' + missingFiles.length + ' referenced image file(s) missing on disk: ' + missingFiles.slice(0, 12).join('; ') +
+  (missingFiles.length > 12 ? '; ...(' + (missingFiles.length - 12) + ' more)' : ''));
+check(badDescriptors.length === 0,
+  '8. ' + badDescriptors.length + ' srcset descriptor(s) outside the allowed set: ' + badDescriptors.slice(0, 12).join('; ') +
+  (badDescriptors.length > 12 ? '; ...(' + (badDescriptors.length - 12) + ' more)' : ''));
+
+/* ---------------------------------------------------------------------
+   9. Every grid card <img> has loading="lazy", decoding="async", and
+      numeric width/height attributes. The cover img has
+      fetchpriority="high" and does NOT have loading="lazy". The head
+      contains a <link rel="preload" as="image"> with imagesrcset and
+      type="image/avif".
+   --------------------------------------------------------------------- */
+{
+  const bad = [];
+  cards.forEach((c) => {
+    const imgTag = (c.frag.match(/<img\b[^>]*>/) || [])[0];
+    const label = c.slug || '(unknown card)';
+    if (!imgTag) { bad.push(label + ': no <img> found'); return; }
+    if (attr(imgTag, 'loading') !== 'lazy') bad.push(label + ': img missing loading="lazy"');
+    if (attr(imgTag, 'decoding') !== 'async') bad.push(label + ': img missing decoding="async"');
+    const w = attr(imgTag, 'width');
+    const h = attr(imgTag, 'height');
+    if (!w || !/^\d+$/.test(w)) bad.push(label + ': img width not numeric ("' + w + '")');
+    if (!h || !/^\d+$/.test(h)) bad.push(label + ': img height not numeric ("' + h + '")');
+  });
+  check(bad.length === 0, '9. grid card img attribute problem(s): ' + bad.join('; '));
+}
+{
+  const coverTag = (page.match(/<img\b[^>]*fetchpriority="high"[^>]*>/) || [])[0]
+    || (page.match(/<img\b[^>]*class="[^"]*as-cover__media[^"]*"[^>]*>/) || [])[0];
+  check(!!coverTag, '9. no cover <img> found (fetchpriority="high" or class="as-cover__media")');
+  if (coverTag) {
+    check(attr(coverTag, 'fetchpriority') === 'high', '9. cover img missing fetchpriority="high"');
+    check(attr(coverTag, 'loading') !== 'lazy', '9. cover img must not have loading="lazy"');
+  }
+  const preloadAvif = preloadTags.some((t) => /imagesrcset="/.test(t) && /type="image\/avif"/.test(t));
+  check(preloadAvif, '9. no <link rel="preload" as="image" imagesrcset="..." type="image/avif"> in the head');
+}
+
+/* 10. Every grid card img is inside a <picture> that has a
+   <source type="image/avif">. */
+{
+  const bad = [];
+  cards.forEach((c) => {
+    const label = c.slug || '(unknown card)';
+    const pictureMatch = c.frag.match(/<picture>([\s\S]*?)<\/picture>/);
+    if (!pictureMatch) { bad.push(label + ': img not wrapped in <picture>'); return; }
+    if (!/<source\b[^>]*type="image\/avif"[^>]*>/.test(pictureMatch[1])) {
+      bad.push(label + ': <picture> has no <source type="image/avif">');
+    }
+  });
+  check(bad.length === 0, '10. picture/avif-source problem(s): ' + bad.join('; '));
+}
+
+/* 11. No-JS completeness: no `hidden` attribute anywhere inside the grid
+   <ul>; at least two chips (buttons) with aria-pressed="true" exist in
+   the shipped HTML. */
+{
+  const hiddenCount = (gridHtml.match(/\bhidden\b/g) || []).length;
+  check(hiddenCount === 0, '11. grid <ul> contains ' + hiddenCount + ' occurrence(s) of the `hidden` attribute (must ship with no-JS complete)');
+  const pressedTrueChips = (page.match(/<button\b[^>]*aria-pressed="true"[^>]*>/g) || []);
+  check(pressedTrueChips.length >= 2,
+    '11. only ' + pressedTrueChips.length + ' button(s) with aria-pressed="true" found, want >= 2');
+}
+
+/* 12. Perf budget from files on disk. */
+{
+  function largestVariant(prefix) {
+    const dir = path.join(root, 'assets/img/v2');
+    let files = [];
+    try { files = fs.readdirSync(dir); } catch (e) { files = []; }
+    const re = new RegExp('^' + prefix + '-(\\d+)\\.avif$');
+    const widths = files.map((f) => {
+      const m = f.match(re);
+      return m ? { file: f, w: parseInt(m[1], 10) } : null;
+    }).filter(Boolean);
+    if (!widths.length) return null;
+    widths.sort((a, b) => b.w - a.w);
+    return path.posix.join('assets/img/v2', widths[0].file);
+  }
+  function sizeOf(relPath) {
+    try { return fs.statSync(path.join(root, relPath)).size; } catch (e) { return null; }
+  }
+
+  const heroProjectsPreferred = 'assets/img/v2/hero-projects-1920.avif';
+  const heroProjectsFile = exists(heroProjectsPreferred) ? heroProjectsPreferred : largestVariant('hero-projects');
+  if (!heroProjectsFile) {
+    check(false, '12. no hero-projects-*.avif found on disk');
+  } else {
+    const sz = sizeOf(heroProjectsFile);
+    check(sz !== null && sz <= 250 * 1024,
+      '12. ' + heroProjectsFile + ' is ' + (sz === null ? 'missing' : (sz / 1024).toFixed(1) + 'KB') + ', budget <= 250KB');
+  }
+
+  const heroCurrentFile = largestVariant('hero-current');
+  if (!heroCurrentFile) {
+    check(false, '12. no hero-current-*.avif found on disk (needed for the full-scroll budget sum)');
+  }
+
+  let cardSum = 0;
+  const oversizedCards = [];
+  const missingCardAvif = [];
+  manifest.forEach((m) => {
+    const rel = 'assets/img/v2/proj/' + m.slug + '-440.avif';
+    const sz = sizeOf(rel);
+    if (sz === null) { missingCardAvif.push(rel); return; }
+    cardSum += sz;
+    if (sz > 60 * 1024) oversizedCards.push(rel + ' (' + (sz / 1024).toFixed(1) + 'KB)');
+  });
+  check(missingCardAvif.length === 0,
+    '12. missing card 440 AVIF derivative(s): ' + missingCardAvif.join(', '));
+  check(oversizedCards.length === 0,
+    '12. card 440 AVIF(s) over the 60KB budget: ' + oversizedCards.join(', '));
+
+  if (heroProjectsFile && heroCurrentFile && missingCardAvif.length === 0) {
+    const heroProjectsSz = sizeOf(heroProjectsFile) || 0;
+    const heroCurrentSz = sizeOf(heroCurrentFile) || 0;
+    const total = cardSum + heroProjectsSz + heroCurrentSz;
+    check(total <= 1.5 * 1024 * 1024,
+      '12. full-scroll AVIF sum ' + (total / 1024 / 1024).toFixed(2) + 'MB exceeds the 1.5MB budget ' +
+      '(cards ' + (cardSum / 1024).toFixed(1) + 'KB + ' + heroProjectsFile + ' ' + (heroProjectsSz / 1024).toFixed(1) + 'KB + ' +
+      heroCurrentFile + ' ' + (heroCurrentSz / 1024).toFixed(1) + 'KB)');
+  }
+}
+
+/* 13. Builder chrome intact: page contains `block-header` and `FUdf9w9dXZ`. */
+check(page.includes('block-header'), '13. page is missing "block-header" (builder header chrome)');
+check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder footer marker)');
+
+/* 14. Head hygiene: <title> does not contain "mockup" (case-insensitive);
+   stylesheet chain includes about-suite.css and pages/projects.css;
+   scripts include js/projects.js. */
+{
+  const titleMatch = page.match(/<title>([\s\S]*?)<\/title>/);
+  const title = titleMatch ? titleMatch[1] : '';
+  check(!!titleMatch, '14. no <title> found on the page');
+  check(!/mockup/i.test(title), '14. <title> contains "mockup": ' + JSON.stringify(title));
+  check(/href="[^"]*\/assets\/css\/about-suite\.css(\?[^"]*)?"/.test(page),
+    '14. stylesheet chain missing about-suite.css');
+  check(/href="[^"]*\/assets\/css\/pages\/projects\.css(\?[^"]*)?"/.test(page),
+    '14. stylesheet chain missing pages/projects.css');
+  check(/src="[^"]*\/assets\/js\/projects\.js(\?[^"]*)?"/.test(page),
+    '14. scripts missing js/projects.js');
+}
+
+/* ---------------------------------------------------------------------
+   Report
+   --------------------------------------------------------------------- */
+if (failures.length) {
+  console.error('FAIL\n' + failures.map((f) => ' - ' + f).join('\n'));
+  process.exit(1);
+}
+console.log('OK: all projects-hub checks passed');
