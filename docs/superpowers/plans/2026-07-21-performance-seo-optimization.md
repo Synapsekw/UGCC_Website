@@ -34,7 +34,7 @@ Read these before Task 1. They are established in the repo, not invented here.
 
 **Content freeze:** re-encoding at identical dimensions and crop is allowed. Changing copy, crops, colours, or swapping an image is not. `alt` text is exempt (invisible to sighted visitors).
 
-**Baseline:** `npx vitest run` currently reports **22 failing, 60 passing (82 total)** — the v2→v3 rename broke the checkers. Task 0 restores 82 passing; from there every task ends green.
+**Baseline:** `npx vitest run` → 3 files, **82 tests passing** (restored by Task 0, commit `ca69f42`). Every task ends green.
 
 ---
 
@@ -64,7 +64,14 @@ Read these before Task 1. They are established in the repo, not invented here.
 
 Zero-risk cleanup first, so the expensive image work happens on a clean tree.
 
-### Task 0: Repair the v2→v3 rename fallout
+### Task 0: Repair the v2→v3 rename fallout — ✅ DONE (`ca69f42`)
+
+> **Executed 2026-07-21. Suite restored to 82 passing.** Two findings worth carrying forward, both of which invalidated this task's original approach:
+>
+> 1. **A literal grep does not find the real bugs.** Three of the four functional defects live in `tests/business-line.test.mjs` as *escaped* regex forms — `v2\.css`, `img\/v2\/blp` — which `grep "v2\.css"` and `grep "assets/img/v2"` both miss. The blanket `sed` in Step 4 below would have rewritten only the comments and left the suite red. **Read the failing assertions; do not trust the grep.**
+> 2. **`node tools/<x>-check.js` failing is not evidence of a regression.** Six of the eleven checkers (`business-line`, `business-lines`, `facilities`, `hero`, `offices`, `rail`) are browser-console scripts using `document`/`window`/`location`. They throw `ReferenceError` under Node by design. Only `projects-hub-check.js`, `credentials`, `home`, `projects` and `careers` are Node checkers. Judging health by "how many checkers exit 0" overcounts breakage badly.
+>
+> The steps below are kept as the record of what was diagnosed and fixed.
 
 The suite is red: 22 of 82 tests fail. Commit `89b06a6` renamed the design layer but left five files asserting v2 paths. **Nothing downstream can be verified until this is green**, so it goes first.
 
@@ -110,17 +117,25 @@ Expected: exactly the eight hits below. **If the list differs, work from the liv
 
 - [ ] **Step 4: Rewrite them, scoped to these files only**
 
-The rename keys on the hyphen for class/variable prefixes — the page builder emits custom properties like `--v2b806092` with no hyphen, and matching those would unstyle the site. These five files contain no builder hashes, but keep the same discipline:
+**This sed is insufficient — see the note at the top of this task.** It rewrites the comments but misses the three escaped regexes in `tests/business-line.test.mjs`, which are the assertions actually failing. What was done instead:
+
+| File | Change |
+| --- | --- |
+| `tools/projects-hub-check.js:331,341` | `'assets/img/v2'` → `'assets/img/v3'` |
+| `tests/business-line.test.mjs:50` | `/\/assets\/css\/v2\.css\?v=\d+/` → `v3\.css`, and the `iV2` local renamed `iV3` |
+| `tests/business-line.test.mjs:70` | `<section class="v2-subnav">` → `v3-subnav` |
+| `tests/business-line.test.mjs:105` | `assets\/img\/v2\/blp\/` → `assets\/img\/v3\/blp\/` |
+| `hero-check.js:373,378`, `careers-check.js:201`, `projects-check.js:64` | comments only — naming files that no longer exist |
+
+Verify each replacement against the live page before making it, since the correct target is whatever the build actually emits:
 
 ```bash
-sed -i '' \
-  -e 's|assets/img/v2|assets/img/v3|g' \
-  -e 's|v2\.css|v3.css|g' \
-  -e 's|v2\.js|v3.js|g' \
-  -e 's|v2-|v3-|g' \
-  tools/projects-hub-check.js tools/hero-check.js tools/careers-check.js \
-  tools/projects-check.js tests/business-line.test.mjs
+grep -o '/assets/css/[A-Za-z0-9/_-]*\.css[^"]*' civil-infrastructure-kuwait/index.html
+grep -o '<section class="[a-z0-9-]*subnav">' civil-infrastructure-kuwait/index.html
+grep -o '"image":"[^"]*blp[^"]*"' civil-infrastructure-kuwait/index.html
 ```
+
+Note the character class: `[a-z/-]` excludes digits and so silently hides `v3.css`. Include `0-9` or the grep lies to you.
 
 - [ ] **Step 5: Verify no stale token survives and no builder hash was harmed**
 
