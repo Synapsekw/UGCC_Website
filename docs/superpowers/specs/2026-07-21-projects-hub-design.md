@@ -68,17 +68,27 @@ disabled.
   `/owwsct2460879` pages instead of the old `ugcc.com/project/…` URLs; the
   5a-haya-eo24 card shows its own approved detail-page title instead of the
   neighbouring card's title it shows today.
-- **⚠ Customer-visible copy removal to flag (corrected 2026-07-21 by final
-  review):** Variant B keeps the hero subtitle and all 30 project titles, but
-  ~21 unique approved texts from the old hub — the 5 distinct discipline
-  intro paragraphs (7 slots, 2 were verbatim duplicates) and ~16 per-project
-  featured-card blurbs — appear NOWHERE else on the site after this change.
-  The earlier claim that the intros "live on the business-line pages" was
-  wrong: those pages carry different approved copy. Under the standing
-  content freeze this removal requires explicit sign-off from Danijel (and
-  the customer as he judges necessary) before merge. Fallback options if
-  declined are recorded in the merge-gate discussion (re-home blurbs on
-  detail pages in phase 3, or a discipline-intros section on the hub).
+- **Copy removal — flagged, and RESOLVED 2026-07-21 (Danijel's decision).**
+  Variant B keeps the hero subtitle and all 30 project titles, but ~20 unique
+  approved texts from the old hub would otherwise disappear from the site:
+  the 5 distinct discipline intro paragraphs (7 slots, 2 were verbatim
+  duplicates) and ~15 per-project featured-card blurbs. (An earlier claim
+  that the intros "live on the business-line pages" was wrong — those pages
+  carry different approved copy. Corrected by final review.)
+
+  **Decision:** the discipline intros are approved for removal; the
+  per-project blurbs are **re-homed onto their own project detail pages**
+  rather than deleted. Re-homing happens ON THIS BRANCH BEFORE MERGE, so no
+  approved sentence is ever absent from the live site. Mechanics:
+  - `tools/projects-blurb-map.tsv` records blurb → slug with a confidence
+    grade, built by CONTENT matching (contract numbers, place names) and
+    verified against each detail page's `<h1>`/`<h2>`. Position-based
+    association is forbidden: the old hub's DOM order demonstrably
+    mis-attributes blurbs to neighbouring cards.
+  - Blurbs are inserted byte-exact (tags stripped only; typos, entities and
+    spacing preserved — including the "Al-Mutlaa Residentia City" variant).
+  - Checker check 16 asserts every mapped blurb is present on its detail
+    page, so the guarantee is machine-enforced and cannot silently regress.
 
 ## 4. Performance work (ships with the page, not after it)
 
