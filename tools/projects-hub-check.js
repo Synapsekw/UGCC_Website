@@ -95,6 +95,12 @@ const cards = cardFragments.map((frag) => {
 /* 2. Every manifest slug appears exactly once as a card link href="/<slug>"
    within the grid; no grid card href outside the 30. */
 {
+  // Hardening (review finding): a card with no <a href> at all would evade
+  // the per-slug checks below — pin the card count itself.
+  check(
+    cards.length === manifest.length,
+    '2. grid has ' + cards.length + ' card(s), want exactly ' + manifest.length
+  );
   const hrefCounts = new Map();
   cards.forEach((c) => {
     if (!c.href) return;
