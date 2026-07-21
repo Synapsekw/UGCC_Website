@@ -4,26 +4,34 @@
     {
       "name": "ugcc-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8747"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8747"
+      ],
       "port": 8747
     },
     {
       "name": "ugcc-static-alt",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8751"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8751"
+      ],
       "port": 8751
     },
     {
       "name": "ugcc-business-lines",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8759", "--directory", ".claude/worktrees/business-lines"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8759",
+        "--directory",
+        ".claude/worktrees/business-lines"
+      ],
       "port": 8759
-    },
-    {
-      "name": "ugcc-project-detail",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8753", "--directory", ".claude/worktrees/project-detail"],
-      "port": 8753
     }
   ]
 }
