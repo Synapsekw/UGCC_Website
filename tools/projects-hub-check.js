@@ -491,11 +491,15 @@ check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder fo
    guarantee machine-enforced: every row of tools/projects-blurb-map.tsv
    (slug, confidence, already_present, blurb — blurb has HTML tags
    stripped but entities preserved) must byte-exact-appear somewhere in
-   that slug's <slug>/index.html. A plain substring match also covers the
-   two known special cases without extra logic: owwsct2460879's blurb
-   lives in the page's <h1> rather than body copy, and mew6085's blurb is
-   a strict prefix of a longer paragraph on the page - includes() finds
-   both. koc36081 has two map rows and must contain both blurbs.
+   that slug's <slug>/index.html. Matching is done against the raw HTML
+   first and, failing that, against the page's tag-stripped text: on
+   mew5773 and mew6085 the approved sentence is visible but interrupted by
+   inline markup (a <strong> around the contract number), so the bytes are
+   not contiguous in the source while the reader still sees the sentence
+   intact. Entities are never decoded on either side. This also covers the
+   two other special cases: owwsct2460879's blurb lives in the page's <h1>
+   rather than body copy, and mew6085's blurb is a strict prefix of a
+   longer paragraph. koc36081 has two map rows and must contain both.
    --------------------------------------------------------------------- */
 {
   const MAP_PATH = 'tools/projects-blurb-map.tsv';
@@ -530,7 +534,11 @@ check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder fo
         missingPages.push(row.slug + ': detail page ' + detailPath + ' missing');
         return;
       }
-      if (!detailHtml.includes(row.blurb)) {
+      if (!detailCache.has(row.slug + '#text')) {
+        detailCache.set(row.slug + '#text', detailHtml.replace(/<[^>]+>/g, ''));
+      }
+      const detailText = detailCache.get(row.slug + '#text');
+      if (!detailHtml.includes(row.blurb) && !detailText.includes(row.blurb)) {
         missingBlurbs.push(row.slug + ': blurb not found byte-exact, starts "' + row.blurb.slice(0, 60) + '"');
       }
     });
