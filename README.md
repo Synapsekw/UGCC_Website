@@ -24,10 +24,6 @@ much faster than uploading 1,000+ files individually.
 
 ## Things that still point at external services (intentional)
 
-- **Background videos** on some sections stream from `videos.pexels.com` (same as the
-  original site). They total ~315 MB, which is why they are not bundled. To self-host
-  them, download each URL found via `grep -r videos.pexels.com`, put the files in
-  `assets/video/`, and update the `<video src=...>` references.
 - **Chat widget**: `https://synapsekw.github.io/ugcc_widget/widget.js` with its n8n
   webhook — your own infrastructure, left untouched.
 - **Google Maps embed** on the contact page.

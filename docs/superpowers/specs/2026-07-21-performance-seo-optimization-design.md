@@ -1,12 +1,16 @@
 # Performance, SEO and codebase-health pass — design
 
-Date: 2026-07-21
-Branch: V2 (the live site; `master` is the backup and is not modified)
+Date: 2026-07-21 (rebaselined against V3 the same day)
+Branch: **V3** — `origin/V3` and the working tree both sit at `89b06a6`, the
+commit that renamed the design layer from v2 to v3 (`assets/img/v3/`,
+`v3.css`, `v3.js`). `master` is a backup and is not modified.
 
 ## Problem
 
-V2 is feature-complete. It has never had a performance pass. Measured on the
-V2 working tree (51 pages, all numbers from files on disk, not estimates):
+The build is feature-complete. It has never had a performance pass. Measured
+on the V3 working tree (51 pages, all numbers from files on disk, not
+estimates). Every figure below was re-measured after the v2→v3 rename and came
+out identical — the rename moved paths, not content:
 
 | Symptom | Measurement |
 | --- | --- |
@@ -22,19 +26,38 @@ V2 working tree (51 pages, all numbers from files on disk, not estimates):
 | Render-blocking CSS (homepage) | 11 stylesheets, 476 KB raw |
 | `main.css` dead weight | 1,193 of 1,254 class selectors unused on any page |
 | `@font-face` declarations | 55, none preloaded, incl. Devanagari/Cyrillic/math subsets |
-| Unreferenced images tracked in git | 2,616 files, 297 MB |
-| `<img>` with empty or missing `alt` | ~380 |
+| Unreferenced images tracked in git | 2,621 files, 297 MB |
+| `<img>` without non-empty `alt` | 500 of 656 (some legitimately decorative) |
+| Pages with empty `og:image:alt` | 38 of 51 |
 
-Two correctness defects surfaced during the audit:
+Three correctness defects surfaced during the audit:
 
-1. **The About page's Expertise row renders a blank Construction column.**
-   V2 references `about-engineering.jpg` and `about-procurement.jpg` but has
-   zero references to `about-construction.jpg`, which sits on disk at 198 KB.
-   `master`'s commit `4634868` fixes exactly this against the v2 photo set,
-   but V2's About page has changed since (the two-column reading-sections
-   work landed after), so the fix needs porting rather than cherry-picking.
-2. **CI never runs the tests.** `.github/workflows/push-log.yml` only writes a
-   push summary. The 82 tests in `tests/` pass today but nothing enforces it.
+1. **The test suite is red: 22 of 82 tests fail on V3.** The v2→v3 rename
+   updated the build files but not the checkers or test fixtures, which still
+   assert v2 paths:
+
+   | File | Stale reference |
+   | --- | --- |
+   | `tools/projects-hub-check.js:331,341` | reads `assets/img/v2`, a directory that no longer exists |
+   | `tools/hero-check.js:373,378` | `v2.js`, `v2.css` |
+   | `tools/careers-check.js:201` | `v2.css` |
+   | `tools/projects-check.js:64` | `v2.css` |
+   | `tests/business-line.test.mjs:45,70` | `v2.css`, the `v2-` class prefix |
+
+   `projects-hub-check.js` is the instructive case: line 366 *was* renamed to
+   v3, lines 331 and 341 were not, so `largestVariant()` reads a missing
+   directory and check 12 fails — even though `hero-current-1920.avif` sits
+   in `assets/img/v3/`. This landed unnoticed precisely because of defect 3.
+
+2. **The About page's Expertise row renders a blank Construction column.**
+   V3 references `about-engineering.jpg` and `about-procurement.jpg` but has
+   zero references to `about-construction.jpg`, which sits on disk at
+   `assets/img/v3/`. `master`'s commit `4634868` fixes exactly this, but the
+   About page has changed since (the two-column reading-sections work landed
+   after), so the fix needs porting rather than cherry-picking.
+
+3. **CI never runs the tests.** `.github/workflows/push-log.yml` only writes a
+   push summary, so nothing gates. Defect 1 is the direct consequence.
 
 ## Constraints
 
@@ -82,27 +105,40 @@ indistinguishable, which satisfies the content freeze.
 
 ## Approach
 
-Six phases, each a separate commit on V2, each independently revertable. The
+Six phases, each a separate commit on V3, each independently revertable. The
 ordering puts the correctness fix and the zero-risk cleanup first so the
 expensive image work happens on an already-clean tree.
 
 ### Phase 1 — Correctness and repo hygiene
 
-- Port `master`'s About Construction fix onto V2's current About markup:
-  remap the three Expertise slots onto the v2 photo set, drop the dangling
-  `srcset`/`sizes` that reference pre-v2 assets, correct the panned slot's
+- **Repair the rename fallout first** — get the suite back to 82 passing by
+  pointing the four checkers and the business-line fixtures at v3. Nothing
+  else can be verified until this is green.
+- Port `master`'s About Construction fix onto V3's current About markup:
+  remap the three Expertise slots onto the v3 photo set, drop the dangling
+  `srcset`/`sizes` that reference pre-v3 assets, correct the panned slot's
   `width`/`height` to the panorama's 1920x728 aspect.
-- Delete the 6 branches that are 0 commits ahead of V2 and therefore fully
+- Delete the 7 refs that are 0 commits ahead of V3 and therefore fully
   absorbed: `projects-hub-tweaks`, `projects-redesign`, `hero-recompose`,
   `claude/ecstatic-sutherland-1dd1dd`, `claude/elated-lumiere-80daf9`,
-  `claude/competent-mendel-e55c1f`. Remove the 4 stale worktrees under
-  `.claude/worktrees/`. **`master` is left untouched as the backup.**
-- Delete the 2,616 unreferenced images (297 MB) from the working tree. Git
+  `claude/competent-mendel-e55c1f`, `origin/baseline`. Remove the stale
+  worktrees under `.claude/worktrees/`.
+
+  **Two branches must NOT be touched.** `origin/V2` has been repointed to a
+  separate line of work, and both it and `origin/master` carry unmerged
+  commits:
+
+  | Branch | vs V3 | Status |
+  | --- | --- | --- |
+  | `v2-basic` = `origin/V2` | 22 ahead, 239 behind | active parallel work |
+  | `master-july2026-changes` = `origin/master` | 21 ahead, 239 behind | active parallel work |
+  | `master` (local) | 1 ahead | holds only the About fix |
+- Delete the 2,621 unreferenced images (297 MB) from the working tree. Git
   history retains every one. Cuts the deployed footprint from ~450 MB to
   ~150 MB before Phase 2 shrinks it further, and cuts clone/deploy time with
   it.
 
-Verification: `npx vitest run` stays green (82 tests); the About page renders
+Verification: `npx vitest run` goes from 22 failing to 82 passing; the About page renders
 three filled Expertise columns at 1280px; a re-run of the reference scan
 reports zero orphans and no newly-broken references.
 
@@ -113,7 +149,7 @@ following the existing `tools/make-*.sh` conventions:
 
 - For each of the 283 referenced root images, emit AVIF + WebP derivatives at
   the widths that page actually renders (capped at the source width — never
-  upscale), into `assets/img/v2/resp/<stem>-<width>.{avif,webp}`.
+  upscale), into `assets/img/v3/resp/<stem>-<width>.{avif,webp}`.
 - Rewrite the `<img>` tags to `<picture>` with an AVIF `<source>`, a WebP
   `<source>`, and the untouched original as the `<img>` fallback. Old browsers
   and any bot that ignores `<source>` still get a working image.
@@ -179,7 +215,8 @@ and `lang`. No duplicate titles or descriptions. `sitemap.xml` covers all 51
 URLs with `lastmod` and `priority`; `robots.txt` is correct. So this phase is
 narrow:
 
-- Write `alt` text for the ~380 images missing it, derived from project name,
+- Write `alt` text for the images lacking it (500 of 656 carry no non-empty
+  `alt`; a minority are genuinely decorative and keep `alt=""`), derived from project name,
   business line and surrounding page context. Factual and descriptive, no
   marketing claims. `alt` is invisible to sighted visitors, so the content
   freeze is not touched.
@@ -207,7 +244,7 @@ session; this phase only closes mechanical gaps.
 
 - Video re-encoding (needs ffmpeg).
 - Keyword research, content strategy, copy rewriting — separate SEO session.
-- Any change to `master`.
+- Any change to `master`, `v2-basic`/`origin/V2`, or `master-july2026-changes`/`origin/master` — all carry parallel work.
 - Any change to visible copy or to the visual content of existing imagery.
 
 ## Risks

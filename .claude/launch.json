@@ -12,6 +12,18 @@
       "port": 8747
     },
     {
+      "name": "ugcc-v2-basic",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8767",
+        "--directory",
+        ".claude/worktrees/v2-basic"
+      ],
+      "port": 8767
+    },
+    {
       "name": "ugcc-static-win",
       "runtimeExecutable": "python",
       "runtimeArgs": [

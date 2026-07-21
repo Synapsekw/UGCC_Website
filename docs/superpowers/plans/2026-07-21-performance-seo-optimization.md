@@ -19,7 +19,7 @@ Read these before Task 1. They are established in the repo, not invented here.
 **The `<picture>` pattern** — copied verbatim from `construction-projects-kuwait/index.html`. AVIF `<source>` plus a JPEG fallback on the `<img>`. **No WebP**: the hub ships AVIF+JPEG only, AVIF is Baseline-supported, and JPEG covers the remainder. Adding WebP would double the derivative count for no reachable browser.
 
 ```html
-<picture><source type="image/avif" srcset="/assets/img/v2/proj/ra268-440.avif 440w, /assets/img/v2/proj/ra268-880.avif 880w" sizes="(max-width:600px) calc(100vw - 64px), (max-width:920px) 50vw, 384px"><img src="/assets/img/v2/proj/ra268-880.jpg" srcset="/assets/img/v2/proj/ra268-440.jpg 440w, /assets/img/v2/proj/ra268-880.jpg 880w" sizes="(max-width:600px) calc(100vw - 64px), (max-width:920px) 50vw, 384px" alt="" width="880" height="495" loading="lazy" decoding="async"></picture>
+<picture><source type="image/avif" srcset="/assets/img/v3/proj/ra268-440.avif 440w, /assets/img/v3/proj/ra268-880.avif 880w" sizes="(max-width:600px) calc(100vw - 64px), (max-width:920px) 50vw, 384px"><img src="/assets/img/v3/proj/ra268-880.jpg" srcset="/assets/img/v3/proj/ra268-440.jpg 440w, /assets/img/v3/proj/ra268-880.jpg 880w" sizes="(max-width:600px) calc(100vw - 64px), (max-width:920px) 50vw, 384px" alt="" width="880" height="495" loading="lazy" decoding="async"></picture>
 ```
 
 **Checker style** — `tools/<area>-check.js`: `#!/usr/bin/env node`, `'use strict'`, `require('fs')`/`require('path')`, no dependencies. Numbered checks. Exit 0 with `OK: all <area> checks passed`, exit 1 with a bulleted failure list. Pages are minified onto one enormous line, so **every extraction must be regex- or split-based, never line-based.**
@@ -28,11 +28,13 @@ Read these before Task 1. They are established in the repo, not invented here.
 
 **Existing budgets** (from `tools/projects-hub-check.js` check 12) — card 440px AVIF ≤ 60 KB, hero AVIF ≤ 250 KB, full-scroll AVIF sum ≤ 1.5 MB. New budgets must not contradict these.
 
-**Branch:** all work lands on `V2`. **`master` is the backup and is never modified.**
+**Branch:** all work lands on **`V3`** (`origin/V3` and the working tree both at `89b06a6`). Three branches carry parallel work and must never be touched: `master`, `v2-basic` (= `origin/V2`, 22 commits ahead), and `master-july2026-changes` (= `origin/master`, 21 ahead).
+
+**Asset paths are v3.** The `89b06a6` rename moved `assets/img/v2/` → `assets/img/v3/`, `v2.css` → `v3.css`, `v2.js` → `v3.js`. Every path in this plan is already v3; if you see a `v2` path anywhere outside Task 0, it is a bug in the plan.
 
 **Content freeze:** re-encoding at identical dimensions and crop is allowed. Changing copy, crops, colours, or swapping an image is not. `alt` text is exempt (invisible to sighted visitors).
 
-**Baseline to preserve:** `npx vitest run` → 3 files, 82 tests passing. Every task ends green.
+**Baseline:** `npx vitest run` currently reports **22 failing, 60 passing (82 total)** — the v2→v3 rename broke the checkers. Task 0 restores 82 passing; from there every task ends green.
 
 ---
 
@@ -379,7 +381,7 @@ One row per <img> that is worth converting. Columns:
 
   page    page path relative to the repo root
   src     source file, relative to the repo root
-  stem    derivative filename stem under assets/img/v2/resp/
+  stem    derivative filename stem under assets/img/v3/resp/
   widths  comma-separated target widths (never above the source width)
   sizes   the sizes attribute to emit
   role    'lcp' for the page's first eager image, else 'below'
@@ -539,7 +541,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ### Task 5: Generate the derivatives
 
 **Files:**
-- Create: `tools/make-responsive-images.py`, `assets/img/v2/resp/*.{avif,jpg}`
+- Create: `tools/make-responsive-images.py`, `assets/img/v3/resp/*.{avif,jpg}`
 
 - [ ] **Step 1: Write the encoder**
 
@@ -548,7 +550,7 @@ Create `tools/make-responsive-images.py`:
 ```python
 #!/usr/bin/env python3
 """tools/make-responsive-images.py — writes AVIF + JPEG derivatives listed in
-tools/responsive-manifest.tsv into assets/img/v2/resp/.
+tools/responsive-manifest.tsv into assets/img/v3/resp/.
 
 Usage:  python3 tools/make-responsive-images.py [--force]
 
@@ -566,7 +568,7 @@ import sys
 
 AVIF_QUALITY = 60
 JPEG_QUALITY = 82
-OUT_DIR = 'assets/img/v2/resp'
+OUT_DIR = 'assets/img/v3/resp'
 
 
 def repo_root():
@@ -644,8 +646,8 @@ if __name__ == '__main__':
 
 ```bash
 time python3 tools/make-responsive-images.py
-ls assets/img/v2/resp | wc -l
-du -sh assets/img/v2/resp
+ls assets/img/v3/resp | wc -l
+du -sh assets/img/v3/resp
 ```
 
 Expected: roughly 4 minutes, ~1,700 files, a few tens of MB. The saving line should report 80%+.
@@ -664,7 +666,7 @@ random.seed(11)
 worst = 0.0
 for row in random.sample(rows, 25):
     width = int(row['widths'].split(',')[0])
-    dst = 'assets/img/v2/resp/%s-%d.avif' % (row['stem'], width)
+    dst = 'assets/img/v3/resp/%s-%d.avif' % (row['stem'], width)
     ref = Image.open(row['src']).convert('RGB')
     ref.thumbnail((width, 10**6), Image.LANCZOS)
     got = Image.open(dst); got.load(); got = got.convert('RGB')
@@ -681,7 +683,7 @@ Expected: every derivative decodes, dimensions match, worst diff well under 6/25
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tools/make-responsive-images.py assets/img/v2/resp
+git add tools/make-responsive-images.py assets/img/v3/resp
 git commit -m "build(images): generate AVIF + JPEG derivatives for every page image
 
 AVIF q60 / JPEG q82 progressive, benchmarked at 85%/74% saving with a mean
@@ -749,7 +751,7 @@ def rows(root):
 
 
 def srcset(stem, widths, ext):
-    return ', '.join('/assets/img/v2/resp/%s-%d.%s %dw' % (stem, w, ext, w)
+    return ', '.join('/assets/img/v3/resp/%s-%d.%s %dw' % (stem, w, ext, w)
                      for w in widths)
 
 
@@ -761,7 +763,7 @@ def build(tag, row, dims):
 
     inner = ATTR.sub('', tag)
     inner = SRC_ATTR.sub(
-        lambda m: 'src="/assets/img/v2/resp/%s-%d.jpg"' % (row['stem'], largest),
+        lambda m: 'src="/assets/img/v3/resp/%s-%d.jpg"' % (row['stem'], largest),
         inner)
 
     extras = [
@@ -817,7 +819,7 @@ def main():
                 continue
             largest = int(row['widths'].split(',')[-1])
             derivative = os.path.join(
-                root, 'assets/img/v2/resp/%s-%d.jpg' % (row['stem'], largest))
+                root, 'assets/img/v3/resp/%s-%d.jpg' % (row['stem'], largest))
             if not os.path.exists(derivative):
                 print('  MISSING derivative, skipping: %s' % derivative)
                 continue
@@ -966,7 +968,7 @@ def main():
             continue
 
         widths = [int(w) for w in row['widths'].split(',')]
-        srcset = ', '.join('/assets/img/v2/resp/%s-%d.avif %dw'
+        srcset = ', '.join('/assets/img/v3/resp/%s-%d.avif %dw'
                            % (row['stem'], w, w) for w in widths)
         link = ('<link rel="preload" as="image" type="image/avif" '
                 'imagesrcset="%s" imagesizes="%s">' % (srcset, row['sizes']))
@@ -1147,11 +1149,11 @@ Expected: `OK: all image-budget checks passed (51 pages)`. If check 2 fails, som
 A checker that has never failed is not known to work.
 
 ```bash
-cp assets/img/v2/resp/$(ls assets/img/v2/resp | grep '\.jpg$' | head -1) /tmp/keep.jpg
+cp assets/img/v3/resp/$(ls assets/img/v3/resp | grep '\.jpg$' | head -1) /tmp/keep.jpg
 python3 -c "
 from PIL import Image
 import glob
-p = sorted(glob.glob('assets/img/v2/resp/*-1920.jpg'))[0]
+p = sorted(glob.glob('assets/img/v3/resp/*-1920.jpg'))[0]
 im = Image.open(p); im.save(p, 'JPEG', quality=100)
 print('bloated', p)
 "
@@ -1166,12 +1168,12 @@ import re
 p = 'index.html'
 s = open(p).read()
 open(p + '.bak', 'w').write(s)
-s = re.sub(r'srcset=\"/assets/img/v2/resp/', 'srcset=\"/assets/img/v2/resp/NOPE-', s, count=1)
+s = re.sub(r'srcset=\"/assets/img/v3/resp/', 'srcset=\"/assets/img/v3/resp/NOPE-', s, count=1)
 open(p, 'w').write(s)
 "
 node tools/image-budget-check.js; echo "exit=$?"
 mv index.html.bak index.html
-git checkout -- assets/img/v2/resp
+git checkout -- assets/img/v3/resp
 ```
 
 Expected: the seeded run exits **1** with a check-1 failure naming the missing file; after restoring, `node tools/image-budget-check.js` passes again.
@@ -1551,7 +1553,7 @@ grep -o '<video[^>]*>' *.html */index.html
 
 - [ ] **Step 2: Add `preload="none"` and a poster to each**
 
-For every `<video>`: add `preload="none"` (so the file is not fetched until play) and `poster="/assets/img/v2/resp/<stem>-1440.jpg"` pointing at an existing derivative that matches the video's opening frame in subject. Do **not** extract a frame — that needs ffmpeg.
+For every `<video>`: add `preload="none"` (so the file is not fetched until play) and `poster="/assets/img/v3/resp/<stem>-1440.jpg"` pointing at an existing derivative that matches the video's opening frame in subject. Do **not** extract a frame — that needs ffmpeg.
 
 If a video is `autoplay` for a background band, keep `autoplay muted loop playsinline` but still add the poster, so something renders during the fetch.
 
@@ -1870,7 +1872,7 @@ for dirpath, dirnames, filenames in os.walk('.'):
     html = open(p, encoding='utf-8', errors='ignore').read()
     worst = 0
     for block in re.findall(r'<picture>.*?</picture>', html, re.S):
-        cands = re.findall(r'(/assets/img/v2/resp/[^"\s]+\.avif)\s+(\d+)w', block)
+        cands = re.findall(r'(/assets/img/v3/resp/[^"\s]+\.avif)\s+(\d+)w', block)
         if cands:
             biggest = max(cands, key=lambda c: int(c[1]))[0].lstrip('/')
             if os.path.exists(biggest):
