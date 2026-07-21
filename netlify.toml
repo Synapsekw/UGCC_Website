@@ -24,3 +24,21 @@
   from = "/api/chat"
   to = "/.netlify/functions/chat"
   status = 200
+
+# Long-lived immutable caching for fingerprinted/versioned static assets.
+# Image filenames are content-hashed (Hostinger export) or curated v2/ files
+# that only change alongside a page edit; CSS/JS use ?v= query versioning.
+[[headers]]
+  for = "/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
