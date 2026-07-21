@@ -484,6 +484,64 @@ check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder fo
 }
 
 /* ---------------------------------------------------------------------
+   16. Frozen blurbs relocated to detail pages: the redesigned hub dropped
+   the per-project blurb paragraphs the old hub carried. Under the
+   customer content freeze those approved texts were RELOCATED onto each
+   project's own detail page, not deleted. This check makes that
+   guarantee machine-enforced: every row of tools/projects-blurb-map.tsv
+   (slug, confidence, already_present, blurb — blurb has HTML tags
+   stripped but entities preserved) must byte-exact-appear somewhere in
+   that slug's <slug>/index.html. A plain substring match also covers the
+   two known special cases without extra logic: owwsct2460879's blurb
+   lives in the page's <h1> rather than body copy, and mew6085's blurb is
+   a strict prefix of a longer paragraph on the page - includes() finds
+   both. koc36081 has two map rows and must contain both blurbs.
+   --------------------------------------------------------------------- */
+{
+  const MAP_PATH = 'tools/projects-blurb-map.tsv';
+  if (!exists(MAP_PATH)) {
+    check(false, '16. ' + MAP_PATH + ' missing');
+  } else {
+    const blurbMapRaw = read(MAP_PATH).replace(/\r\n/g, '\n').trim();
+    const blurbRows = blurbMapRaw.split('\n').filter(Boolean).map((line) => {
+      const parts = line.split('\t');
+      return {
+        slug: parts[0],
+        confidence: parts[1],
+        alreadyPresent: parts[2],
+        blurb: parts[3] || '',
+      };
+    });
+
+    check(blurbRows.length >= 15,
+      '16. ' + MAP_PATH + ' parsed to only ' + blurbRows.length + ' row(s), want >= 15 (vacuous-pass guard)');
+
+    const detailCache = new Map();
+    const missingPages = [];
+    const missingBlurbs = [];
+    blurbRows.forEach((row) => {
+      if (!row.slug) return;
+      const detailPath = row.slug + '/index.html';
+      if (!detailCache.has(row.slug)) {
+        detailCache.set(row.slug, exists(detailPath) ? read(detailPath) : null);
+      }
+      const detailHtml = detailCache.get(row.slug);
+      if (detailHtml === null) {
+        missingPages.push(row.slug + ': detail page ' + detailPath + ' missing');
+        return;
+      }
+      if (!detailHtml.includes(row.blurb)) {
+        missingBlurbs.push(row.slug + ': blurb not found byte-exact, starts "' + row.blurb.slice(0, 60) + '"');
+      }
+    });
+    check(missingPages.length === 0,
+      '16. detail page(s) missing: ' + missingPages.join('; '));
+    check(missingBlurbs.length === 0,
+      '16. relocated blurb(s) not found on detail page: ' + missingBlurbs.join('; '));
+  }
+}
+
+/* ---------------------------------------------------------------------
    Report
    --------------------------------------------------------------------- */
 if (failures.length) {
