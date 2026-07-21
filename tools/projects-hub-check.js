@@ -328,7 +328,7 @@ check(badDescriptors.length === 0,
 /* 12. Perf budget from files on disk. */
 {
   function largestVariant(prefix) {
-    const dir = path.join(root, 'assets/img/v2');
+    const dir = path.join(root, 'assets/img/v3');
     let files = [];
     try { files = fs.readdirSync(dir); } catch (e) { files = []; }
     const re = new RegExp('^' + prefix + '-(\\d+)\\.avif$');
@@ -338,7 +338,7 @@ check(badDescriptors.length === 0,
     }).filter(Boolean);
     if (!widths.length) return null;
     widths.sort((a, b) => b.w - a.w);
-    return path.posix.join('assets/img/v2', widths[0].file);
+    return path.posix.join('assets/img/v3', widths[0].file);
   }
   function sizeOf(relPath) {
     try { return fs.statSync(path.join(root, relPath)).size; } catch (e) { return null; }

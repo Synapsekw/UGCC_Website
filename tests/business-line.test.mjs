@@ -42,16 +42,16 @@ for (const slug of Object.keys(PAGES)) {
 describe.each(Object.entries(PAGES))('%s', (slug, name) => {
   const doc = () => html[slug];
 
-  it('loads the kit stylesheets in order, after v2.css', () => {
+  it('loads the kit stylesheets in order, after v3.css', () => {
     // Version-agnostic: ?v=N bumps on every edit of the asset (house
     // convention), so pinning N here broke on every legitimate bump.
     // The invariant is presence and cascade ORDER, not the number.
     const d = doc();
-    const iV2 = d.search(/\/assets\/css\/v2\.css\?v=\d+/);
+    const iV3 = d.search(/\/assets\/css\/v3\.css\?v=\d+/);
     const iKit = d.search(/\/assets\/css\/about-suite\.css\?v=\d+/);
     const iPage = d.search(/\/assets\/css\/pages\/business-line\.css\?v=\d+/);
-    expect(iV2).toBeGreaterThan(-1);
-    expect(iKit).toBeGreaterThan(iV2);
+    expect(iV3).toBeGreaterThan(-1);
+    expect(iKit).toBeGreaterThan(iV3);
     expect(iPage).toBeGreaterThan(iKit);
   });
 
@@ -67,7 +67,7 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
 
   it('carries the frozen sub-nav with aria-current on its own tab', () => {
     const d = doc();
-    const nav = d.match(/<section class="v2-subnav">.*?<\/section>/s);
+    const nav = d.match(/<section class="v3-subnav">.*?<\/section>/s);
     expect(nav).not.toBeNull();
     const hrefs = [...nav[0].matchAll(/href="([^"]*)"/g)].map(m => m[1]);
     expect(hrefs).toEqual(TABS);
@@ -102,7 +102,7 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
   });
 
   it('JSON-LD image points at the derived cover', () => {
-    expect(doc()).toMatch(/"image":\s*"https:\/\/ugcc\.com\/assets\/img\/v2\/blp\/[a-z]+-cover\.jpg"/);
+    expect(doc()).toMatch(/"image":\s*"https:\/\/ugcc\.com\/assets\/img\/v3\/blp\/[a-z]+-cover\.jpg"/);
   });
 });
 

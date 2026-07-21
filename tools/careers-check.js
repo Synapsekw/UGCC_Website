@@ -198,7 +198,7 @@
   return Promise.resolve()
     .then(function () {
       /* html { scroll-behavior: smooth } is set globally in main.css and
-         v2.css, so scrollIntoView() animates and the lazy background does not
+         v3.css, so scrollIntoView() animates and the lazy background does not
          begin fetching until the animation lands. Scroll instantly instead.
 
          Then force loading="eager". The band's photograph is deliberately

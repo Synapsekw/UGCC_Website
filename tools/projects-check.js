@@ -61,7 +61,7 @@
     return Array.prototype.slice.call(document.querySelectorAll('.v3-proj__item'));
   }
 
-  /* html { scroll-behavior: smooth } is set globally in main.css and v2.css,
+  /* html { scroll-behavior: smooth } is set globally in main.css and v3.css,
      so a bare scrollIntoView() animates and the lazy images do not begin
      fetching until the animation lands. Scroll instantly instead, then poll
      img.complete — which turns true for loaded AND errored images, so this

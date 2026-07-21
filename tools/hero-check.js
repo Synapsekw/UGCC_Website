@@ -370,12 +370,12 @@
                                        : 'h=' + Math.round(restH) + ' stable, ' + filter };
     } finally {
       /* Restore v3-scrolled explicitly using the site's own threshold
-         (assets/js/v2.js: window.scrollY > 24) rather than relying on its
+         (assets/js/v3.js: window.scrollY > 24) rather than relying on its
          scroll listener, which defers to requestAnimationFrame and will
          not have fired synchronously by the time this check returns. */
       document.documentElement.classList.toggle('v3-scrolled', y0 > 24);
       window.scrollTo({ top: y0, behavior: 'instant' });
-      /* Never leave 'auto' stamped on <html>: v2.css sets
+      /* Never leave 'auto' stamped on <html>: v3.css sets
          scroll-behavior: smooth, and a reviewer clicking an anchor link
          afterward would see a false smooth-scroll regression. */
       document.documentElement.style.scrollBehavior = prevScrollBehavior;
