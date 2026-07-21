@@ -557,6 +557,51 @@ check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder fo
 /* ---------------------------------------------------------------------
    Report
    --------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------
+   17. Parity with the original site. Check 15 cross-validates the manifest
+   against the live discipline listing pages, but phase 2 turns those pages
+   into redirects — at which point that source of truth disappears. So the
+   classification as it stood on the `baseline` branch (the pixel replica of
+   the original Hostinger site) is frozen into
+   tools/projects-baseline-classification.tsv, and asserted here. A project
+   filed under several disciplines on the original site must stay filed
+   under all of them. Regenerate only from origin/baseline, never by hand.
+   --------------------------------------------------------------------- */
+{
+  const BASE_PATH = 'tools/projects-baseline-classification.tsv';
+  if (!exists(BASE_PATH)) {
+    check(false, '17. ' + BASE_PATH + ' missing');
+  } else {
+    const baseRows = read(BASE_PATH).replace(/\r\n/g, '\n').trim().split('\n').filter(Boolean)
+      .map((line) => {
+        const [slug, status, lines] = line.split('\t');
+        return { slug, status, lines: (lines || '').split(' ').filter(Boolean) };
+      });
+    check(baseRows.length === manifest.length,
+      '17. baseline classification has ' + baseRows.length + ' rows, manifest has ' + manifest.length);
+
+    const drift = [];
+    baseRows.forEach((row) => {
+      const m = manifestBySlug.get(row.slug);
+      if (!m) { drift.push(row.slug + ': in baseline, absent from manifest'); return; }
+      if (m.status !== row.status) {
+        drift.push(row.slug + ': status "' + m.status + '" vs baseline "' + row.status + '"');
+      }
+      const want = new Set(row.lines);
+      const got = new Set(m.lines);
+      const missing = [...want].filter((d) => !got.has(d));
+      const extra = [...got].filter((d) => !want.has(d));
+      if (missing.length || extra.length) {
+        drift.push(row.slug + ':' +
+          (missing.length ? ' dropped from ' + missing.join(',') : '') +
+          (extra.length ? ' added to ' + extra.join(',') : ''));
+      }
+    });
+    check(drift.length === 0,
+      '17. classification drifted from the original site: ' + drift.join('; '));
+  }
+}
+
 if (failures.length) {
   console.error('FAIL\n' + failures.map((f) => ' - ' + f).join('\n'));
   process.exit(1);
