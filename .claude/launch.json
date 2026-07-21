@@ -22,6 +22,18 @@
       "port": 8751
     },
     {
+      "name": "ugcc-master-july2026",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8761",
+        "--directory",
+        ".claude/worktrees/master-july2026"
+      ],
+      "port": 8761
+    },
+    {
       "name": "ugcc-business-lines",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
