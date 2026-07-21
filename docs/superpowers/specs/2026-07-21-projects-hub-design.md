@@ -68,11 +68,17 @@ disabled.
   `/owwsct2460879` pages instead of the old `ugcc.com/project/…` URLs; the
   5a-haya-eo24 card shows its own approved detail-page title instead of the
   neighbouring card's title it shows today.
-- **⚠ Customer-visible IA change to flag:** the seven discipline intro
-  paragraphs currently on the hub do not appear in Variant B. They are not
-  deleted from the site — each lives on its redesigned business-line page —
-  but the hub itself no longer displays them. Danijel to confirm the customer
-  is comfortable with this relocation.
+- **⚠ Customer-visible copy removal to flag (corrected 2026-07-21 by final
+  review):** Variant B keeps the hero subtitle and all 30 project titles, but
+  ~21 unique approved texts from the old hub — the 5 distinct discipline
+  intro paragraphs (7 slots, 2 were verbatim duplicates) and ~16 per-project
+  featured-card blurbs — appear NOWHERE else on the site after this change.
+  The earlier claim that the intros "live on the business-line pages" was
+  wrong: those pages carry different approved copy. Under the standing
+  content freeze this removal requires explicit sign-off from Danijel (and
+  the customer as he judges necessary) before merge. Fallback options if
+  declined are recorded in the merge-gate discussion (re-home blurbs on
+  detail pages in phase 3, or a discipline-intros section on the hub).
 
 ## 4. Performance work (ships with the page, not after it)
 
@@ -96,8 +102,12 @@ machine: `sips` (sips-316) encodes AVIF natively; `kp3cns301-880.jpg` 187 KB →
    `fetchpriority="high"`, gains a `<link rel="preload" as="image">` with
    `imagesrcset` for the AVIF.
 3. **Caching** — add to `netlify.toml`: `Cache-Control: public,
-   max-age=31536000, immutable` for `/assets/img/*`, `/assets/css/*`,
-   `/assets/js/*` (all content-hashed or version-queried). No other header
+   max-age=31536000, immutable` for `/assets/img/*` (content-hashed exports;
+   repo rule: curated v2/ images are only ever added under new names, never
+   edited in place), and `public, max-age=604800` for `/assets/css/*` and
+   `/assets/js/*` (main.css/custom.css/fonts.css/main.js are referenced
+   unversioned site-wide, so a year-long immutable would be unsafe; amended
+   from the original immutable plan by final review). No other header
    changes (the global `X-Robots-Tag: noindex` stays as-is).
 4. **Budget (acceptance numbers)** — first-viewport image transfer ≤ 400 KB
    (AVIF path); full-scroll total ≤ 1.5 MB; zero CLS (aspect boxes + numeric

@@ -25,9 +25,12 @@
   to = "/.netlify/functions/chat"
   status = 200
 
-# Long-lived immutable caching for fingerprinted/versioned static assets.
-# Image filenames are content-hashed (Hostinger export) or curated v2/ files
-# that only change alongside a page edit; CSS/JS use ?v= query versioning.
+# Caching for static assets. Images are immutable: exported filenames are
+# content-hashed, and curated v2/ files are only ever ADDED under new names,
+# never edited in place (repo rule — editing one in place would be invisible
+# to returning visitors for a year). CSS/JS get a week: the v2-era files use
+# ?v= versioning, but main.css/custom.css/fonts.css/main.js are referenced
+# unversioned across all pages, so a year-long immutable would be unsafe.
 [[headers]]
   for = "/assets/img/*"
   [headers.values]
@@ -36,9 +39,9 @@
 [[headers]]
   for = "/assets/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=604800"
 
 [[headers]]
   for = "/assets/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=604800"
