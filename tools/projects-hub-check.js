@@ -183,15 +183,20 @@ check(page.includes(FROZEN_HERO_SUBTITLE),
   check(bad.length === 0, '6. data-status/data-lines mismatch(es): ' + bad.join('; '));
 }
 
-/* 7. The stats block contains figures 30, 14, and 7. */
+/* 7. Chrome the hub deliberately does NOT carry (Danijel, 2026-07-21): the
+   All/Current/Completed sub-nav rail duplicated the grid's own status chips,
+   and the "The full record" stats section restated what the grid shows. Both
+   were removed; the cover is followed directly by the filter + grid section.
+   Asserted so neither can creep back in unnoticed. */
 {
-  const statsMatch = page.match(/<ul[^>]*class="[^"]*as-stats[^"]*"[^>]*>([\s\S]*?)<\/ul>/);
-  const statsHtml = statsMatch ? statsMatch[1] : '';
-  check(!!statsMatch, '7. no <ul class="as-stats..."> block found on the page');
-  const figures = [...statsHtml.matchAll(/<span class="as-stat__figure">([^<]*)<\/span>/g)].map((m) => m[1]);
-  ['30', '14', '7'].forEach((want) => {
-    check(figures.includes(want), '7. stats block missing figure "' + want + '" (found: ' + figures.join(', ') + ')');
-  });
+  check(!/class="[^"]*v2-subnav/.test(page),
+    '7. the removed .v2-subnav rail is back on the page');
+  check(!/class="[^"]*as-stats/.test(page),
+    '7. the removed .as-stats block is back on the page');
+  const firstSection = page.indexOf('<section class="as-section');
+  const gridSection = page.indexOf('as-section--tint');
+  check(firstSection !== -1 && gridSection !== -1 && gridSection - firstSection < 80,
+    '7. the first .as-section after the cover is not the tint grid section');
 }
 
 /* ---------------------------------------------------------------------

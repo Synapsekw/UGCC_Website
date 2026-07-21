@@ -200,6 +200,24 @@
    five hero images has its subject above the horizontal midline, and the
    bottom third is where the title sits, so biasing the crop upward keeps the
    subject in frame as the box narrows. */
+/* <picture> wrappers (AVIF + JPEG fallback) must not become boxes of their own.
+   .as-cover is a grid container, so an in-flow wrapper claims a grid row and
+   pushes .as-cover__inner into a second row below the padded box, where
+   `overflow: hidden` clips the title. `display: contents` drops the wrapper
+   from layout so .as-cover__media below still applies to the <img> itself.
+   Inert on covers that use a bare <img>. */
+.as-cover picture {
+  display: contents;
+}
+
+/* Upstream CSS gives <source> `display: block`, overriding the browser default
+   of `none`. Harmless while a <picture> wraps it, but once the wrapper is
+   `display: contents` the <source> itself becomes a grid item and claims the
+   row. <source> is never painted, so hiding it everywhere is safe. */
+picture > source {
+  display: none;
+}
+
 .as-cover__media {
   position: absolute;
   inset: 0;
