@@ -181,7 +181,21 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-### Task 1: Restore the About page's Construction image
+### Task 1: Restore the About page's Construction image — ✅ CLOSED, PREMISE FALSE (`802aa7f`)
+
+> **Investigated 2026-07-21. There is no blank column on V3; nothing was fixed because nothing was broken.**
+>
+> Verified in-browser at 1280px: all three Expertise tiles render 351x263 with `naturalWidth > 0`, and the Construction tile shows a UGCC crawler crane at a viaduct. The premise came from `master`'s `4634868`, which fixed a genuinely blank slot in a **panned-crop layout** (`--desktop-left:-508px`, `width:auto`, `height:100%`). V3 rebuilt the row as 4:3 `as-card` tiles with `object-fit: cover`, so that failure mode cannot occur and the commit has nothing to port.
+>
+> **Lesson: a commit message describes the layout that existed when it was written.** Confirm the failure still reproduces before porting a fix across a rebuild.
+>
+> Delivered instead: `tests/about-expertise.test.mjs`, pinning three tiles with correct titles, resolving images, non-empty alt and explicit dimensions — file-agnostic, so Phase 2's `<picture>` rewrite does not break it. `about-contractor-kuwait/index.html` is byte-identical to HEAD.
+>
+> **One open question carried to the user:** `assets/img/v3/about-construction.jpg` (1920x728, 194 KB) is the purpose-shot for that slot and is referenced by nothing, so Task 3 will delete it as an orphan. The tile currently uses a 523 KB PNG instead. Swapping is a visible content change and needs sign-off; the size difference resolves anyway in Phase 2.
+
+The original steps are kept below as the record of what was checked.
+
+### Task 1 (original): Restore the About page's Construction image
 
 V2 references `about-engineering.jpg` and `about-procurement.jpg` but has **zero** references to `about-construction.jpg`, which exists on disk at 198 KB. That Expertise column renders blank. `master`'s commit `4634868` fixed this, but V2's About markup changed afterwards, so this is a port, not a cherry-pick.
 
