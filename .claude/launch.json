@@ -18,6 +18,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8759", "--directory", ".claude/worktrees/business-lines"],
       "port": 8759
+    },
+    {
+      "name": "ugcc-project-detail",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8753", "--directory", ".claude/worktrees/project-detail"],
+      "port": 8753
     }
   ]
 }
