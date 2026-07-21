@@ -1,0 +1,24 @@
+/* Project detail page (all 30 /<slug>/ pages) — leaf sheet on the about-suite kit.
+   Thin by contract: layout spacing for the compact facts band, link behaviour
+   for similar-project tiles, and containers for the optional video and
+   owner-logo slots. Never restyles the visual design of as-* / v2-* components. */
+
+.pjd-facts .as-section__inner { padding-block: 56px; }
+.pjd-facts .as-stats { margin-top: 0; }
+.pjd-facts .as-ledger { margin-top: 44px; }
+
+.pjd-tile-link { display: block; color: inherit; text-decoration: none; }
+
+/* Optional video slot (projects whose original page embeds a video) */
+.pjd-video { aspect-ratio: 16 / 9; }
+.pjd-video iframe { width: 100%; height: 100%; border: 0; display: block; border-radius: 4px; }
+
+/* Optional owner-logo strip (projects whose original page shows owner logos) */
+.pjd-owners { display: flex; flex-wrap: wrap; align-items: center; gap: 40px; margin-top: 44px; }
+.pjd-owners img { max-height: 72px; width: auto; }
+
+@media (max-width: 920px) {
+  .pjd-facts .as-section__inner { padding-block: 44px; }
+  .pjd-owners { gap: 28px; }
+  .pjd-owners img { max-height: 56px; }
+}
