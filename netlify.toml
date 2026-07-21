@@ -136,10 +136,28 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Fonts are content-stable: the subset .woff2 files are only ever ADDED under
+# new names, never edited in place, so a year is safe. They had no rule at all
+# before, which meant they fell back to Netlify's short default and were
+# re-validated far more often than they change.
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/assets/css/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# main.subset.css is content-addressed by name: it is generated from main.css
+# by tools/css-subset.py and republished under a NEW filename whenever the
+# keep-set changes, never edited in place. That makes a year safe here even
+# though the generic css rule above stays at a week.
+[[headers]]
+  for = "/assets/css/main.subset.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/assets/js/*"

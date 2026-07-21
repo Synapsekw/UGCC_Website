@@ -1,23 +1,58 @@
 # UGCC Static Site
 
-Static replica of the UGCC website (originally built with Hostinger Website Builder at
-`stornoway-builder-vkeizur5ysotnsh3.hostingersite.com`), converted to plain HTML/CSS/JS
-so it can be hosted on any regular web hosting (Hostinger shared hosting, etc.).
+Static site for United Gulf Construction Company. Originally exported from Hostinger
+Website Builder and converted to plain HTML/CSS/JS, then rebuilt as the V3 design layer.
+51 pages, no build step, no database, no PHP.
 
-## Deploying to Hostinger
+## Deploying
 
-Upload **everything in this folder** (including the hidden `.htaccess`) into `public_html/`.
-No build step, no database, no PHP required. Total size is ~758 MB (mostly images).
+**The site deploys on Netlify**, from `netlify.toml`: `publish = "."`, no build command —
+the repo root is served as-is. It runs on a temporary Netlify domain until the client
+hands over `ugcc.com`.
 
-Tip: zip the folder, upload the zip via Hostinger File Manager, and extract it there —
-much faster than uploading 1,000+ files individually.
+`.htaccess` is retained for the Apache/Hostinger fallback path but is **not** the tuning
+surface; cache headers live in `netlify.toml`.
+
+### Launch checklist — at domain handover
+
+1. **Remove the site-wide `X-Robots-Tag: noindex, nofollow` block from `netlify.toml`.**
+   It is deliberate: free Netlify has no password protection, so the header is what keeps
+   the client preview out of search results. Nothing will rank until it goes.
+2. Verify the absolute `ugcc.com` canonical, `og:url` and JSON-LD URLs already baked into
+   every page resolve against the live domain.
+3. Re-run `python3 tools/gen-sitemap.py` if any URL changed, and submit `sitemap.xml`.
+
+## Build tooling
+
+No build runs at deploy time — these are run by hand and their output is committed.
+
+| Command | What it does |
+| --- | --- |
+| `npm test` | The full checker suite (vitest). CI runs this on every push. |
+| `npm run check:images` | Per-page image budgets and `<picture>` invariants. |
+| `npm run check:orphans` | Lists assets no HTML/CSS/JS/build script references. |
+| `npm run build:images` | Regenerates the responsive image pipeline end to end. |
+
+`npm run build:images` chains four steps, and order matters:
+`tools/responsive-manifest.py` decides which images need derivatives and at which widths →
+`tools/make-responsive-images.py` encodes AVIF + JPEG into `assets/img/v3/resp/` →
+`tools/rewrite-picture-markup.py` rewrites `<img>` into `<picture>` →
+`tools/add-lcp-preload.py` adds each page's LCP preload. All four are idempotent.
+
+`tools/css-subset.py` regenerates `assets/css/main.subset.css` from `main.css`. Re-run it
+after adding markup that uses a class the subset has never seen, or that class will be
+unstyled. `tools/orphan-keep.txt` protects unreferenced files that must survive.
 
 ## Structure
 
 - `index.html` — home page
-- `<page-slug>/index.html` — the other 63 pages (incl. project detail and listing pages) (clean URLs, e.g. `/contact-us/`)
-- `assets/css/main.css` — the original builder stylesheet (localized)
-- `assets/css/fonts.css` + `assets/fonts/` — self-hosted Google Fonts (Hammersmith One, Open Sans, Carlito, Poppins)
+- `<page-slug>/index.html` — the other 50 pages (clean URLs, e.g. `/contact-us/`)
+- `assets/css/main.subset.css` — what the pages load: `main.css` reduced by
+  `tools/css-subset.py` to the rules anything on the site can match (350KB -> 139KB).
+  `assets/css/main.css` is kept as the source it is generated from.
+- `assets/css/fonts.css` + `assets/fonts/` — self-hosted Google Fonts (Hammersmith One,
+  Open Sans, Carlito, Poppins), latin and latin-ext subsets only
+- `assets/img/v3/resp/` — generated AVIF + JPEG derivatives; do not edit by hand
 - `assets/css/custom.css`, `assets/js/main.js` — small replacement for the builder's JavaScript:
   mobile burger menu, home-page slideshow (3 s autoplay, arrows, dots), appear-on-scroll animations
 - `assets/img/` — all site images, downloaded and self-hosted (all responsive srcset variants preserved)
