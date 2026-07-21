@@ -2,15 +2,12 @@
    Loads after about-suite.css. Everything else on the page is kit.
    Spec: docs/superpowers/specs/2026-07-20-business-lines-hub-design.md */
 
-/* ---- 1. Cover title override -------------------------------------------
-   .as-cover__title is clamp(40px, 5.2vw, 68px) + uppercase, tuned for the
-   suite's one-word titles ("ABOUT"). This page's h1 is 44 characters; in
-   caps at 68px it runs four lines and overflows the 524px cover. 18ch is
-   the measure that breaks the line after "services" at desktop. */
-.as-cover__title {
-  font-size: clamp(30px, 3.4vw, 46px);
-  max-width: 18ch;
-}
+/* ---- 1. (removed) cover title override ---------------------------------
+   A clamp(30px,3.4vw,46px)/18ch cap existed here for the original 44-char
+   topical h1. The 2026-07-20 header unification set the h1 to "Business
+   Lines" (family caps form, matching About/Facilities), which fits the
+   kit's default clamp(40px, 5.2vw, 68px) — so the override is gone. Do not
+   reintroduce it without a measured reason. */
 
 /* ---- 2. Grid ------------------------------------------------------------ */
 .bl-mosaic {

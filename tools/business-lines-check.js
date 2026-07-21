@@ -29,9 +29,18 @@
   ok('exactly one h1', h1s.length === 1, h1s.length);
   ok('h1 is the cover title',
      h1s[0] && h1s[0].classList.contains('as-cover__title'));
-  ok('h1 is a topic signal, not the nav label',
-     h1s[0] && h1s[0].textContent.trim().toLowerCase() !== 'business lines',
+  /* 2026-07-20 header unification: the hub joined the About/Facilities
+     family form — short caps title + sub-nav rail. This reverses the
+     earlier topical-h1 decision (user request). */
+  ok('h1 is the family nav label',
+     h1s[0] && h1s[0].textContent.trim() === 'Business Lines',
      h1s[0] && h1s[0].textContent.trim());
+  var tabs = document.querySelectorAll('.v2-subnav a');
+  ok('sub-nav rail has 8 tabs', tabs.length === 8, tabs.length);
+  var active = document.querySelectorAll('.v2-subnav a.is-active');
+  ok('All is the active tab',
+     active.length === 1 && active[0].textContent.trim() === 'All' &&
+     active[0].getAttribute('aria-current') === 'page');
   ok('eight tiles', tiles.length === 8, tiles.length);
   ok('two lead tiles', leads.length === 2, leads.length);
   ok('one fill tile', document.querySelectorAll('.bl-tile--all').length === 1);

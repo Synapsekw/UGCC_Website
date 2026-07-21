@@ -43,17 +43,20 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
   const doc = () => html[slug];
 
   it('loads the kit stylesheets in order, after v2.css', () => {
+    // Version-agnostic: ?v=N bumps on every edit of the asset (house
+    // convention), so pinning N here broke on every legitimate bump.
+    // The invariant is presence and cascade ORDER, not the number.
     const d = doc();
-    const iV2 = d.indexOf('/assets/css/v2.css?v=4');
-    const iKit = d.indexOf('/assets/css/about-suite.css?v=3');
-    const iPage = d.indexOf('/assets/css/pages/business-line.css?v=2');
+    const iV2 = d.search(/\/assets\/css\/v2\.css\?v=\d+/);
+    const iKit = d.search(/\/assets\/css\/about-suite\.css\?v=\d+/);
+    const iPage = d.search(/\/assets\/css\/pages\/business-line\.css\?v=\d+/);
     expect(iV2).toBeGreaterThan(-1);
     expect(iKit).toBeGreaterThan(iV2);
     expect(iPage).toBeGreaterThan(iKit);
   });
 
-  it('loads about-suite.js at v=2, deferred', () => {
-    expect(doc()).toContain('src="/assets/js/about-suite.js?v=2" defer');
+  it('loads about-suite.js, deferred', () => {
+    expect(doc()).toMatch(/src="\/assets\/js\/about-suite\.js\?v=\d+" defer/);
   });
 
   it('has exactly one h1 and it is the canonical display name', () => {
