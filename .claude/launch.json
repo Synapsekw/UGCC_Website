@@ -12,6 +12,16 @@
       "port": 8747
     },
     {
+      "name": "ugcc-static-win",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8747"
+      ],
+      "port": 8747
+    },
+    {
       "name": "ugcc-static-alt",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
