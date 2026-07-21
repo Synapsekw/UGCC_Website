@@ -1,0 +1,11 @@
+# tools/orphan-keep.txt — assets that are unreferenced but must NOT be deleted
+# by tools/find-orphan-assets.py --delete.
+#
+# One path per line, relative to assets/. Blank lines and # comments ignored.
+
+# The purpose-made Expertise photo for the About page's Construction tile.
+# That tile currently uses 00dfb8ce-media-center-banner instead, so this file
+# is unreferenced — but it is a commissioned shot, kept available in case the
+# tile is ever switched to it. Decision recorded 2026-07-21; swapping the tile
+# would be a visible content change and needs customer sign-off.
+img/v3/about-construction.jpg

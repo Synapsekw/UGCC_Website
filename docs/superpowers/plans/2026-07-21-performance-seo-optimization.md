@@ -383,6 +383,11 @@ No commit — deleting refs is not a tree change.
 
 - [ ] **Step 1: Write the reference scanner**
 
+**A keep-list is required.** `tools/orphan-keep.txt` names assets that are
+unreferenced but must survive — currently `img/v3/about-construction.jpg`, the
+commissioned Expertise photo (decision recorded 2026-07-21, Task 1). The
+scanner must honour it, or the next `--delete` silently drops the file.
+
 Create `tools/find-orphan-assets.py`:
 
 ```python
@@ -406,6 +411,20 @@ REF = re.compile(r'assets/((?:img|video)/[A-Za-z0-9._\-/]+)')
 
 def repo_root():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def kept(root):
+    """Paths listed in tools/orphan-keep.txt are never deleted."""
+    path = os.path.join(root, 'tools/orphan-keep.txt')
+    if not os.path.exists(path):
+        return set()
+    keep = set()
+    with open(path, encoding='utf-8') as handle:
+        for line in handle:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                keep.add(line)
+    return keep
 
 
 def referenced(root):
@@ -434,11 +453,13 @@ def on_disk(root):
 
 def main():
     root = repo_root()
-    refs, disk = referenced(root), on_disk(root)
-    orphans = {rel: p for rel, p in disk.items() if rel not in refs}
+    refs, disk, keep = referenced(root), on_disk(root), kept(root)
+    orphans = {rel: p for rel, p in disk.items()
+               if rel not in refs and rel not in keep}
     total = sum(os.path.getsize(p) for p in orphans.values())
 
     print('referenced: %d' % len(refs))
+    print('kept:       %d (tools/orphan-keep.txt)' % len(keep))
     print('on disk:    %d' % len(disk))
     print('orphaned:   %d files, %.1f MB' % (len(orphans), total / 1e6))
 
