@@ -301,7 +301,21 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-### Task 2: Delete merged branches and stale worktrees
+### Task 2: Delete merged branches and stale worktrees — ✅ DONE
+
+> **Executed 2026-07-21.** Deleted 6 local branches and 4 worktrees; suite green at 92 passing afterwards.
+>
+> **The local branch was renamed `V2` → `V3` mid-task** by the other session, so `git rev-parse V2` began failing. Anything scripted against the branch name needs re-checking, not just the tip SHA.
+>
+> Re-verification earned its keep: both protected branches had **moved again** since the rebaseline — `v2-basic` 22→23 ahead, and the `master-july2026` worktree advanced `b3e943d`→`e2931fe`. Deleting from a stale survey would have destroyed live work.
+>
+> Deleted: `claude/competent-mendel-e55c1f`, `claude/ecstatic-sutherland-1dd1dd`, `claude/elated-lumiere-80daf9`, `hero-recompose`, `projects-hub-tweaks`, `projects-redesign`. Worktrees: the three detached ones plus `master-about-fix`.
+>
+> Survived, as intended: `master`, `master-july2026-changes`, `v2-basic` — the last two still checked out in their worktrees and being written to.
+>
+> **Remote refs were NOT touched.** `origin/baseline` and `origin/hero-recompose` are both 0 ahead and deletable, but deleting a remote branch affects everyone using the repo, so it needs explicit sign-off. Left for the user.
+
+### Task 2 (original steps)
 
 Six local branches are 0 commits ahead of V3 — fully absorbed.
 
