@@ -389,7 +389,19 @@ No commit — deleting refs is not a tree change.
 
 ---
 
-### Task 3: Delete the 2,616 unreferenced images
+### Task 3: Delete the unreferenced images — ✅ DONE (`97b938d`)
+
+> **Executed 2026-07-21. 2,613 files, 294 MB freed; `assets/` 453 MB → 167 MB.**
+>
+> **The plan's scanner would have caused damage.** As specified it scanned only HTML/CSS/JS, which misses the `tools/make-*.sh` generators — those name their SOURCE images, and a source is typically referenced by nothing else since only its derivative reaches a page. Seven build sources (2.4 MB), including `card-kp3.jpg` and `slide-09.jpg`, were in scope for deletion; losing them would have made the projects-hub cards and rail slides unregenerable. Fixed by adding `.sh`/`.py` to `SCAN_EXT`, which protects them automatically rather than by hand-maintained list.
+>
+> Two more v2→v3 leftovers surfaced here and were fixed: `make-rail-images.sh` read from `assets/img/v2`, and `make-careers-image.sh` would have `mkdir -p`'d a stray `v2` output directory. **Task 0 missed both because it only swept `*-check.js` and `tests/`** — the rename fallout was wider than the test failures revealed.
+>
+> Hardening added beyond the plan: the scanner refuses `--delete` while any reference is broken, and reports referenced-but-missing separately from orphaned, so a broken page cannot hide among orphans.
+>
+> Verified: 0 orphans and 0 missing afterwards; 92 tests; all five Node checkers; and a crawl of every URL in `sitemap.xml` resolved **1,014 asset references across 476 distinct files with zero 404s** and a clean console.
+
+### Task 3 (original steps)
 
 297 MB tracked in git, referenced by no HTML/CSS/JS. Git history retains all of it.
 
