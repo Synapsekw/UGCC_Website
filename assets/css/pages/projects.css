@@ -1,0 +1,125 @@
+/* pages/projects.css — projects hub (unified grid). Thin add-on over about-suite.css. */
+
+/* ======================================================================
+   Variant B — unified portfolio grid (pjx- namespace, mockup-local)
+   ====================================================================== */
+
+/* --- filter bar ----------------------------------------------------- */
+.pjx-filter { margin: 40px 0 0; }
+.pjx-filter__group { margin-top: 24px; }
+.pjx-filter__group:first-child { margin-top: 0; }
+.pjx-filter__label {
+  margin: 0 0 12px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--as-meta-light, #6b747c);
+}
+.pjx-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+/* chips are real buttons wearing the kit's .as-pill skin */
+.pjx-chip {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.pjx-chip:hover,
+.pjx-chip:focus-visible { background: rgba(0, 42, 65, .14); }
+.pjx-chip:focus-visible { outline: 3px solid var(--v2-red, #d41c22); outline-offset: 2px; }
+.pjx-chip[aria-pressed="true"] {
+  background: var(--v2-navy, #002a41);
+  border-color: var(--v2-navy, #002a41);
+  color: #fff;
+}
+
+/* result count — pre-filled in HTML so the no-JS page reads complete */
+.pjx-count {
+  margin: 32px 0 20px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--as-meta-light, #6b747c);
+}
+
+/* --- the grid ------------------------------------------------------- */
+.pjx-grid { margin-top: 0; }
+/* JS filtering hides via [hidden]; .as-card sets display:flex so restate */
+.pjx-grid .as-card[hidden] { display: none; }
+
+.pjx-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 4px;
+}
+.pjx-card__link:focus-visible {
+  outline: 3px solid var(--v2-red, #d41c22);
+  outline-offset: 4px;
+}
+
+.pjx-card__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 14px;
+}
+.pjx-flag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.pjx-flag--current {
+  color: var(--v2-red, #d41c22);
+  background: rgba(212, 28, 34, .07);
+  border: 1px solid rgba(212, 28, 34, .3);
+}
+.pjx-flag--completed {
+  color: var(--v2-navy, #002a41);
+  background: rgba(0, 42, 65, .06);
+  border: 1px solid rgba(0, 42, 65, .18);
+}
+.pjx-tags {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--as-meta-light, #6b747c);
+}
+
+/* long frozen titles: sentence case at reading size, not the tile
+   caption's letter-spaced uppercase */
+.pjx-card .as-card__title {
+  margin: 12px 0 0;
+  font-family: 'Hammersmith One', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--v2-navy, #002a41);
+}
+
+/* two tracks on tablet widths; the kit's single 920px collapse would give
+   a 30-item single column. 600px is the sanctioned grid-collapse point. */
+@media (max-width: 920px) and (min-width: 601px) {
+  .pjx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
