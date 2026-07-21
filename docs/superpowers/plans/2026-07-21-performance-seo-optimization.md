@@ -1979,6 +1979,20 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
+> ## Phases 4 & 5 — ✅ COMPLETE (`dccc07b`, `fa01995`)
+>
+> **Phase 4 — video.** All three background videos now carry `data-src` + `preload="none"`, loaded after `window.load` and only within two screen heights. The About page starts at **0 bytes of video instead of 17.1 MB**; its far video (3,994px down) never loads unless the visitor scrolls there.
+>
+> Proximity uses `getBoundingClientRect` on a **capture-phase document** scroll listener, not IntersectionObserver — IO does not fire at all in this pane, and the page scrolls inside a container so a window-only listener never hears it. A 1s interval backs both up. `play()` retries on `canplay`, `loadeddata` and first interaction, because autoplay does not re-trigger for a src assigned after parse.
+>
+> **Unverified, needs a real-browser check:** this pane enforces a stricter autoplay policy than Chrome/Safari and preserves media state across navigations, so unattended autoplay could not be confirmed. If it were ever blocked the poster still renders — the homepage hero is visually unchanged because the LCP image carries that composition.
+>
+> **Phase 5 — SEO.** Descriptive alt 156 → 224 of 656; the other 432 now say `alt=""` explicitly. **No image lacks the attribute.**
+>
+> The spec framed this as "write alt for ~380 images". That was the wrong target. The right split was: **name the client logos** (39 instances, using the site's own names, not invented expansions), **describe each page's cover** (29, written from viewing each image — deriving them from the h1 would have produced 29 restatements of the contract name), and **deliberately leave 432 gallery images empty**, which is what WCAG requires when surrounding text already describes them. Generating filler for those would degrade screen-reader output, not improve it.
+>
+> Six meta descriptions trimmed 166-176 → 133-150 chars; `og:image:alt`/`twitter:image:alt` filled on all 51 pages, 29 describing the cover image rather than repeating the title.
+
 # Phase 6 — Guardrails
 
 ### Task 15: Add `package.json` and make CI run the tests
