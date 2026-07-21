@@ -1425,6 +1425,22 @@ Expected: 5 files, 85 tests passing.
 
 ---
 
+> ## Phase 2 — ✅ COMPLETE (Tasks 4-8, `fbb1633`..`ec03505`)
+>
+> **Worst-case page image weight: 112.0 MB → 46.8 MB (58%). Homepage 3.43 → 1.63 MB. Median page 0.67 MB.**
+>
+> Below the spec's 85% headline. That benchmark downscaled 3840px stock photos to 1600px, so most of its saving was resolution rather than format; much of this library is already 840-1024px. 58% is the honest figure for the real mix.
+>
+> **The `sizes` attribute was wrong twice, and both versions would have shipped looking correct.** Reading the `<img>`'s own class marked every builder hero as a card (the builder puts the class on a parent div). Reading a fixed window of preceding characters then bled across siblings, so an Expertise card inherited "banner" from the previous card's *filename* — a 351px slot fetching a 1440px file. Resolved with `html.parser` tracking real ancestors, matching class attributes only, never filenames. 100vw slots fell 126 → exactly 51, one hero per page.
+>
+> **Two audit claims corrected.** 173 of 656 images (26%) already had builder `srcset` — the spec's "zero outside the projects hub" was wrong, it had only checked for `<source>`. And 500 of 656 images lack non-empty `alt`, not ~380.
+>
+> **Cost:** `assets/` grew 167 MB → 335 MB. Derivatives are repo and deploy weight; page weight is what halved. Heroes cap at 1920px, so 2x-DPI displays get a slightly softer hero than the builder's old 2880w variants — deliberate.
+>
+> Task 8's checker found a real gap on its first run: the header logo, twice per page, had no width/height. 102 images fixed.
+>
+> Four pages remain above 2 MB, all project galleries of 16-20 full-width lazy photographs; `kp3cns301` is worst at 3.53 MB.
+
 # Phase 3 — Critical rendering path
 
 Netlify already Brotli-compresses text, so the win here is parse cost and round trips, not transfer bytes. `main.css` is 358 KB raw but 37.8 KB gzipped — the 1,193 dead selectors still cost style-recalc on every page.
