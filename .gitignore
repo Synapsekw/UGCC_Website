@@ -12,7 +12,9 @@ assets/img/MEW-6085-2024_2025_GalleryTobeupdated/
 __pycache__/
 .pytest_cache/
 node_modules/
-package-lock.json
+# package-lock.json is COMMITTED on purpose: CI runs `npm ci`, which needs the
+# lockfile and refuses to run without it. Committing it also pins the exact
+# vitest build the checkers were verified against.
 
 .superpowers/
 

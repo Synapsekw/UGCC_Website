@@ -1,0 +1,40 @@
+name: Tests
+
+# Runs the checker suites on every push and PR.
+#
+# The existing push-log workflow only writes a summary — nothing gated, which
+# is exactly how the v2->v3 rename shipped 22 failing tests unnoticed. This is
+# the workflow that actually fails a bad push.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: vitest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `npm ci` (not `install`) so the run uses the committed lockfile
+      # exactly and cannot drift from what was verified locally.
+      - name: Install
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      # Belt and braces: the image budgets also run inside the vitest suite,
+      # but running the checker directly makes a budget failure obvious in the
+      # job log without unpicking vitest's output.
+      - name: Image budgets
+        run: npm run check:images

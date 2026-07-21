@@ -1,0 +1,15 @@
+{
+  "name": "ugcc-website",
+  "private": true,
+  "version": "1.0.0",
+  "description": "UGCC static site. No build step — the repo root is published as-is. These scripts are the checkers and the image pipeline.",
+  "scripts": {
+    "test": "vitest run",
+    "check:images": "node tools/image-budget-check.js",
+    "check:orphans": "python3 tools/find-orphan-assets.py",
+    "build:images": "python3 tools/responsive-manifest.py && python3 tools/make-responsive-images.py && python3 tools/rewrite-picture-markup.py && python3 tools/add-lcp-preload.py"
+  },
+  "devDependencies": {
+    "vitest": "4.1.10"
+  }
+}
