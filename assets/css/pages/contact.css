@@ -1,0 +1,107 @@
+/* ==========================================================================
+   /contact-us — page-specific rules only
+   ==========================================================================
+   Linked after about-suite.css, same order as the other kit pages. The page
+   is built from the kit (.as-cover, .as-section--split, .as-head,
+   .as-ledger); this file only supplies what has no kit equivalent:
+
+     1. the contact ledger variant — the kit ledger is a dated register
+        (64px year track + name); contact channels have no year, so the
+        term collapses to a single track and widens to hold the longest
+        label ("Career inquiries", measured 132px at 16/600 — 200px leaves
+        the same webfont headroom the kit's 236px track carries);
+     2. ledger placement inside the split grid — the kit routes only
+        .as-prose/.as-pills/.as-figure/.as-accordion to column 2, so the
+        ledger and the full-span map figure need their tracks stated here;
+     3. the framed map — the builder's bare iframe, re-framed with the
+        V2 table treatment (14px radius, hairline, lifted shadow) so the
+        two framed rectangles on the site share one geometry.
+
+   The cover's geometry is deliberately absent: height, padding and type are
+   the kit's contract and must be identical across the kit pages.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Ledger placement in the split section
+   --------------------------------------------------------------------------
+   26px matches the kit's own head-with-eyebrow alignment rule
+   (.as-head:has(.as-head__eyebrow) + …), which does not know about ledgers. */
+@media (min-width: 921px) {
+  .as-section__inner--split > .ct-ledger {
+    grid-column: 2;
+    margin-top: 26px;
+  }
+
+  .as-section__inner--split > .ct-map {
+    grid-column: 1 / -1;
+    margin-top: 56px;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Contact ledger — the no-year variant
+   -------------------------------------------------------------------------- */
+.ct-ledger .as-ledger__row {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+
+.ct-ledger .as-ledger__term {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Same treatment as .as-prose a: navy label on a red baseline, warming to
+   red on hover. Declared here because ledger descriptions are not prose. */
+.ct-ledger a {
+  color: var(--v2-navy, #002a41);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid var(--v2-red, #d41c22);
+  transition: color .25s var(--v2-ease-out-quart);
+}
+
+.ct-ledger a:hover,
+.ct-ledger a:focus-visible {
+  color: var(--v2-red, #d41c22);
+}
+
+/* Restate the kit's own mobile collapse: the 200px track above outranks it
+   on load order, so without this the label column would hold 200px on a
+   360px screen. */
+@media (max-width: 920px) {
+  .ct-ledger .as-ledger__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   The framed map
+   --------------------------------------------------------------------------
+   Geometry copied from .v2-table-scroll (v2.css): the site's one existing
+   framed rectangle. The caption reuses .as-figure__cap from the kit. */
+.ct-map {
+  margin: 44px 0 0;
+}
+
+.ct-map__frame {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 42, 65, .12);
+  box-shadow: 0 14px 34px -22px rgba(0, 21, 33, .35);
+  /* Navy placeholder while the embed loads, matching .as-figure img. */
+  background: #0b2233;
+}
+
+.ct-map__frame iframe {
+  display: block;
+  width: 100%;
+  height: 460px;
+  border: 0;
+}
+
+@media (max-width: 920px) {
+  .ct-map { margin-top: 32px; }
+  .ct-map__frame iframe { height: 340px; }
+}
