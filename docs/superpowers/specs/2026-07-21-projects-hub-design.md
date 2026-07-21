@@ -89,6 +89,13 @@ disabled.
     spacing preserved — including the "Al-Mutlaa Residentia City" variant).
   - Checker check 16 asserts every mapped blurb is present on its detail
     page, so the guarantee is machine-enforced and cannot silently regress.
+  - **Documented repair (approved by Danijel 2026-07-21):** the blurb
+    re-homed to `ra-259` named "the RA-200 development" while that page is
+    RA-259 (RA-200 is `ra200`, which carries its own Cairo Street blurb).
+    Corrected to "RA-259" on the page and in the map — single-token repair,
+    same class as the previously approved fixes. All other typos, entities
+    and spacings in relocated text remain verbatim, including the
+    "Al-Mutlaa Residentia City" variant.
 
 ## 4. Performance work (ships with the page, not after it)
 
