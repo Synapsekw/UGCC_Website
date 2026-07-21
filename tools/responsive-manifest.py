@@ -24,6 +24,7 @@ re-deriving them.
 """
 import os
 import re
+from html.parser import HTMLParser
 
 SKIP_DIRS = {'node_modules', '.git', '.claude', '.superpowers'}
 MIN_BYTES = 40 * 1024
@@ -39,14 +40,22 @@ CLASS_ATTR = re.compile(r'\bclass="([^"]*)"')
 SIZES_FULL = '100vw'
 SIZES_CARD = '(max-width:600px) calc(100vw - 64px), (max-width:920px) 50vw, 384px'
 
-# Matched against the image's own class/filename AND the markup immediately
-# preceding it. The builder wraps full-bleed images in a parent div
-# (block-background, block-media) and leaves the <img> itself class-less, so
-# looking only at the tag misclassified every builder hero as a card — which
-# would have made browsers fetch a 384px file for a 100vw slot.
-FULL_BLEED_HINTS = ('as-cover', 'cover', 'hero', 'banner',
-                    'block-background', 'block-media', 'fullscreen')
-CONTEXT_CHARS = 400
+# Matched ONLY against the class attributes of the <img> and its ancestors,
+# resolved with a real parser.
+#
+# Two earlier attempts were wrong. Reading just the <img> tag's own class
+# misclassified every builder hero as a card, because the builder puts the
+# full-bleed class on a parent div and leaves the <img> class-less. Reading a
+# fixed window of preceding characters then over-corrected: the window bleeds
+# across sibling elements, so an Expertise card inherited "banner" from the
+# previous card's filename and was told it spanned the viewport.
+#
+# Filenames are deliberately NOT consulted. "cover", "banner" and "hero" are
+# common in this library's filenames regardless of how the image is used — the
+# Expertise Construction tile is literally named media-center-banner — so the
+# filename says nothing about the slot's width.
+FULL_BLEED_HINTS = ('as-cover', 'block-background', 'block-media',
+                    'hero', 'banner', 'fullscreen', 'cover')
 
 # Brand marks and client logos: small, flat, already optimal as PNG.
 LOGO_HINTS = ('logo', 'icon', 'favicon', 'android-chrome', 'apple-touch')
@@ -63,6 +72,50 @@ def pages(root):
         if 'index.html' in filenames:
             found.append(os.path.join(dirpath, 'index.html'))
     return sorted(found)
+
+
+class ImgScanner(HTMLParser):
+    """Collects every <img>, with the class attributes of its ancestor chain.
+
+    A real parser is used rather than a regex window because full-bleed-ness
+    is a property of the image's CONTAINER, and the only reliable way to know
+    the container is to track open tags. Void elements are not pushed, and
+    stray close tags are tolerated — this HTML is builder output and is not
+    guaranteed to be tidy.
+    """
+
+    VOID = {'img', 'source', 'br', 'hr', 'meta', 'link', 'input', 'area',
+            'base', 'col', 'embed', 'param', 'track', 'wbr'}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.images = []
+        self.in_picture = 0
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'img':
+            self.images.append({
+                'attrs': attrs,
+                'ancestors': list(self.stack),
+                'in_picture': self.in_picture > 0,
+            })
+            return
+        if tag == 'picture':
+            self.in_picture += 1
+        if tag not in self.VOID:
+            self.stack.append((attrs.get('class') or '').lower())
+
+    def handle_startendtag(self, tag, attrs):
+        if tag == 'img':
+            self.handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        if tag == 'picture' and self.in_picture:
+            self.in_picture -= 1
+        if tag not in self.VOID and self.stack:
+            self.stack.pop()
 
 
 def stem_for(src):
@@ -108,20 +161,23 @@ def main():
         with open(page, encoding='utf-8', errors='ignore') as handle:
             html = handle.read()
 
-        # Blank out existing <picture> blocks, preserving offsets, so their
-        # <img> are neither re-processed nor counted as the page's LCP.
-        masked = PICTURE.sub(lambda m: ' ' * len(m.group(0)), html)
+        scanner = ImgScanner()
+        scanner.feed(html)
 
         page_rel = os.path.relpath(page, root)
         first_eager_done = False
         seen_on_page = set()
 
-        for match in IMG_TAG.finditer(masked):
-            tag = match.group(0)
-            src_match = SRC_ATTR.search(tag)
-            if not src_match:
+        for img in scanner.images:
+            # Already converted (the projects hub): leave alone, and do not
+            # let it claim the page's LCP slot.
+            if img['in_picture']:
                 continue
-            rel = src_match.group(1).lstrip('/')
+
+            src = img['attrs'].get('src', '')
+            if not src.startswith('/assets/img/'):
+                continue
+            rel = src.lstrip('/')
             abs_path = os.path.join(root, rel)
             if not os.path.exists(abs_path):
                 continue
@@ -132,17 +188,15 @@ def main():
             if os.path.getsize(abs_path) < MIN_BYTES:
                 continue
 
-            class_match = CLASS_ATTR.search(tag)
-            classes = (class_match.group(1) if class_match else '').lower()
-            # Include the enclosing markup: builder heroes carry their
-            # full-bleed class on a parent div, not on the <img>.
-            context = masked[max(0, match.start() - CONTEXT_CHARS):
-                             match.start()].lower()
-            full_bleed = any(h in classes or h in lowered or h in context
-                             for h in FULL_BLEED_HINTS)
+            # Full-bleed is a property of the container, so test the image's
+            # own class and every ancestor's — never the filename.
+            classes = [(img['attrs'].get('class') or '').lower()]
+            classes.extend(img['ancestors'])
+            full_bleed = any(hint in cls
+                             for cls in classes for hint in FULL_BLEED_HINTS)
 
             role = 'below'
-            if 'loading="lazy"' not in tag and not first_eager_done:
+            if img['attrs'].get('loading') != 'lazy' and not first_eager_done:
                 role = 'lcp'
                 first_eager_done = True
 
