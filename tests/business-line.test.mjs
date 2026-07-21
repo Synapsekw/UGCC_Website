@@ -108,9 +108,11 @@ describe.each(Object.entries(PAGES))('%s', (slug, name) => {
 
 describe('oil-and-gas status-aware links', () => {
   it('links completed only — no current button, no dead link', () => {
+    // The listing pages were retired in phase 2; the buttons now deep-link
+    // into hub filter state. Oil and gas still has no "current" bucket.
     const d = html['oil-and-gas-construction-kuwait'];
-    expect(d).toContain('href="/oil-and-gas-completed"');
-    expect(d).not.toContain('href="/oil-and-gas-current"');
+    expect(d).toContain('href="/construction-projects-kuwait#oil+completed"');
+    expect(d).not.toContain('#oil+current');
   });
 });
 

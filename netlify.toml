@@ -25,6 +25,106 @@
   to = "/.netlify/functions/chat"
   status = 200
 
+# Phase 2: the 16 legacy project listing pages were retired in favour of the
+# filterable hub. Each 301s to the equivalent hub filter state so the indexed
+# URLs keep their link equity. Note Netlify drops the fragment unless it is
+# part of the destination — it is, so the hub's deep-link handler picks it up.
+[[redirects]]
+  from = "/all-projects-new"
+  to = "/construction-projects-kuwait"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/all-project-current"
+  to = "/construction-projects-kuwait#current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/all-projects-completed"
+  to = "/construction-projects-kuwait#completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/roads-and-bridges-current"
+  to = "/construction-projects-kuwait#roads+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/roads-and-bridges-completed"
+  to = "/construction-projects-kuwait#roads+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/civil-current"
+  to = "/construction-projects-kuwait#civil+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/civil-completed"
+  to = "/construction-projects-kuwait#civil+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/building-construction-current"
+  to = "/construction-projects-kuwait#building+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/building-construction-completed"
+  to = "/construction-projects-kuwait#building+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/micro-tunneling-current"
+  to = "/construction-projects-kuwait#micro+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/micro-tunneling-completed"
+  to = "/construction-projects-kuwait#micro+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/water-current"
+  to = "/construction-projects-kuwait#water+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/water-completed"
+  to = "/construction-projects-kuwait#water+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/electro-mechanical-current"
+  to = "/construction-projects-kuwait#em+current"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/electro-mechanical-completed"
+  to = "/construction-projects-kuwait#em+completed"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/oil-and-gas-completed"
+  to = "/construction-projects-kuwait#oil+completed"
+  status = 301
+  force = true
+
 # Caching for static assets. Images are immutable: exported filenames are
 # content-hashed, and curated v2/ files are only ever ADDED under new names,
 # never edited in place (repo rule — editing one in place would be invisible

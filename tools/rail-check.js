@@ -37,12 +37,14 @@
   }
 
   var SECTION = 'zOl98u';
+  // Phase 2 retired the discipline listing pages; the rail cards now deep-link
+  // into the hub's filter state instead.
   var EXPECTED_HREFS = [
-    '/oil-and-gas-completed',
-    '/civil-completed',
-    '/water-completed',
-    '/building-construction-completed',
-    '/roads-and-bridges-completed'
+    '/construction-projects-kuwait#oil+completed',
+    '/construction-projects-kuwait#civil+completed',
+    '/construction-projects-kuwait#water+completed',
+    '/construction-projects-kuwait#building+completed',
+    '/construction-projects-kuwait#roads+completed'
   ];
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

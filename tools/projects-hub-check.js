@@ -406,87 +406,14 @@ check(page.includes('FUdf9w9dXZ'), '13. page is missing "FUdf9w9dXZ" (builder fo
 }
 
 /* ---------------------------------------------------------------------
-   15. Manifest cross-validated against the actual listing pages on disk
-   (review finding): checks 1-14 only validate the hub page against the
-   manifest, so a manifest row mis-tagged relative to reality (status or
-   lines) would sail through undetected as long as the hub page merely
-   echoed the wrong manifest value. This check derives "truth" from the
-   listing pages themselves and compares the manifest against it.
+   15. RETIRED. This check derived the manifest's "truth" from the old
+   listing pages on disk (all-project-current, all-projects-completed,
+   all-projects-new and the 13 discipline listings). Those pages were
+   retired in phase 2 and now 301-redirect into hub filter states, so that
+   source of truth no longer exists on disk. Check 17 replaces it: the same
+   classification, frozen from the `baseline` branch into
+   tools/projects-baseline-classification.tsv, is asserted there.
    --------------------------------------------------------------------- */
-{
-  const listingCache = new Map();
-  function listingHtml(pagePath) {
-    if (!listingCache.has(pagePath)) {
-      listingCache.set(pagePath, exists(pagePath) ? read(pagePath) : null);
-    }
-    return listingCache.get(pagePath);
-  }
-  function hasHref(pagePath, slug) {
-    const html = listingHtml(pagePath);
-    if (html === null) return false;
-    return html.indexOf('href="/' + slug + '"') !== -1;
-  }
-
-  // token -> listing pages that carry that discipline, as { dir, path }.
-  // "dir" is the short name used in failure messages; "path" is the file
-  // read from disk. A page counts only if it exists on disk (oil has no
-  // "-current" page, per the business-lines set).
-  const LINE_PAGES = {
-    roads: ['roads-and-bridges-current', 'roads-and-bridges-completed'],
-    civil: ['civil-current', 'civil-completed'],
-    building: ['building-construction-current', 'building-construction-completed'],
-    micro: ['micro-tunneling-current', 'micro-tunneling-completed'],
-    water: ['water-current', 'water-completed'],
-    em: ['electro-mechanical-current', 'electro-mechanical-completed'],
-    oil: ['oil-and-gas-completed'],
-  };
-  const LINE_TOKENS = Object.keys(LINE_PAGES);
-
-  const bad = [];
-
-  manifest.forEach((m) => {
-    /* --- Status: slug must appear in all-project-current iff current,
-       and in all-projects-completed iff completed; must always appear
-       in all-projects-new. --- */
-    const inCurrentListing = hasHref('all-project-current/index.html', m.slug);
-    const inCompletedListing = hasHref('all-projects-completed/index.html', m.slug);
-    const inNewListing = hasHref('all-projects-new/index.html', m.slug);
-
-    if (m.status === 'current' && !inCurrentListing) {
-      bad.push('15. ' + m.slug + ': status=current but missing from all-project-current');
-    }
-    if (m.status !== 'current' && inCurrentListing) {
-      bad.push('15. ' + m.slug + ': status=' + m.status + ' but appears in all-project-current');
-    }
-    if (m.status === 'completed' && !inCompletedListing) {
-      bad.push('15. ' + m.slug + ': status=completed but missing from all-projects-completed');
-    }
-    if (m.status !== 'completed' && inCompletedListing) {
-      bad.push('15. ' + m.slug + ': status=' + m.status + ' but appears in all-projects-completed');
-    }
-    if (!inNewListing) {
-      bad.push('15. ' + m.slug + ': missing from all-projects-new');
-    }
-
-    /* --- Lines: for each of the 7 tokens, membership in that token's
-       listing page(s) must match whether the manifest row carries it. --- */
-    const lineSet = new Set(m.lines);
-    LINE_TOKENS.forEach((token) => {
-      const pages = LINE_PAGES[token];
-      const foundOn = pages.filter((dir) => hasHref(dir + '/index.html', m.slug));
-      const present = foundOn.length > 0;
-      const has = lineSet.has(token);
-      if (has && !present) {
-        bad.push('15. ' + m.slug + ': has token "' + token + '" but appears in no ' + token + ' listing page');
-      }
-      if (!has && present) {
-        bad.push('15. ' + m.slug + ': missing token "' + token + '" but appears in ' + foundOn.join(', '));
-      }
-    });
-  });
-
-  check(bad.length === 0, bad.join('; '));
-}
 
 /* ---------------------------------------------------------------------
    16. Frozen blurbs relocated to detail pages: the redesigned hub dropped

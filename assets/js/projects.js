@@ -31,11 +31,25 @@
     });
   });
   // Deep links: #current/#completed preselect status; #roads #civil #building
-  // #micro #water #em #oil-and-gas preselect a line.
-  var h = (location.hash || '').replace('#', '');
+  // #micro #water #em #oil-and-gas preselect a line. Tokens combine with "+"
+  // (#roads+completed), which is how the retired discipline listing pages
+  // — "Roads and Bridges, completed" and friends — map onto hub filter state.
   var lineAlias = { 'oil-and-gas': 'oil' };
-  if (h === 'current' || h === 'completed') { state.status = h; apply(); }
-  else if (h) { h = lineAlias[h] || h;
-    if (cards.some(function (c) { return (' ' + c.getAttribute('data-lines') + ' ').indexOf(' ' + h + ' ') !== -1; })) { state.line = h; apply(); }
+  function hasLine(token) {
+    return cards.some(function (c) {
+      return (' ' + c.getAttribute('data-lines') + ' ').indexOf(' ' + token + ' ') !== -1;
+    });
+  }
+  var raw = (location.hash || '').replace('#', '');
+  if (raw) {
+    var applied = false;
+    raw.split('+').forEach(function (tok) {
+      tok = decodeURIComponent(tok).trim();
+      if (!tok) return;
+      if (tok === 'current' || tok === 'completed') { state.status = tok; applied = true; return; }
+      tok = lineAlias[tok] || tok;
+      if (hasLine(tok)) { state.line = tok; applied = true; }
+    });
+    if (applied) apply();
   }
 })();
