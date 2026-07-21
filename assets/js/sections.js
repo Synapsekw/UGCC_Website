@@ -4,7 +4,7 @@
    NOT requested reduced motion. So the reduced-motion path is static by
    construction rather than by override.
 
-   This file also adds .v2-reveal, and the hiding rules in sections.css are
+   This file also adds .v3-reveal, and the hiding rules in sections.css are
    scoped to it. That makes the reveal opt-IN: if this script fails to load,
    or IntersectionObserver is unavailable, nothing is ever set to opacity 0
    and the content is simply visible. The alternative - hiding in CSS and
@@ -34,7 +34,7 @@
 
   if (!targets.length) return;
 
-  root.classList.add('v2-reveal');
+  root.classList.add('v3-reveal');
 
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {

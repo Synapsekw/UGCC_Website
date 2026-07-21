@@ -8,16 +8,16 @@
    supplies both for those pages, against the same contract about-suite.css
    already implements, so no CSS changes.
 
-   Contract (see docs/superpowers/specs/2026-07-20-v2-design-system.md):
+   Contract (see docs/superpowers/specs/2026-07-20-v3-design-system.md):
      - .hero-motion on <html>, only when reduced motion is NOT requested, so
        the calm path is static by construction rather than by override.
-     - .v2-reveal on <html>, added only once targets are found and an observer
+     - .v3-reveal on <html>, added only once targets are found and an observer
        is actually installed.
      - .is-in on each element as it intersects, threshold 0.2, then unobserve.
      - inline --i integer stagger, read by the animation-delay rule.
 
    Opt-in by construction, matching sections.js: the hiding rules in
-   about-suite.css are scoped to .hero-motion.v2-reveal, and BOTH classes are
+   about-suite.css are scoped to .hero-motion.v3-reveal, and BOTH classes are
    added here. If this script fails to load, or IntersectionObserver is
    missing, nothing is ever set to opacity 0 and the page is simply visible.
    The inverse — hiding in CSS and revealing in JS — fails to a blank page. */
@@ -82,7 +82,7 @@
     counters[idx] += 1;
   });
 
-  root.classList.add('v2-reveal');
+  root.classList.add('v3-reveal');
 
   /* Two thresholds, not the contract's bare 0.2, because 0.2 is unreachable
      for an element taller than five viewports: the ratio is measured against
@@ -116,8 +116,8 @@
      other ways to end up with an installed-but-silent observer (bfcache
      restores, printing from a background tab, engine bugs). So: if not one
      single target has been revealed a few seconds in, conclude the observer is
-     not working and drop `.v2-reveal` from <html>. The hide rule requires BOTH
-     `.hero-motion` and `.v2-reveal`, so removing one un-hides everything at
+     not working and drop `.v3-reveal` from <html>. The hide rule requires BOTH
+     `.hero-motion` and `.v3-reveal`, so removing one un-hides everything at
      once, permanently, with no further work.
 
      Deliberately NOT gated on visibilityState: in a hidden tab this fires
@@ -134,6 +134,6 @@
       if (targets[i].classList.contains('is-in')) return;
     }
     io.disconnect();
-    root.classList.remove('v2-reveal');
+    root.classList.remove('v3-reveal');
   }, 4000);
 }());

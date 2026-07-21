@@ -340,10 +340,10 @@
     try {
       document.documentElement.style.scrollBehavior = 'auto';
       window.scrollTo({ top: 0, behavior: 'instant' });
-      document.documentElement.classList.remove('v2-scrolled');
+      document.documentElement.classList.remove('v3-scrolled');
       var restH = header.getBoundingClientRect().height;
 
-      document.documentElement.classList.add('v2-scrolled');
+      document.documentElement.classList.add('v3-scrolled');
       var condH = header.getBoundingClientRect().height;
       var cs = getComputedStyle(header);
       var filter = cs.backdropFilter || cs.webkitBackdropFilter || '';
@@ -369,11 +369,11 @@
                detail: problems.length ? problems.join('; ')
                                        : 'h=' + Math.round(restH) + ' stable, ' + filter };
     } finally {
-      /* Restore v2-scrolled explicitly using the site's own threshold
+      /* Restore v3-scrolled explicitly using the site's own threshold
          (assets/js/v2.js: window.scrollY > 24) rather than relying on its
          scroll listener, which defers to requestAnimationFrame and will
          not have fired synchronously by the time this check returns. */
-      document.documentElement.classList.toggle('v2-scrolled', y0 > 24);
+      document.documentElement.classList.toggle('v3-scrolled', y0 > 24);
       window.scrollTo({ top: y0, behavior: 'instant' });
       /* Never leave 'auto' stamped on <html>: v2.css sets
          scroll-behavior: smooth, and a reviewer clicking an anchor link
@@ -383,7 +383,7 @@
   });
 
   check('contact link is a pill, not a plain link', function () {
-    /* Resting-state rule, not the .v2-scrolled block — this check does
+    /* Resting-state rule, not the .v3-scrolled block — this check does
        not depend on (and must not toggle) scroll state. */
     var last = document.querySelector(
       '.block-header-layout-desktop .block-header-item:last-child .item-content');

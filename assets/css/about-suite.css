@@ -4,14 +4,14 @@
      /about-contractor-kuwait   /credentials   /hse   /quality   /csr
 
    Loaded by those five pages only, AFTER v2.css (it deliberately overrides
-   a handful of .v2-* rules — see "Accordion" below). It is not linked from
+   a handful of .v3-* rules — see "Accordion" below). It is not linked from
    index.html and owns nothing on the landing page.
 
        <link rel="stylesheet" href="/assets/css/about-suite.css?v=1">
 
    Namespace: every class here is `as-` (about-suite). Nothing collides with
-   the existing `v2-*`, `cred__*` or `off__*` families. The one deliberate
-   exception is the accordion, which must ALSO carry the `v2-acc*` classes —
+   the existing `v3-*`, `cred__*` or `off__*` families. The one deliberate
+   exception is the accordion, which must ALSO carry the `v3-acc*` classes —
    see below.
 
    --------------------------------------------------------------------------
@@ -19,20 +19,20 @@
    --------------------------------------------------------------------------
    assets/js/v2.js (already linked on all five pages) contains:
 
-       document.querySelectorAll('.v2-acc__btn').forEach(function (btn) {
+       document.querySelectorAll('.v3-acc__btn').forEach(function (btn) {
          btn.addEventListener('click', function () {
-           var acc = btn.closest('.v2-acc');
+           var acc = btn.closest('.v3-acc');
            var open = acc.classList.toggle('is-open');
            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
          });
        });
 
-   That is the whole accordion contract, and it keys off `.v2-acc__btn` and
-   `.v2-acc`. Rather than ask for a second script that does the same thing,
+   That is the whole accordion contract, and it keys off `.v3-acc__btn` and
+   `.v3-acc`. Rather than ask for a second script that does the same thing,
    `.as-acc` is defined as a *restyling* of that contract: every accordion
-   element carries BOTH classes (`class="as-acc v2-acc"`,
-   `class="as-acc__btn v2-acc__btn"`, …). v2.js keeps working untouched; the
-   `as-` rules below sit at the same specificity as the `v2-` rules they
+   element carries BOTH classes (`class="as-acc v3-acc"`,
+   `class="as-acc__btn v3-acc__btn"`, …). v2.js keeps working untouched; the
+   `as-` rules below sit at the same specificity as the `v3-` rules they
    replace and win purely on load order. If this file is ever loaded BEFORE
    v2.css the accordion reverts to the v2 look — it still functions.
 
@@ -43,7 +43,7 @@
    REVEALS
    --------------------------------------------------------------------------
    The spec's opt-in contract is reused verbatim: rules are double-gated on
-   `.hero-motion` AND `.v2-reveal`, both on <html>, and the state class is
+   `.hero-motion` AND `.v3-reveal`, both on <html>, and the state class is
    `.is-in` with an inline `--i` stagger index. Neither gate class is added by
    any script these five pages currently load (sections.js and hero.js are
    index-only), so today every reveal rule here is inert and all content is
@@ -189,7 +189,7 @@
   padding: 0 0 72px;
   /* Below the photo the ground is brand navy, so a slow-loading or missing
      image degrades to a navy plate rather than to white-on-white. */
-  background: var(--v2-navy, #002a41);
+  background: var(--v3-navy, #002a41);
   /* .block-background renders at z-index 13 and .block-layout lifts content to
      14. This kit drops .block-layout, so the stacking context is owned here
      (hazard 2). */
@@ -226,7 +226,7 @@ picture > source {
   height: 100%;
   object-fit: cover;
   object-position: 50% 40%;
-  /* Matches .v2-careers: the photo is desaturated a touch so the red rule and
+  /* Matches .v3-careers: the photo is desaturated a touch so the red rule and
      any red eyebrow stay the warmest thing in the frame. */
   filter: saturate(.9);
 }
@@ -267,9 +267,9 @@ picture > source {
   margin-inline: auto;
 }
 
-/* Optional. Uppercase red-on-photo: --v2-red-text, never --v2-red (3.09:1 on
+/* Optional. Uppercase red-on-photo: --v3-red-text, never --v3-red (3.09:1 on
    a dark ground and fails AA). On the measured #2d4451 title band
-   --v2-red-text computes 4.6:1 — AA for normal text. */
+   --v3-red-text computes 4.6:1 — AA for normal text. */
 .as-cover__eyebrow {
   margin: 0 0 14px;
   display: flex;
@@ -281,7 +281,7 @@ picture > source {
   line-height: 1;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--v2-red-text, #e8635e);
+  color: var(--v3-red-text, #e8635e);
 }
 
 .as-cover__eyebrow::before {
@@ -289,7 +289,7 @@ picture > source {
   flex: none;
   width: 30px;
   height: 2px;
-  background: var(--v2-red, #d41c22);
+  background: var(--v3-red, #d41c22);
 }
 
 /* Hammersmith One ships a single weight, so 400 is both correct and the only
@@ -378,7 +378,7 @@ picture > source {
   padding-block: 88px;
 }
 
-/* A narrower measure for reading-led sections. 880px matches .v2-prose__inner
+/* A narrower measure for reading-led sections. 880px matches .v3-prose__inner
    in v2.css, so a page that mixes the two does not step. */
 .as-section__inner--narrow {
   width: min(880px, 100% - 64px);
@@ -453,7 +453,7 @@ picture > source {
 
 .as-section--light { background: #fff; }
 .as-section--tint  { background: var(--as-tint); }
-.as-section--navy  { background: var(--v2-navy, #002a41); }
+.as-section--navy  { background: var(--v3-navy, #002a41); }
 
 /* Consecutive sections on the same ground would show a seam only where the
    two are both light; a hairline restores the beat without a colour change. */
@@ -505,7 +505,7 @@ picture > source {
   max-width: 720px;
 }
 
-/* Eyebrow is a <p>, never a heading. --v2-red on light grounds; the
+/* Eyebrow is a <p>, never a heading. --v3-red on light grounds; the
    --on-navy override below swaps it. 5.26:1 on #fff, 5.0:1 on --as-tint. */
 .as-head__eyebrow {
   margin: 0;
@@ -515,7 +515,7 @@ picture > source {
   line-height: 1;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
 }
 
 /* Explicit family + weight (hazard 4). clamp() ceiling 40px rather than the
@@ -529,7 +529,7 @@ picture > source {
   line-height: 1.15;
   letter-spacing: -.005em;
   text-wrap: balance;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
 }
 
 /* A <span aria-hidden="true">, never an <hr>: an <hr> announces a thematic
@@ -541,7 +541,7 @@ picture > source {
   width: 34px;
   height: 2px;
   margin: 20px 0;
-  background: var(--v2-red, #d41c22);
+  background: var(--v3-red, #d41c22);
 }
 
 /* 46ch, the design system's cap for a section lede (54ch is reserved for the
@@ -557,19 +557,19 @@ picture > source {
 
 /* ---- inverted onto navy ---- */
 
-/* --v2-red-text, not --v2-red: small red text on a dark ground is 3.09:1 with
-   --v2-red and fails AA. --v2-red-text is 4.53:1 on rgb(0,42,65). Getting
+/* --v3-red-text, not --v3-red: small red text on a dark ground is 3.09:1 with
+   --v3-red and fails AA. --v3-red-text is 4.53:1 on rgb(0,42,65). Getting
    this backwards is invisible in a screenshot, which is why it is a rule. */
-.as-section--navy .as-head__eyebrow { color: var(--v2-red-text, #e8635e); }
+.as-section--navy .as-head__eyebrow { color: var(--v3-red-text, #e8635e); }
 .as-section--navy .as-head__title   { color: #fff; }            /* 14.9:1 */
 .as-section--navy .as-head__lede    { color: var(--as-muted-dark); } /* 7.2:1 */
 
 /* The rule keeps the solid brand red on both grounds — it is a fill, not
-   text, so the 3:1 non-text threshold applies and --v2-red is 3.5:1 on navy.
-   About's navy variant lifts it to --v2-red-text at 48x2; that variant exists
+   text, so the 3:1 non-text threshold applies and --v3-red is 3.5:1 on navy.
+   About's navy variant lifts it to --v3-red-text at 48x2; that variant exists
    for a rule standing alone above a statement with no eyebrow, which is not
    this unit. */
-.as-section--navy .as-head__rule { background: var(--v2-red, #d41c22); }
+.as-section--navy .as-head__rule { background: var(--v3-red, #d41c22); }
 
 @media (max-width: 920px) {
   .as-head { margin-bottom: 32px; }
@@ -606,7 +606,7 @@ picture > source {
   font-weight: 400;
   font-size: 21px;
   line-height: 1.3;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
 }
 
 .as-prose h4 {
@@ -616,7 +616,7 @@ picture > source {
   font-size: 17px;
   line-height: 1.35;
   letter-spacing: .01em;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
 }
 
 /* First child never carries top margin — the head above already set the gap. */
@@ -634,16 +634,16 @@ picture > source {
 .as-prose strong { font-weight: 700; }
 
 .as-prose a {
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
   text-decoration: none;
-  border-bottom: 1px solid var(--v2-red, #d41c22);
-  transition: color .25s var(--v2-ease-out-quart),
-              border-color .25s var(--v2-ease-out-quart);
+  border-bottom: 1px solid var(--v3-red, #d41c22);
+  transition: color .25s var(--v3-ease-out-quart),
+              border-color .25s var(--v3-ease-out-quart);
 }
 
 .as-prose a:hover,
 .as-prose a:focus-visible {   /* one rule, both states, so they cannot drift */
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
 }
 
 /* ---- lists ----
@@ -679,7 +679,7 @@ picture > source {
   left: 2px;
   width: 5px;
   height: 5px;
-  background: var(--v2-red, #d41c22);   /* square, per the radii table: 0 */
+  background: var(--v3-red, #d41c22);   /* square, per the radii table: 0 */
 }
 
 /* Ordered lists keep real numerals; counters so the number can be typed. */
@@ -697,7 +697,7 @@ picture > source {
   top: 0;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
 }
 
 /* Nesting. /csr's Code of Conduct nests one level; two is the supported
@@ -711,7 +711,7 @@ picture > source {
 
 .as-prose li > ul > li::before {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--v2-red, #d41c22);
+  box-shadow: inset 0 0 0 1px var(--v3-red, #d41c22);
 }
 
 .as-prose li:last-child { margin-bottom: 0; }
@@ -725,9 +725,9 @@ picture > source {
 .as-section--navy .as-prose ol    { color: var(--as-body-dark); }
 .as-section--navy .as-prose a     { color: #fff; }
 .as-section--navy .as-prose a:hover,
-.as-section--navy .as-prose a:focus-visible { color: var(--v2-red-text, #e8635e); }
+.as-section--navy .as-prose a:focus-visible { color: var(--v3-red-text, #e8635e); }
 /* The marker keeps the solid red fill: 3.5:1 on navy clears the 3:1 non-text
-   threshold, and --v2-red-text at 5px square would read pink. */
+   threshold, and --v3-red-text at 5px square would read pink. */
 
 @media (max-width: 920px) {
   .as-prose,
@@ -773,8 +773,8 @@ picture > source {
   border: 1px solid var(--as-hair-light);
   border-radius: 14px;   /* the large-surface radius */
   padding: 28px;
-  transition: transform .3s var(--v2-ease-out-quart),
-              box-shadow .3s var(--v2-ease-out-quart);
+  transition: transform .3s var(--v3-ease-out-quart),
+              box-shadow .3s var(--v3-ease-out-quart);
 }
 
 .as-card:hover,
@@ -806,8 +806,8 @@ picture > source {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform .5s var(--v2-ease-out-quart),
-              filter .5s var(--v2-ease-out-quart);
+  transition: transform .5s var(--v3-ease-out-quart),
+              filter .5s var(--v3-ease-out-quart);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -825,14 +825,14 @@ picture > source {
   box-shadow: none;
 }
 
-/* --v2-red at 19px on white is 5.26:1. */
+/* --v3-red at 19px on white is 5.26:1. */
 .as-card__title {
   margin: 0 0 10px;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 19px;
   line-height: 1.3;
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
 }
 
 /* The tile caption is navy and uppercase, not red — it labels a photograph
@@ -842,7 +842,7 @@ picture > source {
   font-size: 15px;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
 }
 
 .as-card p {
@@ -859,8 +859,8 @@ picture > source {
   border-color: var(--as-hair-dark);
 }
 
-/* --v2-red-text, 4.53:1 on navy. --v2-red here would be 3.09:1 and fail. */
-.as-section--navy .as-card__title { color: var(--v2-red-text, #e8635e); }
+/* --v3-red-text, 4.53:1 on navy. --v3-red here would be 3.09:1 and fail. */
+.as-section--navy .as-card__title { color: var(--v3-red-text, #e8635e); }
 .as-section--navy .as-card--tile .as-card__title { color: #fff; }
 .as-section--navy .as-card p { color: var(--as-body-dark); }
 .as-section--navy .as-card--tile { background: transparent; }
@@ -945,7 +945,7 @@ picture > source {
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: .02em;
-  color: var(--v2-navy, #002a41);   /* 12.9:1 on white */
+  color: var(--v3-navy, #002a41);   /* 12.9:1 on white */
 }
 
 .as-ledger__desc {
@@ -966,7 +966,7 @@ picture > source {
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
   background: rgba(0, 42, 65, .06);
   border: 1px solid rgba(0, 42, 65, .14);
 }
@@ -1016,7 +1016,7 @@ picture > source {
    buttons do nothing, which would hide content — so the no-JS case is handled
    by <details>/<summary> instead. TWO MARKUP OPTIONS, both supported here:
 
-     (a) button + panel, carrying the v2-acc classes so assets/js/v2.js drives
+     (a) button + panel, carrying the v3-acc classes so assets/js/v2.js drives
          it (no new JS). Preferred, because it matches the existing site.
      (b) <details class="as-acc"><summary class="as-acc__btn"> — zero JS, open
          by default if the author sets `open`.
@@ -1028,8 +1028,8 @@ picture > source {
    page needs the content unconditionally visible without JS, use (b).
 
    Specificity note: each rule below matches the v2.css rule it supersedes
-   exactly (`.as-acc` vs `.v2-acc` = 0,1,0; `.as-acc.is-open .as-acc__panel`
-   vs `.v2-acc.is-open .v2-acc__panel` = 0,3,0), so this file must be linked
+   exactly (`.as-acc` vs `.v3-acc` = 0,1,0; `.as-acc.is-open .as-acc__panel`
+   vs `.v3-acc.is-open .v3-acc__panel` = 0,3,0), so this file must be linked
    AFTER v2.css. It is; see the <link> order in the kit doc. */
 
 .as-accordion {
@@ -1042,8 +1042,8 @@ picture > source {
   border: 1px solid var(--as-hair-light);
   border-radius: 12px;   /* the accordion radius from the radii table */
   overflow: hidden;
-  transition: box-shadow .3s var(--v2-ease-out-quart),
-              border-color .3s var(--v2-ease-out-quart);
+  transition: box-shadow .3s var(--v3-ease-out-quart),
+              border-color .3s var(--v3-ease-out-quart);
 }
 
 .as-acc:last-child { margin-bottom: 0; }
@@ -1069,8 +1069,8 @@ picture > source {
   font-weight: 400;
   font-size: 18px;
   line-height: 1.3;
-  color: var(--v2-navy, #002a41);
-  transition: background-color .22s var(--v2-ease-out-quart);
+  color: var(--v3-navy, #002a41);
+  transition: background-color .22s var(--v3-ease-out-quart);
 }
 
 /* <summary> needs the marker removed in both spellings, and list-item display
@@ -1090,10 +1090,10 @@ picture > source {
   width: 10px;
   height: 10px;
   margin-top: -4px;   /* optical: a rotated square hangs low against the cap */
-  border-right: 2px solid var(--v2-red, #d41c22);
-  border-bottom: 2px solid var(--v2-red, #d41c22);
+  border-right: 2px solid var(--v3-red, #d41c22);
+  border-bottom: 2px solid var(--v3-red, #d41c22);
   transform: rotate(45deg);
-  transition: transform .3s var(--v2-ease-out-quint);
+  transition: transform .3s var(--v3-ease-out-quint);
 }
 
 .as-acc.is-open .as-acc__btn::after,
@@ -1104,7 +1104,7 @@ picture > source {
 .as-acc__panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows .4s var(--v2-ease-out-quint);
+  transition: grid-template-rows .4s var(--v3-ease-out-quint);
 }
 
 .as-acc.is-open .as-acc__panel { grid-template-rows: 1fr; }
@@ -1130,7 +1130,7 @@ picture > source {
 .as-section--navy .as-acc__btn:hover,
 .as-section--navy .as-acc__btn:focus-visible { background: rgba(255, 255, 255, .07); }
 .as-section--navy .as-acc__btn::after {
-  border-color: var(--v2-red-text, #e8635e);   /* 3:1+ on navy as a 2px mark */
+  border-color: var(--v3-red-text, #e8635e);   /* 3:1+ on navy as a 2px mark */
 }
 
 @media (max-width: 920px) {
@@ -1144,7 +1144,7 @@ picture > source {
    ==========================================================================
    A <ul> of <li>, not a row of <span>: three named commitments are a list and
    should announce as one. They are not links and must not be given hover
-   affordances that suggest they are — so the landing page's .v2-pill lift is
+   affordances that suggest they are — so the landing page's .v3-pill lift is
    deliberately NOT reproduced here. */
 
 .as-pills {
@@ -1162,7 +1162,7 @@ picture > source {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--v2-navy, #002a41);          /* 12.9:1 on white */
+  color: var(--v3-navy, #002a41);          /* 12.9:1 on white */
   background: rgba(0, 42, 65, .06);
   border: 1px solid rgba(0, 42, 65, .14);
   border-radius: 999px;                    /* the pill radius */
@@ -1170,7 +1170,7 @@ picture > source {
 
 /* Red-keyed variant for a group that names a policy rather than a topic. */
 .as-pill--key {
-  color: var(--v2-red, #d41c22);           /* 5.26:1 on white */
+  color: var(--v3-red, #d41c22);           /* 5.26:1 on white */
   background: rgba(212, 28, 34, .06);
   border-color: rgba(212, 28, 34, .28);
 }
@@ -1183,7 +1183,7 @@ picture > source {
 }
 
 .as-section--navy .as-pill--key {
-  color: var(--v2-red-text, #e8635e);      /* 4.53:1 */
+  color: var(--v3-red-text, #e8635e);      /* 4.53:1 */
   background: rgba(232, 99, 94, .1);
   border-color: rgba(232, 99, 94, .4);
 }
@@ -1237,7 +1237,7 @@ picture > source {
   align-self: center;
   width: 2px;
   height: 11px;
-  background: var(--v2-red, #d41c22);
+  background: var(--v3-red, #d41c22);
 }
 
 /* ---- the full-bleed band ----
@@ -1258,7 +1258,7 @@ picture > source {
   max-width: 100vw;
   margin: 0;
   overflow: hidden;
-  background: var(--v2-navy, #002a41);
+  background: var(--v3-navy, #002a41);
 }
 
 .as-band img {
@@ -1315,7 +1315,7 @@ picture > source {
   /* A hairline lead-in rather than a box: these are figures in running text,
      not cards. */
   padding-left: 16px;
-  border-left: 2px solid var(--v2-red, #d41c22);
+  border-left: 2px solid var(--v3-red, #d41c22);
 }
 
 /* Hammersmith One 400, declared (hazard 4). 44px against the landing block's
@@ -1327,7 +1327,7 @@ picture > source {
   font-size: 44px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--v2-navy, #002a41);   /* 12.9:1 on white */
+  color: var(--v3-navy, #002a41);   /* 12.9:1 on white */
 }
 
 /* #6b747c, not a lighter grey: at 11px these labels are what make the bare
@@ -1359,13 +1359,13 @@ picture > source {
 /* ==========================================================================
    11. .as-quote — the centred uppercase pull-quote banner
    ==========================================================================
-   Supersedes .v2-banner. Differences, all deliberate:
+   Supersedes .v3-banner. Differences, all deliberate:
      - it is a <blockquote>, so the quotation is marked up as one;
      - the type is capped by ch rather than px, so the measure holds at any
        font size;
      - it carries a red rule above the text, which is the only thing that
        distinguishes it from a navy section with a centred h2;
-     - the 48px top margin .v2-banner hardcodes is gone: spacing belongs to
+     - the 48px top margin .v3-banner hardcodes is gone: spacing belongs to
        the section, and a banner that sets its own outer margin cannot be
        placed adjacent to anything predictably.
 
@@ -1384,10 +1384,10 @@ picture > source {
   height: 2px;
   /* 48x2, the About dialect's measure: this rule stands entirely alone above
      a statement with no eyebrow beside it, so it needs the extra weight to
-     register. --v2-red-text rather than --v2-red for the same reason About
+     register. --v3-red-text rather than --v3-red for the same reason About
      lifts it — the mark is the only red on a large navy field. */
   margin: 0 auto 28px;
-  background: var(--v2-red-text, #e8635e);
+  background: var(--v3-red-text, #e8635e);
 }
 
 .as-quote__text {
@@ -1419,9 +1419,9 @@ picture > source {
 /* On a light ground the quote inverts to navy text. Used sparingly — the
    banner's job is to be the dark beat in a light page. */
 .as-section--light .as-quote__text,
-.as-section--tint .as-quote__text { color: var(--v2-navy, #002a41); } /* 12.9:1 */
+.as-section--tint .as-quote__text { color: var(--v3-navy, #002a41); } /* 12.9:1 */
 .as-section--light .as-quote::before,
-.as-section--tint .as-quote::before { background: var(--v2-red, #d41c22); }
+.as-section--tint .as-quote::before { background: var(--v3-red, #d41c22); }
 .as-section--light .as-quote__cite,
 .as-section--tint .as-quote__cite { color: var(--as-meta-light); }    /* 4.76:1 */
 
@@ -1435,7 +1435,7 @@ picture > source {
 /* ==========================================================================
    12. Reveals — the existing opt-in contract, reused
    ==========================================================================
-   Double-gated on .hero-motion AND .v2-reveal, both on <html>. Neither class
+   Double-gated on .hero-motion AND .v3-reveal, both on <html>. Neither class
    is added by any script these pages currently load, so these rules are inert
    today and every element below is fully visible. If a future script adopts
    the sections.js pattern (IntersectionObserver, threshold 0.2, unobserve
@@ -1445,35 +1445,35 @@ picture > source {
    NOTHING is hidden outside the gates. A script failure must degrade to
    visible content, not to a blank section. */
 
-.hero-motion.v2-reveal .as-head,
-.hero-motion.v2-reveal .as-prose,
-.hero-motion.v2-reveal .as-card,
-.hero-motion.v2-reveal .as-ledger__row,
-.hero-motion.v2-reveal .as-acc,
-.hero-motion.v2-reveal .as-stat,
-.hero-motion.v2-reveal .as-quote {
+.hero-motion.v3-reveal .as-head,
+.hero-motion.v3-reveal .as-prose,
+.hero-motion.v3-reveal .as-card,
+.hero-motion.v3-reveal .as-ledger__row,
+.hero-motion.v3-reveal .as-acc,
+.hero-motion.v3-reveal .as-stat,
+.hero-motion.v3-reveal .as-quote {
   opacity: 0;
 }
 
-.hero-motion.v2-reveal .as-head.is-in,
-.hero-motion.v2-reveal .as-prose.is-in,
-.hero-motion.v2-reveal .as-card.is-in,
-.hero-motion.v2-reveal .as-ledger__row.is-in,
-.hero-motion.v2-reveal .as-acc.is-in,
-.hero-motion.v2-reveal .as-stat.is-in,
-.hero-motion.v2-reveal .as-quote.is-in {
+.hero-motion.v3-reveal .as-head.is-in,
+.hero-motion.v3-reveal .as-prose.is-in,
+.hero-motion.v3-reveal .as-card.is-in,
+.hero-motion.v3-reveal .as-ledger__row.is-in,
+.hero-motion.v3-reveal .as-acc.is-in,
+.hero-motion.v3-reveal .as-stat.is-in,
+.hero-motion.v3-reveal .as-quote.is-in {
   /* hero-fade-up is defined in hero.css, which these pages do NOT link. A
      local copy under a distinct name avoids linking an index-only stylesheet
      for one keyframe, and avoids two different definitions of one name. */
-  animation: as-fade-up .8s var(--v2-ease-out-expo, cubic-bezier(.16, 1, .3, 1)) both;
+  animation: as-fade-up .8s var(--v3-ease-out-expo, cubic-bezier(.16, 1, .3, 1)) both;
 }
 
 /* The stagger the contract specifies: inline `--i` (integer, positional)
    multiplied by 60ms. Applied only to repeated items. */
-.hero-motion.v2-reveal .as-card.is-in,
-.hero-motion.v2-reveal .as-ledger__row.is-in,
-.hero-motion.v2-reveal .as-acc.is-in,
-.hero-motion.v2-reveal .as-stat.is-in {
+.hero-motion.v3-reveal .as-card.is-in,
+.hero-motion.v3-reveal .as-ledger__row.is-in,
+.hero-motion.v3-reveal .as-acc.is-in,
+.hero-motion.v3-reveal .as-stat.is-in {
   animation-delay: calc(var(--i, 0) * 60ms);
 }
 
@@ -1491,13 +1491,13 @@ picture > source {
    braces — and it also neutralises the stagger, which the global rule does
    not touch. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-motion.v2-reveal .as-head,
-  .hero-motion.v2-reveal .as-prose,
-  .hero-motion.v2-reveal .as-card,
-  .hero-motion.v2-reveal .as-ledger__row,
-  .hero-motion.v2-reveal .as-acc,
-  .hero-motion.v2-reveal .as-stat,
-  .hero-motion.v2-reveal .as-quote {
+  .hero-motion.v3-reveal .as-head,
+  .hero-motion.v3-reveal .as-prose,
+  .hero-motion.v3-reveal .as-card,
+  .hero-motion.v3-reveal .as-ledger__row,
+  .hero-motion.v3-reveal .as-acc,
+  .hero-motion.v3-reveal .as-stat,
+  .hero-motion.v3-reveal .as-quote {
     opacity: 1;
     animation: none;
     animation-delay: 0s;
@@ -1516,7 +1516,7 @@ picture > source {
    ==========================================================================
    The global focus ring in v2.css is inherited unchanged:
 
-     :focus-visible { outline: 2px solid var(--v2-red); outline-offset: 3px;
+     :focus-visible { outline: 2px solid var(--v3-red); outline-offset: 3px;
                       border-radius: 2px; box-shadow: 0 0 0 7px #fff; }
 
    On navy the white halo carries the 3:1 non-text contrast (14.9:1); on white
@@ -1534,7 +1534,7 @@ picture > source {
 /* On navy the white halo would draw a bright box over the panel; the red
    outline alone is 3.5:1 there, which clears SC 1.4.11 for a focus indicator. */
 .as-section--navy .as-acc__btn:focus-visible {
-  outline-color: var(--v2-red-text, #e8635e);
+  outline-color: var(--v3-red-text, #e8635e);
 }
 
 /* Where the platform asks for its own indicator, give it a real one rather
@@ -1581,8 +1581,8 @@ picture > source {
    exactly the inconsistency this suite exists to remove, so the component
    belongs here.
 
-   Why not just link sections.css and use `.v2-btn`? Because that file is
-   loaded by index.html ONLY, and says so in its own header: its `v2-` prefix
+   Why not just link sections.css and use `.v3-btn`? Because that file is
+   loaded by index.html ONLY, and says so in its own header: its `v3-` prefix
    is homepage-scoped, unlike the site-wide tokens in v2.css. Linking a
    homepage stylesheet onto five inner pages to borrow one rule would pull in
    the whole About/Who-are-we block with it.
@@ -1591,12 +1591,12 @@ picture > source {
    painted by rules scoped to the builder's `[data-v-297de5e8]` attribute. On
    hand-authored markup it renders as bare unstyled text.
 
-   So the geometry, type and transition below are `.v2-btn`'s values copied
+   So the geometry, type and transition below are `.v3-btn`'s values copied
    verbatim from sections.css, and the two ground variants keep their
    homepage names (`--on-dark` / `--on-light`) and their exact colours. A
    button in this suite and a button on the landing page are the same object.
 
-   Deliberately NOT copied: `.v2-btn--on-dark`'s ::after shine sweep. Per its
+   Deliberately NOT copied: `.v3-btn--on-dark`'s ::after shine sweep. Per its
    own comment in sections.css it is white-on-white and has never actually
    rendered; reproducing a no-op here would only carry the confusion forward. */
 
@@ -1615,10 +1615,10 @@ picture > source {
   border: 1px solid transparent;
   cursor: pointer;
   transition:
-    transform .25s var(--v2-ease-out-quart),
-    background-color .25s var(--v2-ease-out-quart),
-    box-shadow .25s var(--v2-ease-out-quart),
-    color .25s var(--v2-ease-out-quart);
+    transform .25s var(--v3-ease-out-quart),
+    background-color .25s var(--v3-ease-out-quart),
+    box-shadow .25s var(--v3-ease-out-quart),
+    color .25s var(--v3-ease-out-quart);
 }
 
 /* Every variant below is written `.as-btn.as-btn--x`, doubling the class, so it
@@ -1631,7 +1631,7 @@ picture > source {
 
 /* Navy pill, for light and tint grounds. #fff on rgb(0,42,65) is 12.9:1. */
 .as-btn.as-btn--on-light {
-  background: var(--v2-navy, #002a41);
+  background: var(--v3-navy, #002a41);
   color: #fff;
 }
 
@@ -1672,7 +1672,7 @@ picture > source {
 
 .as-btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--v2-shadow-lift, 0 14px 28px -12px rgba(0, 21, 33, .35));
+  box-shadow: var(--v3-shadow-lift, 0 14px 28px -12px rgba(0, 21, 33, .35));
 }
 
 .as-btn:active {

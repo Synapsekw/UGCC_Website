@@ -54,16 +54,16 @@
 /* Same treatment as .as-prose a: navy label on a red baseline, warming to
    red on hover. Declared here because ledger descriptions are not prose. */
 .ct-ledger a {
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
   font-weight: 600;
   text-decoration: none;
-  border-bottom: 1px solid var(--v2-red, #d41c22);
-  transition: color .25s var(--v2-ease-out-quart);
+  border-bottom: 1px solid var(--v3-red, #d41c22);
+  transition: color .25s var(--v3-ease-out-quart);
 }
 
 .ct-ledger a:hover,
 .ct-ledger a:focus-visible {
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
 }
 
 /* Restate the kit's own mobile collapse: the 200px track above outranks it
@@ -79,7 +79,7 @@
 /* --------------------------------------------------------------------------
    The framed map
    --------------------------------------------------------------------------
-   Geometry copied from .v2-table-scroll (v2.css): the site's one existing
+   Geometry copied from .v3-table-scroll (v2.css): the site's one existing
    framed rectangle. The caption reuses .as-figure__cap from the kit. */
 .ct-map {
   margin: 44px 0 0;

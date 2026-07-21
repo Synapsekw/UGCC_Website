@@ -171,7 +171,7 @@
     if (!s) return { ok: false, detail: 'section missing' };
     var a = s.querySelector('a');
     if (!a) return { ok: false, detail: 'no link found' };
-    var has = a.classList.contains('v2-btn') && a.classList.contains('v2-btn--on-light');
+    var has = a.classList.contains('v3-btn') && a.classList.contains('v3-btn--on-light');
     var radius = getComputedStyle(a).borderRadius;
     return {
       ok: has && parseInt(radius, 10) > 100,

@@ -151,11 +151,11 @@
   check('CTA is the last thing in the block', function () {
     var s = block();
     if (!s) return { ok: false, detail: 'section missing' };
-    var layout = s.querySelector('.v2-careers__layout');
-    if (!layout) return { ok: false, detail: 'no .v2-careers__layout' };
+    var layout = s.querySelector('.v3-careers__layout');
+    if (!layout) return { ok: false, detail: 'no .v3-careers__layout' };
     var last = layout.lastElementChild;
-    var cta = s.querySelector('.v2-careers__cta');
-    if (!cta) return { ok: false, detail: 'no .v2-careers__cta' };
+    var cta = s.querySelector('.v3-careers__cta');
+    if (!cta) return { ok: false, detail: 'no .v3-careers__cta' };
     return {
       ok: last && last.contains(cta),
       detail: last ? 'ends with .' + (last.className || last.tagName) : 'layout is empty'
@@ -165,15 +165,15 @@
   check('background carries a scrim, so white text has a ground', function () {
     var s = block();
     if (!s) return { ok: false, detail: 'section missing' };
-    var ov = s.querySelector('.v2-careers__scrim');
-    if (!ov) return { ok: false, detail: 'no .v2-careers__scrim' };
+    var ov = s.querySelector('.v3-careers__scrim');
+    if (!ov) return { ok: false, detail: 'no .v3-careers__scrim' };
     var bg = getComputedStyle(ov).backgroundImage;
     return { ok: bg.indexOf('gradient') !== -1, detail: bg.slice(0, 60) };
   });
 
   check('headline renders white on the scrim', function () {
-    var h = document.querySelector('.v2-careers__title');
-    if (!h) return { ok: false, detail: 'no .v2-careers__title' };
+    var h = document.querySelector('.v3-careers__title');
+    if (!h) return { ok: false, detail: 'no .v3-careers__title' };
     var c = getComputedStyle(h).color;
     return { ok: c === 'rgb(255, 255, 255)', detail: c };
   });

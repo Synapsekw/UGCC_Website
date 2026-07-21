@@ -17,7 +17,7 @@
    ========================================================================== */
 
 #zrby1M {
-  background: var(--v2-navy, rgb(0, 42, 65));
+  background: var(--v3-navy, rgb(0, 42, 65));
   color: #fff;
   /* Task 4 strips the section's inline --block-padding variables. main.css
      still declares padding: var(--block-padding) on .block, which becomes an
@@ -60,7 +60,7 @@
   letter-spacing: .2em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--v2-red-text, #e8635e);
+  color: var(--v3-red-text, #e8635e);
 }
 
 /* font-family and weight are explicit: this heading lives outside .text-box,
@@ -136,7 +136,7 @@
   letter-spacing: .14em;
   text-transform: uppercase;
   color: #fff;
-  background: var(--v2-red, #d41c22);
+  background: var(--v3-red, #d41c22);
 }
 
 .off__addr {
@@ -193,14 +193,14 @@
   font-variant-numeric: tabular-nums;
   border-bottom: 1px solid transparent;
   transition:
-    color .25s var(--v2-ease-out-quart, ease),
-    border-color .25s var(--v2-ease-out-quart, ease);
+    color .25s var(--v3-ease-out-quart, ease),
+    border-color .25s var(--v3-ease-out-quart, ease);
 }
 
 .off__link:hover,
 .off__link:focus-visible {
-  color: var(--v2-red-text, #e8635e);
-  border-bottom-color: var(--v2-red-text, #e8635e);
+  color: var(--v3-red-text, #e8635e);
+  border-bottom-color: var(--v3-red-text, #e8635e);
 }
 
 /* ---------- presence tier ---------- */
@@ -259,7 +259,7 @@
      puts its centre at 5.56px. That is where the old absolutely-positioned
      bullet sat, so this is position-preserving, not a new choice. */
   vertical-align: .18em;
-  border: 1px solid var(--v2-red-text, #e8635e);
+  border: 1px solid var(--v3-red-text, #e8635e);
   border-radius: 50%;
 }
 
@@ -347,8 +347,8 @@
    Arabia and Oman merge into one red mass and the block appears to claim one
    country instead of three. */
 .off__map-hq path {
-  fill: var(--v2-red, #d41c22);
-  stroke: var(--v2-navy, rgb(0, 42, 65));
+  fill: var(--v3-red, #d41c22);
+  stroke: var(--v3-navy, rgb(0, 42, 65));
   stroke-width: .3;
 }
 
@@ -399,7 +399,7 @@
 }
 
 .off__key-swatch--office {
-  background: var(--v2-red, #d41c22);
+  background: var(--v3-red, #d41c22);
 }
 
 .off__key-swatch--op {

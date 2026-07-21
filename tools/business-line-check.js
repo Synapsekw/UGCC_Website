@@ -110,14 +110,14 @@
   }
 
   /* 3. Sub-nav */
-  var tabs = document.querySelectorAll('.v2-subnav a');
+  var tabs = document.querySelectorAll('.v3-subnav a');
   ok(tabs.length === 8, 'sub-nav has 8 tabs');
   var hrefsOk = tabs.length === 8;
   for (var i = 0; i < tabs.length; i++) {
     if (tabs[i].getAttribute('href') !== TABS[i]) hrefsOk = false;
   }
   ok(hrefsOk, 'sub-nav hrefs in frozen order');
-  var active = document.querySelectorAll('.v2-subnav a.is-active');
+  var active = document.querySelectorAll('.v3-subnav a.is-active');
   ok(active.length === 1, 'exactly one active tab');
   ok(active[0] && active[0].getAttribute('href') === '/' + slug, 'active tab is this page');
   ok(active[0] && active[0].getAttribute('aria-current') === 'page', 'active tab has aria-current');

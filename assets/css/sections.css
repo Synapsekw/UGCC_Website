@@ -2,8 +2,8 @@
    UGCC homepage — shared button, About, Who-are-we.
    Loaded only by index.html, after hero.css.
 
-   The v2- prefix here is homepage-scoped, unlike the site-wide v2- tokens
-   in v2.css: this file is loaded by index.html only, so .v2-btn on any
+   The v3- prefix here is homepage-scoped, unlike the site-wide v3- tokens
+   in v2.css: this file is loaded by index.html only, so .v3-btn on any
    other page renders as an unstyled anchor.
    ========================================================================== */
 
@@ -16,7 +16,7 @@
    source; the hero keeps its own mobile layout overrides in hero.css; the
    hero markup keeps its .hero-btn class names, so tools/hero-check.js and
    any external references are unaffected. */
-.v2-btn,
+.v3-btn,
 #aCqA2TkE7 .hero-btn {
   display: inline-block;
   padding: 15px 32px;
@@ -26,52 +26,52 @@
   text-decoration: none;
   border: 1px solid transparent;
   transition:
-    transform .25s var(--v2-ease-out-quart),
-    background-color .25s var(--v2-ease-out-quart),
-    box-shadow .25s var(--v2-ease-out-quart),
-    color .25s var(--v2-ease-out-quart);
+    transform .25s var(--v3-ease-out-quart),
+    background-color .25s var(--v3-ease-out-quart),
+    box-shadow .25s var(--v3-ease-out-quart),
+    color .25s var(--v3-ease-out-quart);
 }
 
 /* White pill. Hero video, About navy. */
-.v2-btn--on-dark,
+.v3-btn--on-dark,
 #aCqA2TkE7 .hero-btn--primary {
   background: #fff;
   color: #101010;
 }
 
 /* Navy pill. Who-are-we. */
-.v2-btn--on-light {
-  background: var(--v2-navy);
+.v3-btn--on-light {
+  background: var(--v3-navy);
   color: #fff;
 }
 
-/* var(--v2-navy) is rgb(0, 42, 65); this is that lifted ~8% toward white,
+/* var(--v3-navy) is rgb(0, 42, 65); this is that lifted ~8% toward white,
    which is the smallest step that reads as a state change on a light
    ground without the pill starting to look grey. */
-.v2-btn--on-light:hover {
+.v3-btn--on-light:hover {
   background: #063a56;
 }
 
 /* Outlined — for dark grounds only; the border colour is white. */
-.v2-btn--ghost,
+.v3-btn--ghost,
 #aCqA2TkE7 .hero-btn--secondary {
   border-color: rgba(255, 255, 255, .5);
   color: #fff;
 }
 
-.v2-btn--ghost:hover,
+.v3-btn--ghost:hover,
 #aCqA2TkE7 .hero-btn--secondary:hover {
   background: rgba(255, 255, 255, .12);
   border-color: #fff;
 }
 
-.v2-btn:hover,
+.v3-btn:hover,
 #aCqA2TkE7 .hero-btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--v2-shadow-lift);
+  box-shadow: var(--v3-shadow-lift);
 }
 
-.v2-btn:active,
+.v3-btn:active,
 #aCqA2TkE7 .hero-btn:active {
   transform: translateY(0);
 }
@@ -86,13 +86,13 @@
    visible on the hero either. Kept as-is rather than "fixed", because the
    hero is finished and client-reviewed and this task must not change how
    it renders. Raised separately. */
-.v2-btn--on-dark,
+.v3-btn--on-dark,
 #aCqA2TkE7 .hero-btn--primary {
   position: relative;
   overflow: hidden;
 }
 
-.v2-btn--on-dark::after,
+.v3-btn--on-dark::after,
 #aCqA2TkE7 .hero-btn--primary::after {
   content: '';
   position: absolute;
@@ -111,13 +111,13 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .v2-btn--on-dark:hover::after,
+  .v3-btn--on-dark:hover::after,
   #aCqA2TkE7 .hero-btn--primary:hover::after {
-    animation: v2-shine .8s var(--v2-ease-out-quart);
+    animation: v3-shine .8s var(--v3-ease-out-quart);
   }
 }
 
-@keyframes v2-shine {
+@keyframes v3-shine {
   from { left: -60%; }
   to   { left: 120%; }
 }
@@ -153,7 +153,7 @@
   max-width: 720px;
 }
 
-/* --v2-red-text is the lightened salmon, correct here because the ground is
+/* --v3-red-text is the lightened salmon, correct here because the ground is
    navy. 48x2 rather than the hero's 26x1: it stands alone rather than
    sitting beside eyebrow text, so it needs the extra weight to register. */
 #BCClZ9bf3 .about-rule {
@@ -161,7 +161,7 @@
   width: 48px;
   height: 2px;
   margin: 0 0 24px;
-  background: var(--v2-red-text);
+  background: var(--v3-red-text);
 }
 
 #BCClZ9bf3 .about-statement {
@@ -186,7 +186,7 @@
   color: rgba(255, 255, 255, .66);
 }
 
-#BCClZ9bf3 .v2-btn {
+#BCClZ9bf3 .v3-btn {
   margin-top: 30px;
 }
 
@@ -211,7 +211,7 @@
     font-size: 15px;
   }
 
-  #BCClZ9bf3 .v2-btn {
+  #BCClZ9bf3 .v3-btn {
     display: block;
     text-align: center;
   }
@@ -246,10 +246,10 @@
   max-width: 520px;
 }
 
-/* --v2-red, NOT --v2-red-text. The salmon variant the hero and About use is
+/* --v3-red, NOT --v3-red-text. The salmon variant the hero and About use is
    tuned for legibility on dark video; on this near-white ground it computes
-   to roughly 2.9:1 and fails. --v2-red measures 3.3-5.3:1 across this photo's
-   range versus 1.6-2.6:1 for --v2-red-text, so it is the correct token of the
+   to roughly 2.9:1 and fails. --v3-red measures 3.3-5.3:1 across this photo's
+   range versus 1.6-2.6:1 for --v3-red-text, so it is the correct token of the
    two; the eyebrow is 12px/600 letterspaced label text rather than body copy.
    home-check.js asserts this, because getting the two backwards is invisible
    in a screenshot. */
@@ -261,14 +261,14 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .16em;
-  color: var(--v2-red);
+  color: var(--v3-red);
 }
 
 #u7vIc0iRh .wr-rule {
   flex: none;
   width: 26px;
   height: 1px;
-  background: var(--v2-red);
+  background: var(--v3-red);
 }
 
 #u7vIc0iRh .wr-title {
@@ -281,7 +281,7 @@
   font-weight: 400;
   font-size: clamp(22px, 2.2vw, 32px);
   line-height: 1.25;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
 }
 
 #u7vIc0iRh .wr-intro {
@@ -309,23 +309,23 @@
   /* Declared at zero width so the hover state transitions rather than
      snapping, and so the red edge never affects layout. A border-left would
      shift every row 2px on hover. */
-  box-shadow: inset 0 0 0 var(--v2-red);
+  box-shadow: inset 0 0 0 var(--v3-red);
   transition:
-    background-color .2s var(--v2-ease-out-quart),
-    box-shadow .2s var(--v2-ease-out-quart);
+    background-color .2s var(--v3-ease-out-quart),
+    box-shadow .2s var(--v3-ease-out-quart);
 }
 
 #u7vIc0iRh .wr-num {
   font-size: 13px;
   color: rgba(0, 42, 65, .72);
-  transition: color .2s var(--v2-ease-out-quart);
+  transition: color .2s var(--v3-ease-out-quart);
 }
 
 #u7vIc0iRh .wr-name {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: .04em;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
 }
 
 /* .72 is the floor that clears 4.5:1 against the DARKEST pixel of this
@@ -350,8 +350,8 @@
      edge to edge - i.e. it removed the arrowhead and left a dash. */
   transform: translateX(-4px);
   transition:
-    color .2s var(--v2-ease-out-quart),
-    transform .2s var(--v2-ease-out-quart);
+    color .2s var(--v3-ease-out-quart),
+    transform .2s var(--v3-ease-out-quart);
 }
 
 /* One rule, both states. Keyboard users get exactly what mouse users get and
@@ -360,7 +360,7 @@
 #u7vIc0iRh .wr-row:hover,
 #u7vIc0iRh .wr-row:focus-visible {
   background-color: rgba(0, 42, 65, .07);
-  box-shadow: inset 3px 0 0 var(--v2-red);
+  box-shadow: inset 3px 0 0 var(--v3-red);
   outline: none;
 }
 
@@ -368,7 +368,7 @@
 #u7vIc0iRh .wr-row:focus-visible .wr-num,
 #u7vIc0iRh .wr-row:hover .wr-arrow,
 #u7vIc0iRh .wr-row:focus-visible .wr-arrow {
-  color: var(--v2-red);
+  color: var(--v3-red);
 }
 
 #u7vIc0iRh .wr-row:hover .wr-arrow,
@@ -390,7 +390,7 @@
    a small fraction of the area WCAG 2.4.13 expects. */
 @media (prefers-contrast: more) {
   #u7vIc0iRh .wr-row:focus-visible {
-    outline: 2px solid var(--v2-navy);
+    outline: 2px solid var(--v3-navy);
     outline-offset: -2px;
   }
 }
@@ -405,7 +405,7 @@
     display: block;
   }
 
-  #u7vIc0iRh .wr-head .v2-btn {
+  #u7vIc0iRh .wr-head .v3-btn {
     display: block;
     margin-top: 24px;
     text-align: center;
@@ -428,24 +428,24 @@
 /* ==========================================================================
    Motion / reveal — both sections.
    Doubly gated: .hero-motion (set by hero.js when reduced motion is NOT
-   requested) AND .v2-reveal (set by sections.js once it has targets). If
+   requested) AND .v3-reveal (set by sections.js once it has targets). If
    either is missing nothing is hidden, so a script that fails to load
    degrades to static content rather than a blank section.
    hero-fade-up is defined in hero.css; both files always load together.
    ========================================================================== */
 
-.hero-motion.v2-reveal #BCClZ9bf3 .about-stack,
-.hero-motion.v2-reveal #u7vIc0iRh .wr-head,
-.hero-motion.v2-reveal #u7vIc0iRh .wr-row {
+.hero-motion.v3-reveal #BCClZ9bf3 .about-stack,
+.hero-motion.v3-reveal #u7vIc0iRh .wr-head,
+.hero-motion.v3-reveal #u7vIc0iRh .wr-row {
   opacity: 0;
 }
 
-.hero-motion.v2-reveal #BCClZ9bf3 .about-stack.is-in,
-.hero-motion.v2-reveal #u7vIc0iRh .wr-head.is-in,
-.hero-motion.v2-reveal #u7vIc0iRh .wr-row.is-in {
-  animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
+.hero-motion.v3-reveal #BCClZ9bf3 .about-stack.is-in,
+.hero-motion.v3-reveal #u7vIc0iRh .wr-head.is-in,
+.hero-motion.v3-reveal #u7vIc0iRh .wr-row.is-in {
+  animation: hero-fade-up .8s var(--v3-ease-out-expo) both;
 }
 
-.hero-motion.v2-reveal #u7vIc0iRh .wr-row.is-in {
+.hero-motion.v3-reveal #u7vIc0iRh .wr-row.is-in {
   animation-delay: calc(var(--i, 0) * 60ms);
 }

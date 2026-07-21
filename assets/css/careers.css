@@ -1,6 +1,6 @@
 /* ==========================================================================
    UGCC homepage — CAREERS band ("site board").
-   Loaded only by index.html, after sections.css. Shares the .v2-btn
+   Loaded only by index.html, after sections.css. Shares the .v3-btn
    treatment defined there; adds no button rules of its own except the red
    fill, which no other homepage block uses.
 
@@ -19,7 +19,7 @@
 /* The builder's own .block-layout centres content in a 1224px column via
    inline custom properties. Those went with the grid, so the width is
    re-declared here rather than inherited. */
-.v2-careers {
+.v3-careers {
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -28,10 +28,10 @@
      stack is ~400px, and holding the old floor left a band of empty scrim
      above the eyebrow that read as a mistake rather than as breathing room. */
   min-height: 560px;
-  background: var(--v2-navy);
+  background: var(--v3-navy);
 }
 
-.v2-careers .block-background__image {
+.v3-careers .block-background__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -44,7 +44,7 @@
 /* Top-to-bottom rather than a flat wash: the aerial is brightest along its
    top edge, where the headline sits, and the block hands off to the black
    footer at its bottom edge — so the scrim doubles as that transition. */
-.v2-careers__scrim {
+.v3-careers__scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -58,14 +58,14 @@
 /* Twelve hairlines on the same 12-column rhythm the builder grid used, as a
    texture rather than a layout: purely decorative, so it is not a grid and
    nothing is placed against it. */
-.v2-careers__rule {
+.v3-careers__rule {
   position: absolute;
   inset: 0;
   background-image: linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
   background-size: calc(100% / 12) 100%;
 }
 
-.v2-careers__layout {
+.v3-careers__layout {
   position: relative;
   width: 100%;
   max-width: 1224px;
@@ -74,7 +74,7 @@
   color: #fff;
 }
 
-.v2-careers__head {
+.v3-careers__head {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: clamp(32px, 6vw, 80px);
@@ -84,7 +84,7 @@
 /* Same eyebrow construction as .wr-eyebrow, in white-on-photo instead of
    navy-on-white. Kept as its own rule rather than a shared class because the
    rule element there is navy and would vanish here. */
-.v2-careers__eyebrow {
+.v3-careers__eyebrow {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -97,16 +97,16 @@
   color: rgba(255, 255, 255, .6);
 }
 
-.v2-careers__rule-mark {
+.v3-careers__rule-mark {
   width: 36px;
   height: 2px;
-  background: var(--v2-red);
+  background: var(--v3-red);
 }
 
 /* Declared explicitly for the same reason .wr-title is: unstyled, this h2
    picks up the builder's `.text-box h2 { font-family: var(--h2-font-family) }`
    only inside a .text-box, and there is no .text-box left in this block. */
-.v2-careers__title {
+.v3-careers__title {
   margin: 0;
   font-family: 'Hammersmith One', sans-serif;
   font-size: clamp(42px, 5.6vw, 76px);
@@ -118,33 +118,33 @@
 
 /* The one red word in the block. It carries the whole claim, so it is the
    only place the signal red appears in type anywhere on the homepage. */
-.v2-careers__title em {
+.v3-careers__title em {
   font-style: normal;
-  color: var(--v2-red);
+  color: var(--v3-red);
 }
 
-.v2-careers__intro {
+.v3-careers__intro {
   margin: 0 0 32px;
   font-size: 16px;
   line-height: 1.8;
   color: rgba(255, 255, 255, .75);
 }
 
-.v2-careers__cta {
+.v3-careers__cta {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
 }
 
 /* Red fill. The homepage's other primary buttons are white-on-dark
-   (.v2-btn--on-dark) or navy-on-light (.v2-btn--on-light); neither reads as
+   (.v3-btn--on-dark) or navy-on-light (.v3-btn--on-light); neither reads as
    a call on a navy scrim, which is why this variant exists. */
-.v2-btn--red {
-  background: var(--v2-red);
+.v3-btn--red {
+  background: var(--v3-red);
   color: #fff;
 }
 
-.v2-btn--red:hover {
+.v3-btn--red:hover {
   background: #b8161c;
 }
 
@@ -153,15 +153,15 @@
 /* One breakpoint, at the width where the 7/5 head split starts squeezing the
    headline onto four lines. Below it the head is a single column. */
 @media (max-width: 900px) {
-  .v2-careers {
+  .v3-careers {
     min-height: 0;
   }
 
-  .v2-careers__layout {
+  .v3-careers__layout {
     padding: 88px 16px 72px;
   }
 
-  .v2-careers__head {
+  .v3-careers__head {
     grid-template-columns: 1fr;
     gap: 32px;
   }

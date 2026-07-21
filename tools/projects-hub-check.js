@@ -189,8 +189,8 @@ check(page.includes(FROZEN_HERO_SUBTITLE),
    were removed; the cover is followed directly by the filter + grid section.
    Asserted so neither can creep back in unnoticed. */
 {
-  check(!/class="[^"]*v2-subnav/.test(page),
-    '7. the removed .v2-subnav rail is back on the page');
+  check(!/class="[^"]*v3-subnav/.test(page),
+    '7. the removed .v3-subnav rail is back on the page');
   check(!/class="[^"]*as-stats/.test(page),
     '7. the removed .as-stats block is back on the page');
   const firstSection = page.indexOf('<section class="as-section');
@@ -344,7 +344,7 @@ check(badDescriptors.length === 0,
     try { return fs.statSync(path.join(root, relPath)).size; } catch (e) { return null; }
   }
 
-  const heroProjectsPreferred = 'assets/img/v2/hero-projects-1920.avif';
+  const heroProjectsPreferred = 'assets/img/v3/hero-projects-1920.avif';
   const heroProjectsFile = exists(heroProjectsPreferred) ? heroProjectsPreferred : largestVariant('hero-projects');
   if (!heroProjectsFile) {
     check(false, '12. no hero-projects-*.avif found on disk');
@@ -363,7 +363,7 @@ check(badDescriptors.length === 0,
   const oversizedCards = [];
   const missingCardAvif = [];
   manifest.forEach((m) => {
-    const rel = 'assets/img/v2/proj/' + m.slug + '-440.avif';
+    const rel = 'assets/img/v3/proj/' + m.slug + '-440.avif';
     const sz = sizeOf(rel);
     if (sz === null) { missingCardAvif.push(rel); return; }
     cardSum += sz;

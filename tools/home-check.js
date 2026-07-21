@@ -120,7 +120,7 @@
     };
   });
 
-  /* The invariant is that EVERY .v2-btn on the page renders as the hero's
+  /* The invariant is that EVERY .v3-btn on the page renders as the hero's
      button does — not that there is some particular number of them. An
      earlier version asserted exactly 2, which was true on the day the
      component had exactly two call sites and became a false alarm the
@@ -128,15 +128,15 @@
      match is the actual contract, and it gets stricter as adoption grows
      rather than breaking. The two homepage buttons are asserted by name
      separately, so this cannot pass vacuously on a page with none. */
-  check('every .v2-btn matches the hero button', function () {
+  check('every .v3-btn matches the hero button', function () {
     var hero = document.querySelector('#aCqA2TkE7 .hero-btn--primary');
     if (!hero) return { ok: false, detail: 'hero primary button not found' };
-    var btns = document.querySelectorAll('.v2-btn');
-    if (!btns.length) return { ok: false, detail: 'no .v2-btn on the page' };
+    var btns = document.querySelectorAll('.v3-btn');
+    if (!btns.length) return { ok: false, detail: 'no .v3-btn on the page' };
 
     var required = [
-      [ABOUT + ' .v2-btn', 'About'],
-      [WHO + ' .v2-btn', 'Who-are-we']
+      [ABOUT + ' .v3-btn', 'About'],
+      [WHO + ' .v3-btn', 'Who-are-we']
     ];
     var missing = [];
     required.forEach(function (r) {
@@ -157,7 +157,7 @@
     });
     return {
       ok: bad.length === 0,
-      detail: bad.join('; ') || btns.length + ' .v2-btn, all matching the hero'
+      detail: bad.join('; ') || btns.length + ' .v3-btn, all matching the hero'
     };
   });
 
@@ -194,30 +194,30 @@
     };
   });
 
-  /* The reveal must be opt-IN. sections.js adds .v2-reveal before the hiding
+  /* The reveal must be opt-IN. sections.js adds .v3-reveal before the hiding
      rules bite, so a failure to load the script leaves the content visible
      rather than permanently invisible. Removing the class must therefore
      leave every row fully opaque. */
   check('reveal is opt-in, not opt-out', function () {
     var root = document.documentElement;
-    var had = root.classList.contains('v2-reveal');
-    root.classList.remove('v2-reveal');
+    var had = root.classList.contains('v3-reveal');
+    root.classList.remove('v3-reveal');
     var rows = document.querySelectorAll(WHO + ' .wr-row');
     var hidden = 0;
     Array.prototype.forEach.call(rows, function (r) {
       if (parseFloat(getComputedStyle(r).opacity) < 1) hidden++;
     });
-    if (had) root.classList.add('v2-reveal');
+    if (had) root.classList.add('v3-reveal');
     return {
       ok: rows.length === 7 && hidden === 0,
-      detail: 'rows=' + rows.length + '; hidden without .v2-reveal=' + hidden
+      detail: 'rows=' + rows.length + '; hidden without .v3-reveal=' + hidden
     };
   });
 
-  /* --v2-red-text (#e8635e) is a lightened salmon chosen for legibility on
+  /* --v3-red-text (#e8635e) is a lightened salmon chosen for legibility on
      dark video. On this section's near-white ground it falls to roughly
-     2.9:1. --v2-red measures 3.3-5.3:1 across this photo's range versus
-     1.6-2.6:1 for --v2-red-text, so it is the correct token of the two; the
+     2.9:1. --v3-red measures 3.3-5.3:1 across this photo's range versus
+     1.6-2.6:1 for --v3-red-text, so it is the correct token of the two; the
      eyebrow is 12px/600 letterspaced label text rather than body copy.
      Getting these two backwards is invisible in a screenshot and fails
      accessibility. */

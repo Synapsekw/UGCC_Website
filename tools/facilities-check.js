@@ -42,7 +42,7 @@
      'got ' + document.querySelectorAll('h1').length);
 
   /* 2 — the shipped subnav, kept, with the a11y addition */
-  var subLinks = document.querySelectorAll('.v2-subnav a');
+  var subLinks = document.querySelectorAll('.v3-subnav a');
   ok('subnav: 4 links', subLinks.length === 4, 'got ' + subLinks.length);
   var LABELS = ['Facilities', 'Plants', 'Laboratories', 'Equipment'];
   Array.prototype.forEach.call(subLinks, function (a, i) {
@@ -50,7 +50,7 @@
        a.textContent.replace(/\s+/g, ' ').trim() === LABELS[i],
        'got "' + a.textContent.trim() + '"');
   });
-  var actives = document.querySelectorAll('.v2-subnav a.is-active');
+  var actives = document.querySelectorAll('.v3-subnav a.is-active');
   ok('subnav: exactly one .is-active', actives.length === 1);
   ok('subnav: .is-active carries aria-current="page"',
      actives.length === 1 && actives[0].getAttribute('aria-current') === 'page');
@@ -109,12 +109,12 @@
   });
   ok('no photo rendered twice on the page', !dup, dup || '');
 
-  /* 5 — the two reds: eyebrows on light grounds use --v2-red (#d41c22).
+  /* 5 — the two reds: eyebrows on light grounds use --v3-red (#d41c22).
      Getting this backwards is invisible in a screenshot. */
   Array.prototype.forEach.call(
     document.querySelectorAll('.as-section--light .as-head__eyebrow, .as-section--tint .as-head__eyebrow'),
     function (el) {
-      ok('eyebrow on light ground is --v2-red',
+      ok('eyebrow on light ground is --v3-red',
          getComputedStyle(el).color === 'rgb(212, 28, 34)',
          getComputedStyle(el).color);
     });
@@ -123,7 +123,7 @@
      nothing may compute to opacity 0 (a failed script must degrade to a
      visible page, never a blank one) */
   var root = document.documentElement;
-  var gated = root.classList.contains('hero-motion') && root.classList.contains('v2-reveal');
+  var gated = root.classList.contains('hero-motion') && root.classList.contains('v3-reveal');
   if (!gated) {
     var hiddenEl = null;
     Array.prototype.forEach.call(
@@ -142,7 +142,7 @@
   }
   var lockSel = ['.as-cover__title', '.as-cover__lede', '.as-head__title',
     '.as-head__lede', '.as-head__eyebrow', '.as-prose', '.fx-tile__desc',
-    '.fx-type', '.v2-table', '.as-quote__text'].join(',');
+    '.fx-type', '.v3-table', '.as-quote__text'].join(',');
   var parts = [];
   Array.prototype.forEach.call(document.querySelectorAll(lockSel), function (el) {
     parts.push(el.textContent.replace(/\s+/g, ' ').trim());
@@ -157,7 +157,7 @@
 
   /* 8 — tables survived verbatim (row counts; content is covered by #7) */
   var ROWS = { hub: 5, plants: 6, labs: 7, equipment: 7 };
-  var rows = document.querySelectorAll('.v2-table tbody tr');
+  var rows = document.querySelectorAll('.v3-table tbody tr');
   ok('table: ' + ROWS[PAGE] + ' body rows', rows.length === ROWS[PAGE], 'got ' + rows.length);
 
   var summary = 'facilities-check [' + PAGE + ']: ' + passes + ' passed, ' +

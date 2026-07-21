@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
     new GlassChatWidget({
         webhookUrl: '/api/chat',
         chatTitle: 'UGCC Assistant',
-        logoUrl: '/assets/img/v2/ugcc-chat-logo.png',
+        logoUrl: '/assets/img/v3/ugcc-chat-logo.png',
         primaryColor: '#d31225',
         welcomeMessage: 'Hello! Ask me anything about UGCC. / مرحباً! اسألني أي شيء عن الشركة.'
     });

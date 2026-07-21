@@ -1,7 +1,7 @@
 /* ==========================================================================
    UGCC — homepage gallery rail (#zOl98u)
    Replaces the builder slideshow. Loaded by index.html only.
-   Tokens (--v2-navy, --v2-red, --v2-red-text, --v2-ease-out-quart) come from v2.css.
+   Tokens (--v3-navy, --v3-red, --v3-red-text, --v3-ease-out-quart) come from v2.css.
 
    The drift is a pure-CSS compositor animation and needs no JavaScript.
    assets/js/rail.js adds only the pause toggle and the handover to native
@@ -9,14 +9,14 @@
    scrollable with that file removed.
    ========================================================================== */
 
-.v2-rail-block {
-  background: var(--v2-navy);
+.v3-rail-block {
+  background: var(--v3-navy);
   padding: 52px 0 57px;
   overflow: hidden;               /* full-bleed track must not scroll the page */
 }
 
 /* The eyebrow spans the full row so the title sits on the line beneath it. */
-.v2-rail__head {
+.v3-rail__head {
   max-width: 1224px;
   margin: 0 auto 30px;
   padding: 0 24px;
@@ -26,7 +26,7 @@
   gap: 20px;
 }
 
-.v2-rail__eyebrow {
+.v3-rail__eyebrow {
   flex: 0 0 100%;
   margin: 0;
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
@@ -34,10 +34,10 @@
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--v2-red-text);
+  color: var(--v3-red-text);
 }
 
-.v2-rail__title {
+.v3-rail__title {
   margin: 6px 0 0;
   flex: 1;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
@@ -55,7 +55,7 @@
 
    Do not set scroll-behavior: smooth here. */
 
-.v2-rail__viewport {
+.v3-rail__viewport {
   overflow-x: auto;
   overflow-y: hidden;
   /* Keep a horizontal swipe that overshoots the rail's end inside the rail.
@@ -81,7 +81,7 @@
    Free scrolling after handover costs nothing; a jump at the moment the visitor
    touches the rail is exactly the judder this design is meant to remove. */
 
-.v2-rail__viewport::-webkit-scrollbar { display: none; }
+.v3-rail__viewport::-webkit-scrollbar { display: none; }
 
 /* The track carries NO horizontal padding and NO flex gap, and every item owns
    its own trailing margin instead. That is what makes translateX(-50%) land on
@@ -96,7 +96,7 @@
 
    The lead-in inset lives on the viewport (padding-left) where it shifts the
    content without contributing to the track's width. */
-.v2-rail__track {
+.v3-rail__track {
   display: flex;
   width: max-content;
   margin: 0;
@@ -104,13 +104,13 @@
   list-style: none;
 }
 
-.v2-rail__item {
+.v3-rail__item {
   flex: none;
   width: 458px;
   margin-right: 16px;
 }
 
-.v2-rail__card {
+.v3-rail__card {
   position: relative;
   display: block;
   height: 302px;
@@ -120,24 +120,24 @@
   text-decoration: none;
 }
 
-.v2-rail__card img {
+.v3-rail__card img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform .5s var(--v2-ease-out-quart),
-              filter .5s var(--v2-ease-out-quart);
+  transition: transform .5s var(--v3-ease-out-quart),
+              filter .5s var(--v3-ease-out-quart);
 }
 
-.v2-rail__card:hover img,
-.v2-rail__card:focus-visible img {
+.v3-rail__card:hover img,
+.v3-rail__card:focus-visible img {
   transform: scale(1.05);
   filter: brightness(1.06) saturate(1.05);
 }
 
 /* ---------- caption ---------- */
 
-.v2-rail__tag {
+.v3-rail__tag {
   position: absolute;
   left: 0;
   right: 0;
@@ -151,19 +151,19 @@
   background: linear-gradient(to top, rgba(0, 20, 32, .92), rgba(0, 20, 32, 0));
 }
 
-.v2-rail__tag::before {
+.v3-rail__tag::before {
   content: "";
   display: inline-block;
   width: 2px;
   height: 11px;
   margin-right: 8px;
   vertical-align: -1px;
-  background: var(--v2-red);
+  background: var(--v3-red);
 }
 
 /* ---------- pause toggle ---------- */
 
-.v2-rail__toggle {
+.v3-rail__toggle {
   flex: none;
   width: 42px;
   height: 42px;
@@ -179,22 +179,22 @@
   transition: background .2s, border-color .2s, opacity .2s;
 }
 
-.v2-rail__toggle:hover {
-  background: var(--v2-red);
-  border-color: var(--v2-red);
+.v3-rail__toggle:hover {
+  background: var(--v3-red);
+  border-color: var(--v3-red);
 }
 
-.v2-rail__icon { width: 16px; height: 16px; }
-.v2-rail__icon--play { display: none; }
+.v3-rail__icon { width: 16px; height: 16px; }
+.v3-rail__icon--play { display: none; }
 
-.v2-rail[data-paused="true"] .v2-rail__icon--pause { display: none; }
-.v2-rail[data-paused="true"] .v2-rail__icon--play  { display: block; }
+.v3-rail[data-paused="true"] .v3-rail__icon--pause { display: none; }
+.v3-rail[data-paused="true"] .v3-rail__icon--play  { display: block; }
 
 /* Once the visitor has taken the rail over there is no longer any autoplay to
    pause, so the control stops being meaningful. Hidden from assistive tech too,
    not merely faded — a button that no longer does anything should not be
    reachable. Same reasoning under reduced motion, where drift never starts. */
-.v2-rail[data-manual="true"] .v2-rail__toggle { display: none; }
+.v3-rail[data-manual="true"] .v3-rail__toggle { display: none; }
 
 /* ---------- drift ----------
    A compositor-driven transform, not per-frame JavaScript: this is the smoothest
@@ -209,27 +209,27 @@
    roughly 6 seconds throughout. */
 
 @media (prefers-reduced-motion: no-preference) {
-  .v2-rail__track {
-    animation: v2-rail-drift 90s linear infinite;
+  .v3-rail__track {
+    animation: v3-rail-drift 90s linear infinite;
     will-change: transform;
   }
 
-  .v2-rail__viewport:hover .v2-rail__track,
-  .v2-rail__viewport:focus-within .v2-rail__track,
-  .v2-rail[data-paused="true"] .v2-rail__track {
+  .v3-rail__viewport:hover .v3-rail__track,
+  .v3-rail__viewport:focus-within .v3-rail__track,
+  .v3-rail[data-paused="true"] .v3-rail__track {
     animation-play-state: paused;
   }
 
   /* After handover the track is positioned by scrollLeft, not by transform.
      rail.js clears the inline transform; this stops the animation from
      reasserting one. */
-  .v2-rail[data-manual="true"] .v2-rail__track {
+  .v3-rail[data-manual="true"] .v3-rail__track {
     animation: none;
     will-change: auto;
   }
 }
 
-@keyframes v2-rail-drift {
+@keyframes v3-rail-drift {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
@@ -238,30 +238,30 @@
    already overflow-x: auto, so it is simply a scrollable region — every card
    reachable by drag, swipe, trackpad and keyboard. */
 @media (prefers-reduced-motion: reduce) {
-  .v2-rail__viewport {
+  .v3-rail__viewport {
     scroll-snap-type: x proximity;
   }
-  .v2-rail__item { scroll-snap-align: start; }
-  .v2-rail__toggle { display: none; }
+  .v3-rail__item { scroll-snap-align: start; }
+  .v3-rail__toggle { display: none; }
 }
 
 /* ---------- responsive ---------- */
 
 @media (max-width: 1024px) {
-  .v2-rail__item { width: 390px; }
-  .v2-rail__card { height: 258px; }
-  .v2-rail__title { font-size: 31px; }
+  .v3-rail__item { width: 390px; }
+  .v3-rail__card { height: 258px; }
+  .v3-rail__title { font-size: 31px; }
 }
 
 @media (max-width: 600px) {
-  .v2-rail-block { padding: 39px 0 44px; }
+  .v3-rail-block { padding: 39px 0 44px; }
   /* Mobile grows by 15%, not 30%. At 30% the card would be 338px against a
      375px viewport — 90% of the width, leaving no visible sliver of the next
      card, which is the only cue that the rail continues. At 300px the next card
      shows 43px of itself past the 16px gap. Measured, not estimated. */
-  .v2-rail__item { width: 300px; }
-  .v2-rail__card { height: 198px; }
-  .v2-rail__title { font-size: 25px; }
-  .v2-rail__head { margin-bottom: 18px; padding: 0 16px; }
-  .v2-rail__viewport { padding-left: 16px; scroll-padding-left: 16px; }
+  .v3-rail__item { width: 300px; }
+  .v3-rail__card { height: 198px; }
+  .v3-rail__title { font-size: 25px; }
+  .v3-rail__head { margin-bottom: 18px; padding: 0 16px; }
+  .v3-rail__viewport { padding-left: 16px; scroll-padding-left: 16px; }
 }

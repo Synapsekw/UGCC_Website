@@ -2,17 +2,17 @@
 # Generates the homepage CAREERS band's background derivatives from the 1920w
 # original. Idempotent: safe to re-run. Requires macOS `sips` (no dependencies).
 #
-# Source: assets/img/v2/slide-09.jpg (1920x1438) — the same aerial the rail
+# Source: assets/img/v3/slide-09.jpg (1920x1438) — the same aerial the rail
 # uses; cropped here to a much wider band because the careers block is a
 # full-bleed strip, not a 16:10 card.
 #
-# Output: assets/img/v2/careers-{960,1280,1920}.jpg, centre-cropped to an exact
+# Output: assets/img/v3/careers-{960,1280,1920}.jpg, centre-cropped to an exact
 # 2.34:1 so every width crops the same part of the frame and swapping between
 # srcset candidates never shifts the subject.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-SRC="assets/img/v2/slide-09.jpg"
+SRC="assets/img/v3/slide-09.jpg"
 OUT="assets/img/v2"
 
 [ -f "$SRC" ] || { echo "missing $SRC" >&2; exit 1; }

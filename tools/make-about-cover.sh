@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Derives the About page's cover image into the same slot and format the other
 # four About-family covers already use: a single 1920w JPEG at
-# assets/img/v2/hero-<page>.jpg, no srcset, no builder hash in the name.
+# assets/img/v3/hero-<page>.jpg, no srcset, no builder hash in the name.
 #
 # Before this script, About was the odd one out — it pointed at six hashed
 # Hostinger PNG derivatives (*-opt4-copy-F7I0HwQ7cakkCmCV.png) behind a
@@ -19,7 +19,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 SRC="assets/img/59682a2e-opt4-copy-F7I0HwQ7cakkCmCV.png"
-OUT="assets/img/v2/hero-about.jpg"
+OUT="assets/img/v3/hero-about.jpg"
 
 [ -f "$SRC" ] || { echo "missing $SRC" >&2; exit 1; }
 

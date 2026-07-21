@@ -46,7 +46,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .fx-tile__shot img {
-    transition: transform .5s var(--v2-ease-out-quart), filter .5s var(--v2-ease-out-quart);
+    transition: transform .5s var(--v3-ease-out-quart), filter .5s var(--v3-ease-out-quart);
   }
   .fx-tile__link:hover .fx-tile__shot img,
   .fx-tile__link:focus-visible .fx-tile__shot img {
@@ -65,17 +65,17 @@
   font-weight: 400;
   font-size: 21px;               /* the offices country-h3 size */
   letter-spacing: .04em;
-  color: var(--v2-navy);
-  transition: color .25s var(--v2-ease-out-quart);
+  color: var(--v3-navy);
+  transition: color .25s var(--v3-ease-out-quart);
 }
 .fx-tile__num {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 12px; font-weight: 700;
   letter-spacing: .06em;
-  color: var(--v2-red);          /* red index on light ground */
+  color: var(--v3-red);          /* red index on light ground */
 }
 .fx-tile__link:hover .fx-tile__label,
-.fx-tile__link:focus-visible .fx-tile__label { color: var(--v2-red); }
+.fx-tile__link:focus-visible .fx-tile__label { color: var(--v3-red); }
 .fx-tile__desc {
   margin: 8px 0 0;
   font-size: 15px; line-height: 1.7;
@@ -88,12 +88,12 @@
   padding-bottom: 4px;
   font-size: 12px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
-  color: var(--v2-navy);
-  border-bottom: 2px solid var(--v2-red);   /* the .v2-proj__all affordance */
-  transition: color .25s var(--v2-ease-out-quart);
+  color: var(--v3-navy);
+  border-bottom: 2px solid var(--v3-red);   /* the .v3-proj__all affordance */
+  transition: color .25s var(--v3-ease-out-quart);
 }
 .fx-tile__link:hover .fx-tile__more,
-.fx-tile__link:focus-visible .fx-tile__more { color: var(--v2-red); }
+.fx-tile__link:focus-visible .fx-tile__more { color: var(--v3-red); }
 
 /* ---- fx-types: numbered capability rows (no destination pages, so no
    links and no arrows — this is a register, not a nav) */
@@ -110,14 +110,14 @@
 .fx-type__num {
   font-size: 12px; font-weight: 700;
   letter-spacing: .06em;
-  color: var(--v2-red);
+  color: var(--v3-red);
 }
 .fx-type__name {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 18px;
   letter-spacing: .02em;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
 }
 .fx-type__note {
   display: block;
@@ -158,7 +158,7 @@
   object-fit: cover;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .fx-gallery img { transition: transform .5s var(--v2-ease-out-quart), filter .5s var(--v2-ease-out-quart); }
+  .fx-gallery img { transition: transform .5s var(--v3-ease-out-quart), filter .5s var(--v3-ease-out-quart); }
   .fx-gallery > li:hover img { transform: scale(1.05); filter: brightness(1.06) saturate(1.05); }
 }
 
@@ -176,7 +176,7 @@
   text-decoration: none;
   border: 1px solid rgba(255, 255, 255, .16);
   border-radius: 4px;
-  transition: background-color .25s var(--v2-ease-out-quart), border-color .25s var(--v2-ease-out-quart);
+  transition: background-color .25s var(--v3-ease-out-quart), border-color .25s var(--v3-ease-out-quart);
 }
 .fx-next a:hover,
 .fx-next a:focus-visible {
@@ -188,7 +188,7 @@
   display: block;
   font-size: 11px; font-weight: 700;
   letter-spacing: .18em; text-transform: uppercase;
-  color: var(--v2-red-text);     /* small red text on navy — never --v2-red */
+  color: var(--v3-red-text);     /* small red text on navy — never --v3-red */
 }
 .fx-next__name {
   display: block;
@@ -203,19 +203,19 @@
 /* ---- reveals: the .bl-tile pattern exactly (business-lines.css:169).
    Inert unless about-suite.js adds BOTH gate classes; the reduced-motion
    block guarantees visibility even if the UA flips preference mid-session. */
-.hero-motion.v2-reveal .fx-tile,
-.hero-motion.v2-reveal .fx-type,
-.hero-motion.v2-reveal .fx-gallery > li { opacity: 0; }
-.hero-motion.v2-reveal .fx-tile.is-in,
-.hero-motion.v2-reveal .fx-type.is-in,
-.hero-motion.v2-reveal .fx-gallery > li.is-in {
-  animation: as-fade-up .8s var(--v2-ease-out-expo) both;
+.hero-motion.v3-reveal .fx-tile,
+.hero-motion.v3-reveal .fx-type,
+.hero-motion.v3-reveal .fx-gallery > li { opacity: 0; }
+.hero-motion.v3-reveal .fx-tile.is-in,
+.hero-motion.v3-reveal .fx-type.is-in,
+.hero-motion.v3-reveal .fx-gallery > li.is-in {
+  animation: as-fade-up .8s var(--v3-ease-out-expo) both;
   animation-delay: calc(var(--i, 0) * 60ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-motion.v2-reveal .fx-tile,
-  .hero-motion.v2-reveal .fx-type,
-  .hero-motion.v2-reveal .fx-gallery > li { opacity: 1; }
+  .hero-motion.v3-reveal .fx-tile,
+  .hero-motion.v3-reveal .fx-type,
+  .hero-motion.v3-reveal .fx-gallery > li { opacity: 1; }
 }
 
 /* ---- responsive. 920 is the builder's own header breakpoint; 768 would

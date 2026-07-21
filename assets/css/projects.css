@@ -3,18 +3,18 @@
    Replaces the builder's 46-row grid and 8-image square gallery.
    Loaded by index.html only.
 
-   Tokens (--v2-navy, --v2-red, --v2-red-text, --v2-ease-out-quart) come from
+   Tokens (--v3-navy, --v3-red, --v3-red-text, --v3-ease-out-quart) come from
    v2.css. Container metrics and breakpoints deliberately match rail.css so the
    two adjacent navy blocks reflow at the same widths.
 
    No JavaScript: this block is markup and CSS only.
    ========================================================================== */
 
-.v2-proj-block {
+.v3-proj-block {
   padding: 48px 0 56px;
 }
 
-.v2-proj {
+.v3-proj {
   /* The builder's .block-background (main.css, z-index:14 sibling at :13) is
      an opaque plate over the whole section. The builder lifts content above
      it with .block-layout{z-index:14}; this block drops .block-layout, so it
@@ -31,7 +31,7 @@
    Grid areas rather than a wrapper div, so the markup stays flat: the eyebrow
    spans both columns, the title and intro stack in column 1, and the exit link
    sits bottom-right against them. */
-.v2-proj__head {
+.v3-proj__head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
@@ -45,7 +45,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, .16);
 }
 
-.v2-proj__eyebrow {
+.v3-proj__eyebrow {
   grid-area: eyebrow;
   margin: 0;
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
@@ -53,10 +53,10 @@
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--v2-red-text);
+  color: var(--v3-red-text);
 }
 
-.v2-proj__title {
+.v3-proj__title {
   grid-area: title;
   margin: 6px 0 0;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
@@ -66,7 +66,7 @@
   color: #fff;
 }
 
-.v2-proj__intro {
+.v3-proj__intro {
   grid-area: intro;
   margin: 10px 0 0;
   max-width: 54ch;
@@ -76,7 +76,7 @@
   color: rgba(255, 255, 255, .68);
 }
 
-.v2-proj__all {
+.v3-proj__all {
   grid-area: all;
   align-self: end;
   justify-self: end;
@@ -89,12 +89,12 @@
   text-transform: uppercase;
   color: #fff;
   padding-bottom: 4px;
-  border-bottom: 2px solid var(--v2-red);
+  border-bottom: 2px solid var(--v3-red);
 }
 
 /* ---------- grid ---------- */
 
-.v2-proj__grid {
+.v3-proj__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px 24px;
@@ -103,12 +103,12 @@
   list-style: none;
 }
 
-.v2-proj__item {
+.v3-proj__item {
   min-width: 0;              /* grid-blowout guard — keep even as a flex item */
   display: flex;
 }
 
-.v2-proj__card {
+.v3-proj__card {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -119,15 +119,15 @@
 /* The whole card is one anchor, so the focus ring belongs on the card box —
    not on the image alone, which would leave the title and metadata visually
    outside the focused region. */
-.v2-proj__card:focus-visible {
-  outline: 2px solid var(--v2-red);
+.v3-proj__card:focus-visible {
+  outline: 2px solid var(--v3-red);
   outline-offset: 5px;
   border-radius: 4px;
 }
 
 /* aspect-ratio is load-bearing: it reserves the card's image box before the
    lazy image arrives, which is what keeps the block's layout shift at zero. */
-.v2-proj__shot {
+.v3-proj__shot {
   position: relative;
   display: block;
   aspect-ratio: 16 / 10;
@@ -136,7 +136,7 @@
   background: #0b2233;
 }
 
-.v2-proj__shot img {
+.v3-proj__shot img {
   display: block;
   width: 100%;
   height: 100%;
@@ -147,7 +147,7 @@
    The red 2px bar is the rail's caption motif, reused so the two blocks read
    as one family. The tag is a solid plate rather than the rail's gradient
    scrim: these images are lighter and a scrim would wash them out. */
-.v2-proj__tag {
+.v3-proj__tag {
   position: absolute;
   left: 0;
   bottom: 0;
@@ -160,19 +160,19 @@
   color: #fff;
 }
 
-.v2-proj__tag::before {
+.v3-proj__tag::before {
   content: "";
   display: inline-block;
   width: 2px;
   height: 10px;
   margin-right: 8px;
   vertical-align: -1px;
-  background: var(--v2-red);
+  background: var(--v3-red);
 }
 
 /* ---------- card text ---------- */
 
-.v2-proj__name {
+.v3-proj__name {
   margin: 14px 0 0;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-size: 17px;
@@ -182,7 +182,7 @@
   text-wrap: balance;
 }
 
-.v2-proj__meta {
+.v3-proj__meta {
   /* margin-top: auto pins the hairline to the card's bottom edge regardless
      of how many lines the name above it wraps to, so the rule aligns across
      a row instead of stepping down under a two-line title. */
@@ -196,24 +196,24 @@
   font-size: 12px;
 }
 
-.v2-proj__meta > div {
+.v3-proj__meta > div {
   display: flex;
   justify-content: space-between;
   gap: 12px;
 }
 
-.v2-proj__meta dt {
+.v3-proj__meta dt {
   color: rgba(255, 255, 255, .5);
 }
 
-.v2-proj__meta dd {
+.v3-proj__meta dd {
   margin: 0;
   text-align: right;
   color: rgba(255, 255, 255, .9);
   font-variant-numeric: tabular-nums;
   /* break-word does not reduce a flex item's min-content contribution, so a
      long unbroken client name would push the row wider than the card.
-     anywhere does — it is the one that actually works inside .v2-proj__meta
+     anywhere does — it is the one that actually works inside .v3-proj__meta
      > div's flex layout. None of the six current client names trigger this;
      it is robustness for future data. */
   overflow-wrap: anywhere;
@@ -222,51 +222,51 @@
 /* Static hover feedback, outside the reduced-motion gate below: a
    reduced-motion visitor still gets a response on hover, just not the
    image transform. */
-.v2-proj__card:hover .v2-proj__name,
-.v2-proj__card:focus-visible .v2-proj__name {
-  color: var(--v2-red-text);
+.v3-proj__card:hover .v3-proj__name,
+.v3-proj__card:focus-visible .v3-proj__name {
+  color: var(--v3-red-text);
 }
 
 /* ---------- motion ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  .v2-proj__shot img {
-    transition: transform .5s var(--v2-ease-out-quart),
-                filter .5s var(--v2-ease-out-quart);
+  .v3-proj__shot img {
+    transition: transform .5s var(--v3-ease-out-quart),
+                filter .5s var(--v3-ease-out-quart);
   }
 
-  .v2-proj__card:hover .v2-proj__shot img,
-  .v2-proj__card:focus-visible .v2-proj__shot img {
+  .v3-proj__card:hover .v3-proj__shot img,
+  .v3-proj__card:focus-visible .v3-proj__shot img {
     transform: scale(1.05);
     filter: brightness(1.06) saturate(1.05);
   }
 
-  .v2-proj__all {
-    transition: color .25s var(--v2-ease-out-quart);
+  .v3-proj__all {
+    transition: color .25s var(--v3-ease-out-quart);
   }
 }
 
-.v2-proj__all:hover {
-  color: var(--v2-red-text);
+.v3-proj__all:hover {
+  color: var(--v3-red-text);
 }
 
 /* ---------- responsive ----------
    Breakpoints match rail.css so the two blocks reflow together. */
 
 @media (max-width: 1024px) {
-  .v2-proj__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v2-proj__title { font-size: 26px; }
+  .v3-proj__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v3-proj__title { font-size: 26px; }
 }
 
 @media (max-width: 600px) {
-  .v2-proj-block { padding: 34px 0 38px; }
-  .v2-proj { padding: 0 16px; }
-  .v2-proj__grid {
+  .v3-proj-block { padding: 34px 0 38px; }
+  .v3-proj { padding: 0 16px; }
+  .v3-proj__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
-  .v2-proj__title { font-size: 22px; }
-  .v2-proj__head {
+  .v3-proj__title { font-size: 22px; }
+  .v3-proj__head {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "eyebrow"
@@ -275,5 +275,5 @@
       "all";
     row-gap: 14px;
   }
-  .v2-proj__all { justify-self: start; }
+  .v3-proj__all { justify-self: start; }
 }

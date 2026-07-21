@@ -6,7 +6,7 @@
 # produced when the source frame is >=880px wide.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-OUT=assets/img/v2/proj
+OUT=assets/img/v3/proj
 mkdir -p "$OUT"
 
 emit () { # emit <src> <base> <width>  -> base-<w>.jpg + base-<w>.avif
@@ -23,6 +23,6 @@ while IFS=$'\t' read -r slug status lines src; do
 done < tools/projects-hub-manifest.tsv
 
 for h in hero-projects hero-current; do
-  for w in 960 1440 1920; do emit "assets/img/v2/$h.jpg" "assets/img/v2/$h" "$w"; done
+  for w in 960 1440 1920; do emit "assets/img/v3/$h.jpg" "assets/img/v3/$h" "$w"; done
 done
 echo "done"

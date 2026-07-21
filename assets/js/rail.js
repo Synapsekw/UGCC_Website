@@ -40,12 +40,12 @@
   }
 
   function init() {
-    var rails = document.querySelectorAll('.v2-rail');
+    var rails = document.querySelectorAll('.v3-rail');
 
     Array.prototype.forEach.call(rails, function (rail) {
-      var vp = rail.querySelector('.v2-rail__viewport');
-      var track = rail.querySelector('.v2-rail__track');
-      var btn = rail.querySelector('.v2-rail__toggle');
+      var vp = rail.querySelector('.v3-rail__viewport');
+      var track = rail.querySelector('.v3-rail__track');
+      var btn = rail.querySelector('.v3-rail__toggle');
       if (!vp || !track) return;
 
       var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -180,7 +180,7 @@
 
 .hero-motion #aCqA2TkE7 .hero-word {
   display: inline-block;
-  animation: hero-word-in .75s var(--v2-ease-out-expo) both;
+  animation: hero-word-in .75s var(--v3-ease-out-expo) both;
 }
 
 /* .hero-service used to share this selector; removing the cards took the
@@ -188,7 +188,7 @@
    logo rail replaces the cards here and fades in as one band. */
 .hero-motion #aCqA2TkE7 .hero-cta,
 .hero-motion #aCqA2TkE7 .hero-clients {
-  animation: hero-fade-up .8s var(--v2-ease-out-expo) both;
+  animation: hero-fade-up .8s var(--v3-ease-out-expo) both;
 }
 
 @keyframes hero-word-in {

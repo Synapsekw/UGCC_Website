@@ -35,9 +35,9 @@
   ok('h1 is the family nav label',
      h1s[0] && h1s[0].textContent.trim() === 'Business Lines',
      h1s[0] && h1s[0].textContent.trim());
-  var tabs = document.querySelectorAll('.v2-subnav a');
+  var tabs = document.querySelectorAll('.v3-subnav a');
   ok('sub-nav rail has 8 tabs', tabs.length === 8, tabs.length);
-  var active = document.querySelectorAll('.v2-subnav a.is-active');
+  var active = document.querySelectorAll('.v3-subnav a.is-active');
   ok('All is the active tab',
      active.length === 1 && active[0].textContent.trim() === 'All' &&
      active[0].getAttribute('aria-current') === 'page');
@@ -99,7 +99,7 @@
          have revealed. A tile still below the fold is legitimately pending.
      Whether it will ever reveal is a separate, stronger check — the
      SELECTOR assertion below. */
-  var revealGateOn = document.documentElement.classList.contains('v2-reveal') &&
+  var revealGateOn = document.documentElement.classList.contains('v3-reveal') &&
                      document.documentElement.classList.contains('hero-motion');
 
   Array.prototype.forEach.call(tiles, function (tile, i) {
@@ -173,7 +173,7 @@
     Array.prototype.forEach.call(document.styleSheets, function (ss) {
       Array.prototype.forEach.call(ss.cssRules || [], function (r) {
         if (r.style && r.style.opacity === '0' &&
-            /hero-motion\.v2-reveal/.test(r.selectorText || '')) {
+            /hero-motion\.v3-reveal/.test(r.selectorText || '')) {
           (r.selectorText || '').split(',').forEach(function (sel) {
             var m = sel.match(/\.([a-z0-9_-]+)\s*$/i);
             if (m) hiddenBySheet.push('.' + m[1]);
@@ -197,12 +197,12 @@
 
   /* ---- the two reds are not interchangeable ---- */
   var lightEyebrow = document.querySelector('.as-section--light .as-head__eyebrow');
-  ok('light-ground eyebrow uses --v2-red',
+  ok('light-ground eyebrow uses --v3-red',
      !lightEyebrow || getComputedStyle(lightEyebrow).color === 'rgb(212, 28, 34)',
      lightEyebrow && getComputedStyle(lightEyebrow).color);
 
   var darkEyebrow = document.querySelector('.as-section--navy .as-head__eyebrow');
-  ok('navy-ground eyebrow uses --v2-red-text',
+  ok('navy-ground eyebrow uses --v3-red-text',
      !darkEyebrow || getComputedStyle(darkEyebrow).color === 'rgb(232, 99, 94)',
      darkEyebrow && getComputedStyle(darkEyebrow).color);
 

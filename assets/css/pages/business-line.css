@@ -28,9 +28,9 @@
   padding: 18px 0;
   border-bottom: .5px solid rgba(0, 42, 65, .16);
   text-decoration: none;
-  box-shadow: inset 0 0 0 var(--v2-red, #d41c22);   /* zero-width at rest, so it transitions */
-  transition: background-color .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1)),
-              box-shadow .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1));
+  box-shadow: inset 0 0 0 var(--v3-red, #d41c22);   /* zero-width at rest, so it transitions */
+  transition: background-color .2s var(--v3-ease-out-quart, cubic-bezier(.25,1,.5,1)),
+              box-shadow .2s var(--v3-ease-out-quart, cubic-bezier(.25,1,.5,1));
 }
 
 .blp-proj__item:first-child .blp-proj__row {
@@ -42,7 +42,7 @@
 .blp-proj__row:hover,
 .blp-proj__row:focus-visible {
   background-color: rgba(0, 42, 65, .07);
-  box-shadow: inset 3px 0 0 var(--v2-red, #d41c22);
+  box-shadow: inset 3px 0 0 var(--v3-red, #d41c22);
   outline: none;
 }
 
@@ -50,7 +50,7 @@
   .blp-proj__row:focus-visible { outline: 2px solid CanvasText; }
 }
 @media (prefers-contrast: more) {
-  .blp-proj__row:focus-visible { outline: 2px solid var(--v2-navy, rgb(0,42,65)); outline-offset: -2px; }
+  .blp-proj__row:focus-visible { outline: 2px solid var(--v3-navy, rgb(0,42,65)); outline-offset: -2px; }
 }
 
 /* Hammersmith One ships one weight; family AND weight declared because this
@@ -60,7 +60,7 @@
   font-weight: 400;
   font-size: 17px;
   line-height: 1.3;
-  color: var(--v2-navy, rgb(0,42,65));
+  color: var(--v3-navy, rgb(0,42,65));
   text-wrap: balance;
 }
 
@@ -76,7 +76,7 @@
 .blp-proj__value {
   font-size: 13px;
   font-weight: 600;
-  color: var(--v2-navy, rgb(0,42,65));
+  color: var(--v3-navy, rgb(0,42,65));
   font-variant-numeric: tabular-nums;
 }
 
@@ -84,13 +84,13 @@
    column and the glyph is never clipped (homepage .wr-arrow pattern). */
 .blp-proj__arrow {
   justify-self: end;
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
   font-size: 15px;
   transform: translateX(-4px);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .blp-proj__arrow { transition: transform .2s var(--v2-ease-out-quart, cubic-bezier(.25,1,.5,1)); }
+  .blp-proj__arrow { transition: transform .2s var(--v3-ease-out-quart, cubic-bezier(.25,1,.5,1)); }
 }
 
 .blp-proj__row:hover .blp-proj__arrow,

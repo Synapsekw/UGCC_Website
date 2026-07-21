@@ -2,13 +2,13 @@
 # Generates the homepage rail's downscaled derivatives from the 1920w originals.
 # Idempotent: safe to re-run. Requires macOS `sips` (no external dependencies).
 #
-# Output: assets/img/v2/rail/slide-NN-{480,960}.jpg, centre-cropped to an exact
+# Output: assets/img/v3/rail/slide-NN-{480,960}.jpg, centre-cropped to an exact
 # 480x316 / 960x632 so every card reserves the same layout space.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 SRC="assets/img/v2"
-OUT="assets/img/v2/rail"
+OUT="assets/img/v3/rail"
 mkdir -p "$OUT"
 
 make_one() {

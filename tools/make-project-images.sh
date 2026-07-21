@@ -3,20 +3,20 @@
 # cover images already in assets/img/.
 # Idempotent: safe to re-run. Requires macOS `sips` (no external dependencies).
 #
-# Output: assets/img/v2/proj/<slug>-{440,880}.jpg, centre-cropped to an exact
+# Output: assets/img/v3/proj/<slug>-{440,880}.jpg, centre-cropped to an exact
 # 440x275 / 880x550 (16:10) so every card reserves the same layout space and
 # no card shifts as its image arrives.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-OUT="assets/img/v2/proj"
+OUT="assets/img/v3/proj"
 mkdir -p "$OUT"
 
 # slug|source. The slug is the derivative filename stem and matches the project
 # directory, except Duqm which is shortened so the file is not named after a
 # 74-character directory. Every source was verified landscape and >= 1024px wide.
 ROWS=(
-  "kp3cns301|assets/img/v2/card-kp3.jpg"
+  "kp3cns301|assets/img/v3/card-kp3.jpg"
   "ra-259|assets/img/c253e1af-60-mnl4x5okE6sxOWwl.png"
   "pahwc1151|assets/img/37063398-cover-mxB26lNQqxfoZnna.jpg"
   "pai18pa|assets/img/d09f536f-cover-AzGMBZ95W8tqw0VQ.JPG"

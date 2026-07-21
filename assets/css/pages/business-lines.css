@@ -13,7 +13,7 @@
 .bl-mosaic {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 28px 24px;            /* matches .v2-proj__grid on the landing page */
+  gap: 28px 24px;            /* matches .v3-proj__grid on the landing page */
   margin: 0;
   padding: 0;
   list-style: none;
@@ -70,9 +70,9 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 1.25;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   text-wrap: balance;
-  transition: color .25s var(--v2-ease-out-quart);
+  transition: color .25s var(--v3-ease-out-quart);
 }
 
 .bl-tile--lead .bl-tile__name { font-size: 21px; }
@@ -94,7 +94,7 @@
 
 .bl-tile__count {
   font-weight: 600;
-  color: var(--v2-red);      /* light ground -> --v2-red, never --v2-red-text */
+  color: var(--v3-red);      /* light ground -> --v3-red, never --v3-red-text */
   font-variant-numeric: tabular-nums;
 }
 
@@ -122,7 +122,7 @@
   font-weight: 400;
   font-size: 38px;
   line-height: 1;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   font-variant-numeric: tabular-nums;
 }
 
@@ -132,26 +132,26 @@
   font-weight: 600;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--v2-red);
+  color: var(--v3-red);
 }
 
 /* ---- 6. Hover and focus -------------------------------------------------
    One rule carries both states so they cannot drift apart in a later edit. */
 .bl-tile__link:hover .bl-tile__name,
 .bl-tile__link:focus-visible .bl-tile__name {
-  color: var(--v2-red);      /* outside the motion gate: reduced-motion
+  color: var(--v3-red);      /* outside the motion gate: reduced-motion
                                 visitors still get feedback */
 }
 
 .bl-tile__link:focus-visible {
   outline-offset: 5px;
-  border-radius: 4px;        /* ring wraps the whole tile, as .v2-proj__card */
+  border-radius: 4px;        /* ring wraps the whole tile, as .v3-proj__card */
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .bl-tile__shot img {
-    transition: transform .5s var(--v2-ease-out-quart),
-                filter .5s var(--v2-ease-out-quart);
+    transition: transform .5s var(--v3-ease-out-quart),
+                filter .5s var(--v3-ease-out-quart);
   }
   .bl-tile__link:hover .bl-tile__shot img,
   .bl-tile__link:focus-visible .bl-tile__shot img {
@@ -163,9 +163,9 @@
 /* ---- 7. Reveal ----------------------------------------------------------
    Opts into the existing about-suite.js contract. Double-gated, so a script
    failure leaves every tile visible. */
-.hero-motion.v2-reveal .bl-tile { opacity: 0; }
-.hero-motion.v2-reveal .bl-tile.is-in {
-  animation: as-fade-up .8s var(--v2-ease-out-expo) both;
+.hero-motion.v3-reveal .bl-tile { opacity: 0; }
+.hero-motion.v3-reveal .bl-tile.is-in {
+  animation: as-fade-up .8s var(--v3-ease-out-expo) both;
   animation-delay: calc(var(--i, 0) * 60ms);
 }
 
@@ -190,5 +190,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-motion.v2-reveal .bl-tile { opacity: 1; }
+  .hero-motion.v3-reveal .bl-tile { opacity: 1; }
 }

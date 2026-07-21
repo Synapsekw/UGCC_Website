@@ -33,10 +33,10 @@
 }
 .pjx-chip:hover,
 .pjx-chip:focus-visible { background: rgba(0, 42, 65, .14); }
-.pjx-chip:focus-visible { outline: 3px solid var(--v2-red, #d41c22); outline-offset: 2px; }
+.pjx-chip:focus-visible { outline: 3px solid var(--v3-red, #d41c22); outline-offset: 2px; }
 .pjx-chip[aria-pressed="true"] {
-  background: var(--v2-navy, #002a41);
-  border-color: var(--v2-navy, #002a41);
+  background: var(--v3-navy, #002a41);
+  border-color: var(--v3-navy, #002a41);
   color: #fff;
 }
 
@@ -65,7 +65,7 @@
   border-radius: 4px;
 }
 .pjx-card__link:focus-visible {
-  outline: 3px solid var(--v2-red, #d41c22);
+  outline: 3px solid var(--v3-red, #d41c22);
   outline-offset: 4px;
 }
 
@@ -87,12 +87,12 @@
   line-height: 1.4;
 }
 .pjx-flag--current {
-  color: var(--v2-red, #d41c22);
+  color: var(--v3-red, #d41c22);
   background: rgba(212, 28, 34, .07);
   border: 1px solid rgba(212, 28, 34, .3);
 }
 .pjx-flag--completed {
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
   background: rgba(0, 42, 65, .06);
   border: 1px solid rgba(0, 42, 65, .18);
 }
@@ -115,7 +115,7 @@
   line-height: 1.4;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--v2-navy, #002a41);
+  color: var(--v3-navy, #002a41);
 }
 
 /* two tracks on tablet widths; the kit's single 920px collapse would give

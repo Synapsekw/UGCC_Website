@@ -58,7 +58,7 @@
 
   function block() { return document.getElementById(SECTION); }
   function cards() {
-    return Array.prototype.slice.call(document.querySelectorAll('.v2-proj__item'));
+    return Array.prototype.slice.call(document.querySelectorAll('.v3-proj__item'));
   }
 
   /* html { scroll-behavior: smooth } is set globally in main.css and v2.css,
@@ -159,9 +159,9 @@
     var bad = [];
     list.forEach(function (li, i) {
       var a = li.querySelector('a[href]');
-      var h4 = li.querySelector('.v2-proj__name');
+      var h4 = li.querySelector('.v3-proj__name');
       if (!a) { bad.push('#' + i + ' no anchor'); return; }
-      if (!h4) { bad.push('#' + i + ' no .v2-proj__name'); return; }
+      if (!h4) { bad.push('#' + i + ' no .v3-proj__name'); return; }
       var label = norm(a.getAttribute('aria-label'));
       var title = norm(h4.textContent);
       if (!label) { bad.push('#' + i + ' (' + title + ') has no aria-label'); return; }
@@ -198,7 +198,7 @@
   check('image frames reserve a 16:10 box', function () {
     /* This is the mechanism that keeps layout shift at zero as lazy images
        arrive. Assert the mechanism, not a timing-dependent measurement. */
-    var list = document.querySelectorAll('.v2-proj__shot');
+    var list = document.querySelectorAll('.v3-proj__shot');
     if (list.length !== CARD_COUNT) {
       return { ok: false, detail: 'expected ' + CARD_COUNT + ' frames, found ' + list.length };
     }
@@ -227,8 +227,8 @@
   });
 
   check('the all-projects exit is present', function () {
-    var a = document.querySelector('.v2-proj__all');
-    if (!a) return { ok: false, detail: '.v2-proj__all missing' };
+    var a = document.querySelector('.v3-proj__all');
+    if (!a) return { ok: false, detail: '.v3-proj__all missing' };
     return {
       ok: a.getAttribute('href') === ALL_HREF,
       detail: 'href=' + a.getAttribute('href')
@@ -236,7 +236,7 @@
   });
 
   check('column count matches the viewport', function () {
-    var grid = document.querySelector('.v2-proj__grid');
+    var grid = document.querySelector('.v3-proj__grid');
     if (!grid) return { ok: false, detail: 'grid missing' };
     var cols = getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length;
     var w = window.innerWidth;

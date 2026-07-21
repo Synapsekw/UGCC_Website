@@ -1,7 +1,7 @@
 /* Project detail page (all 30 /<slug>/ pages) — leaf sheet on the about-suite kit.
    Thin by contract: layout spacing for the compact facts band, link behaviour
    for similar-project tiles, and containers for the optional video and
-   owner-logo slots. Never restyles the visual design of as-* / v2-* components. */
+   owner-logo slots. Never restyles the visual design of as-* / v3-* components. */
 
 .pjd-facts .as-section__inner { padding-block: 56px; }
 .pjd-facts .as-stats { margin-top: 0; }

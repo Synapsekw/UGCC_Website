@@ -6,16 +6,16 @@
    ========================================================================== */
 
 :root {
-  --v2-navy: rgb(0, 42, 65);
-  --v2-navy-92: rgba(0, 42, 65, .92);
-  --v2-navy-70: rgba(0, 42, 65, .70);
-  --v2-red: #d41c22;
-  --v2-red-text: #e8635e;
-  --v2-shadow-header: 0 10px 30px -12px rgba(0, 21, 33, .45);
-  --v2-shadow-lift: 0 14px 28px -12px rgba(0, 21, 33, .35);
-  --v2-ease-out-quart: cubic-bezier(.25, 1, .5, 1);
-  --v2-ease-out-quint: cubic-bezier(.22, 1, .36, 1);
-  --v2-ease-out-expo: cubic-bezier(.16, 1, .3, 1);
+  --v3-navy: rgb(0, 42, 65);
+  --v3-navy-92: rgba(0, 42, 65, .92);
+  --v3-navy-70: rgba(0, 42, 65, .70);
+  --v3-red: #d41c22;
+  --v3-red-text: #e8635e;
+  --v3-shadow-header: 0 10px 30px -12px rgba(0, 21, 33, .45);
+  --v3-shadow-lift: 0 14px 28px -12px rgba(0, 21, 33, .35);
+  --v3-ease-out-quart: cubic-bezier(.25, 1, .5, 1);
+  --v3-ease-out-quint: cubic-bezier(.22, 1, .36, 1);
+  --v3-ease-out-expo: cubic-bezier(.16, 1, .3, 1);
 }
 
 /* ---------- global feel ---------- */
@@ -24,7 +24,7 @@
 }
 
 ::selection {
-  background: var(--v2-red);
+  background: var(--v3-red);
   color: #fff;
 }
 
@@ -33,7 +33,7 @@
    On navy the white ring carries the contrast (14.9:1); on light surfaces the
    white ring vanishes and the red outline carries it (5.4:1 on white). */
 :focus-visible {
-  outline: 2px solid var(--v2-red);
+  outline: 2px solid var(--v3-red);
   outline-offset: 3px;
   border-radius: 2px;
   box-shadow: 0 0 0 7px #fff;
@@ -50,24 +50,24 @@
    in layout. Frost-only, per plan. */
 .block-header {
   /* border-bottom is reserved at rest (transparent, same width the
-     scrolled state uses) so toggling .v2-scrolled only ever changes its
+     scrolled state uses) so toggling .v3-scrolled only ever changes its
      colour, never the header's box height — a border that appears out of
      nowhere on scroll shifts .page__blocks by its own width, which is
      exactly the class of content-jump this frost-only approach exists to
      avoid. */
   border-bottom: .5px solid transparent;
   transition:
-    background-color .35s var(--v2-ease-out-quart),
-    box-shadow .35s var(--v2-ease-out-quart),
-    backdrop-filter .35s var(--v2-ease-out-quart),
-    border-color .35s var(--v2-ease-out-quart);
+    background-color .35s var(--v3-ease-out-quart),
+    box-shadow .35s var(--v3-ease-out-quart),
+    backdrop-filter .35s var(--v3-ease-out-quart),
+    border-color .35s var(--v3-ease-out-quart);
 }
 
-.v2-scrolled .block-header {
-  background-color: var(--v2-navy-70);
+.v3-scrolled .block-header {
+  background-color: var(--v3-navy-70);
   -webkit-backdrop-filter: blur(22px) saturate(1.4);
   backdrop-filter: blur(22px) saturate(1.4);
-  box-shadow: var(--v2-shadow-header);
+  box-shadow: var(--v3-shadow-header);
   border-bottom-color: rgba(255, 255, 255, .14);
 }
 
@@ -84,10 +84,10 @@
   right: 0;
   bottom: -7px;
   height: 2px;
-  background: var(--v2-red);
+  background: var(--v3-red);
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform .3s var(--v2-ease-out-quint);
+  transition: transform .3s var(--v3-ease-out-quint);
 }
 
 .block-header .item-content-wrapper:hover .item-content::after,
@@ -107,11 +107,11 @@
 .grid-button--primary,
 .grid-button--secondary {
   transition:
-    transform .22s var(--v2-ease-out-quart),
-    box-shadow .22s var(--v2-ease-out-quart),
-    background-color .22s var(--v2-ease-out-quart),
-    color .22s var(--v2-ease-out-quart),
-    border-color .22s var(--v2-ease-out-quart);
+    transform .22s var(--v3-ease-out-quart),
+    box-shadow .22s var(--v3-ease-out-quart),
+    background-color .22s var(--v3-ease-out-quart),
+    color .22s var(--v3-ease-out-quart),
+    border-color .22s var(--v3-ease-out-quart);
   will-change: transform;
 }
 
@@ -120,7 +120,7 @@
 .grid-button--primary:hover,
 .grid-button--secondary:hover {
   transform: translateY(-2px);
-  box-shadow: var(--v2-shadow-lift) !important;
+  box-shadow: var(--v3-shadow-lift) !important;
 }
 
 .grid-button--primary:active,
@@ -144,8 +144,8 @@
 
 .image-wrapper .image--link img {
   transition:
-    transform .7s var(--v2-ease-out-quart),
-    filter .7s var(--v2-ease-out-quart);
+    transform .7s var(--v3-ease-out-quart),
+    filter .7s var(--v3-ease-out-quart);
   will-change: transform;
 }
 
@@ -157,16 +157,16 @@
 
 /* ---------- hero slideshow: slower crossfade + Ken Burns drift ---------- */
 .slideshow.js-init .slide {
-  transition: opacity 1.15s var(--v2-ease-out-quart);
+  transition: opacity 1.15s var(--v3-ease-out-quart);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .slideshow.js-init .slide--active {
-    animation: v2-kenburns 8s var(--v2-ease-out-quart) forwards;
+    animation: v3-kenburns 8s var(--v3-ease-out-quart) forwards;
   }
 }
 
-@keyframes v2-kenburns {
+@keyframes v3-kenburns {
   from { transform: scale(1.02); }
   to   { transform: scale(1.09); }
 }
@@ -174,8 +174,8 @@
 /* dots become pills; the active one stretches */
 .slideshow__dots .dot {
   transition:
-    width .35s var(--v2-ease-out-quint),
-    opacity .35s var(--v2-ease-out-quint);
+    width .35s var(--v3-ease-out-quint),
+    opacity .35s var(--v3-ease-out-quint);
 }
 
 .slideshow__dots .dot--current {
@@ -183,7 +183,7 @@
 }
 
 .slideshow-nav-button {
-  transition: transform .25s var(--v2-ease-out-quart), opacity .25s;
+  transition: transform .25s var(--v3-ease-out-quart), opacity .25s;
 }
 
 .slideshow-nav-button--right:hover { transform: translateX(4px); }
@@ -194,13 +194,13 @@
 .transition.transition--fade:not(.transition--root-hidden)[data-animation-state=active],
 .transition.transition--scale:not(.transition--root-hidden)[data-animation-state=active] {
   transition-duration: .8s;
-  transition-timing-function: var(--v2-ease-out-quint);
+  transition-timing-function: var(--v3-ease-out-quint);
 }
 
 /* ---------- social icons + footer ---------- */
 .social-icons__link {
   display: inline-flex;
-  transition: transform .25s var(--v2-ease-out-quart), opacity .25s;
+  transition: transform .25s var(--v3-ease-out-quart), opacity .25s;
 }
 
 .social-icons__link:hover {
@@ -221,33 +221,33 @@
    V2 data tables — replaces the flattened text-box "tables" from the builder
    ========================================================================== */
 
-.v2-tblock {
+.v3-tblock {
   background: #fff;
   padding: 32px 16px 88px;
 }
 
-.v2-tblock__inner {
+.v3-tblock__inner {
   max-width: 1224px;
   margin: 0 auto;
 }
 
-.v2-tblock__title {
+.v3-tblock__title {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 28px;
   line-height: 1.3;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   margin: 0 0 28px;
 }
 
-.v2-table-scroll {
+.v3-table-scroll {
   overflow-x: auto;
   border: 1px solid rgba(0, 42, 65, .12);
   border-radius: 14px;
   box-shadow: 0 14px 34px -22px rgba(0, 21, 33, .35);
 }
 
-.v2-table {
+.v3-table {
   width: 100%;
   min-width: 640px;
   border-collapse: separate;
@@ -258,8 +258,8 @@
   color: #22313d;
 }
 
-.v2-table thead th {
-  background: var(--v2-navy);
+.v3-table thead th {
+  background: var(--v3-navy);
   color: #fff;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
@@ -271,44 +271,44 @@
   white-space: nowrap;
 }
 
-.v2-table tbody td {
+.v3-table tbody td {
   padding: 15px 22px;
   border-bottom: 1px solid rgba(0, 42, 65, .08);
   vertical-align: top;
-  transition: background-color .22s var(--v2-ease-out-quart);
+  transition: background-color .22s var(--v3-ease-out-quart);
 }
 
-.v2-table tbody tr:last-child td { border-bottom: 0; }
+.v3-table tbody tr:last-child td { border-bottom: 0; }
 
-.v2-table tbody tr:nth-child(even) td { background: rgba(0, 42, 65, .03); }
+.v3-table tbody tr:nth-child(even) td { background: rgba(0, 42, 65, .03); }
 
-.v2-table tbody td:first-child {
+.v3-table tbody td:first-child {
   font-weight: 600;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   white-space: nowrap;
 }
 
-.v2-table tbody tr:hover td { background: rgba(0, 42, 65, .085); }
+.v3-table tbody tr:hover td { background: rgba(0, 42, 65, .085); }
 
-.v2-table tbody tr:hover td:first-child { color: var(--v2-red); }
+.v3-table tbody tr:hover td:first-child { color: var(--v3-red); }
 
 @media (max-width: 640px) {
-  .v2-tblock { padding: 24px 12px 64px; }
-  .v2-table { font-size: 15px; }
-  .v2-table tbody td, .v2-table thead th { padding: 12px 16px; }
-  .v2-table tbody td:first-child { white-space: normal; }
+  .v3-tblock { padding: 24px 12px 64px; }
+  .v3-table { font-size: 15px; }
+  .v3-table tbody td, .v3-table thead th { padding: 12px 16px; }
+  .v3-table tbody td:first-child { white-space: normal; }
 }
 
 /* ==========================================================================
    V2 About-section components: subnav, prose, pills, cards, accordion, banner
    ========================================================================== */
 
-.v2-subnav {
-  background: var(--v2-navy);
+.v3-subnav {
+  background: var(--v3-navy);
   padding: 0 16px;
 }
 
-.v2-subnav__inner {
+.v3-subnav__inner {
   width: max-content;
   max-width: 100%;
   margin: 0 auto;
@@ -318,7 +318,7 @@
   scrollbar-width: none;
 }
 
-.v2-subnav a {
+.v3-subnav a {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 15px;
   font-weight: 600;
@@ -328,41 +328,41 @@
   padding: 18px 14px 16px;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
-  transition: color .22s var(--v2-ease-out-quart), border-color .22s var(--v2-ease-out-quart);
+  transition: color .22s var(--v3-ease-out-quart), border-color .22s var(--v3-ease-out-quart);
 }
 
-.v2-subnav a:hover { color: #fff; }
+.v3-subnav a:hover { color: #fff; }
 
-.v2-subnav a.is-active {
+.v3-subnav a.is-active {
   color: #fff;
-  border-bottom-color: var(--v2-red);
+  border-bottom-color: var(--v3-red);
 }
 
-.v2-prose {
+.v3-prose {
   background: #fff;
   padding: 72px 16px 24px;
 }
 
-.v2-prose__inner { max-width: 880px; margin: 0 auto; }
+.v3-prose__inner { max-width: 880px; margin: 0 auto; }
 
-.v2-prose h2 {
+.v3-prose h2 {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 32px;
   line-height: 1.25;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   margin: 0 0 24px;
 }
 
-.v2-prose h3 {
+.v3-prose h3 {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 20px;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   margin: 28px 0 12px;
 }
 
-.v2-prose p {
+.v3-prose p {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 17px;
   line-height: 1.75;
@@ -370,7 +370,7 @@
   margin: 0 0 18px;
 }
 
-.v2-prose ul {
+.v3-prose ul {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 16px;
   line-height: 1.7;
@@ -379,36 +379,36 @@
   padding-left: 22px;
 }
 
-.v2-prose li { margin-bottom: 6px; }
+.v3-prose li { margin-bottom: 6px; }
 
-.v2-pills {
+.v3-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin: 26px 0 8px;
 }
 
-.v2-pill {
+.v3-pill {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 15px;
   font-weight: 600;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
   background: rgba(0, 42, 65, .06);
   border: 1px solid rgba(0, 42, 65, .14);
   border-radius: 100px;
   padding: 10px 20px;
-  transition: background-color .25s var(--v2-ease-out-quart),
-              color .25s var(--v2-ease-out-quart),
-              transform .25s var(--v2-ease-out-quart);
+  transition: background-color .25s var(--v3-ease-out-quart),
+              color .25s var(--v3-ease-out-quart),
+              transform .25s var(--v3-ease-out-quart);
 }
 
-.v2-pill:hover {
-  background: var(--v2-navy);
+.v3-pill:hover {
+  background: var(--v3-navy);
   color: #fff;
   transform: translateY(-2px);
 }
 
-.v2-cards {
+.v3-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
@@ -417,28 +417,28 @@
   padding: 8px 0 24px;
 }
 
-.v2-card {
+.v3-card {
   background: #fff;
   border: 1px solid rgba(0, 42, 65, .12);
   border-radius: 14px;
   padding: 28px;
-  transition: transform .3s var(--v2-ease-out-quart), box-shadow .3s var(--v2-ease-out-quart);
+  transition: transform .3s var(--v3-ease-out-quart), box-shadow .3s var(--v3-ease-out-quart);
 }
 
-.v2-card:hover {
+.v3-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 38px -20px rgba(0, 21, 33, .4);
 }
 
-.v2-card h3 {
+.v3-card h3 {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
   font-size: 19px;
-  color: var(--v2-red);
+  color: var(--v3-red);
   margin: 0 0 10px;
 }
 
-.v2-card p {
+.v3-card p {
   font-family: var(--font-secondary, 'Open Sans', sans-serif);
   font-size: 15px;
   line-height: 1.65;
@@ -446,24 +446,24 @@
   margin: 0;
 }
 
-.v2-accordion {
+.v3-accordion {
   max-width: 880px;
   margin: 0 auto;
   padding-bottom: 24px;
 }
 
-.v2-acc {
+.v3-acc {
   border: 1px solid rgba(0, 42, 65, .12);
   border-radius: 12px;
   margin-bottom: 14px;
   background: #fff;
   overflow: hidden;
-  transition: box-shadow .3s var(--v2-ease-out-quart);
+  transition: box-shadow .3s var(--v3-ease-out-quart);
 }
 
-.v2-acc.is-open { box-shadow: 0 14px 30px -22px rgba(0, 21, 33, .4); }
+.v3-acc.is-open { box-shadow: 0 14px 30px -22px rgba(0, 21, 33, .4); }
 
-.v2-acc__btn {
+.v3-acc__btn {
   width: 100%;
   display: flex;
   align-items: center;
@@ -476,44 +476,44 @@
   padding: 20px 24px;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-size: 17px;
-  color: var(--v2-navy);
-  transition: background-color .22s var(--v2-ease-out-quart);
+  color: var(--v3-navy);
+  transition: background-color .22s var(--v3-ease-out-quart);
 }
 
-.v2-acc__btn:hover { background: rgba(0, 42, 65, .045); }
+.v3-acc__btn:hover { background: rgba(0, 42, 65, .045); }
 
-.v2-acc__btn::after {
+.v3-acc__btn::after {
   content: "";
   flex: 0 0 auto;
   width: 10px;
   height: 10px;
-  border-right: 2px solid var(--v2-red);
-  border-bottom: 2px solid var(--v2-red);
+  border-right: 2px solid var(--v3-red);
+  border-bottom: 2px solid var(--v3-red);
   transform: rotate(45deg);
-  transition: transform .3s var(--v2-ease-out-quint);
+  transition: transform .3s var(--v3-ease-out-quint);
 }
 
-.v2-acc.is-open .v2-acc__btn::after { transform: rotate(225deg); }
+.v3-acc.is-open .v3-acc__btn::after { transform: rotate(225deg); }
 
-.v2-acc__panel {
+.v3-acc__panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows .4s var(--v2-ease-out-quint);
+  transition: grid-template-rows .4s var(--v3-ease-out-quint);
 }
 
-.v2-acc.is-open .v2-acc__panel { grid-template-rows: 1fr; }
+.v3-acc.is-open .v3-acc__panel { grid-template-rows: 1fr; }
 
-.v2-acc__content { overflow: hidden; }
+.v3-acc__content { overflow: hidden; }
 
-.v2-acc__content-pad { padding: 4px 24px 22px; }
+.v3-acc__content-pad { padding: 4px 24px 22px; }
 
-.v2-banner {
-  background: var(--v2-navy);
+.v3-banner {
+  background: var(--v3-navy);
   padding: 72px 16px;
   margin-top: 48px;
 }
 
-.v2-banner p {
+.v3-banner p {
   max-width: 980px;
   margin: 0 auto;
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
@@ -525,14 +525,14 @@
 }
 
 @media (max-width: 640px) {
-  .v2-prose { padding: 48px 12px 16px; }
-  .v2-prose h2 { font-size: 26px; }
-  .v2-banner p { font-size: 20px; }
+  .v3-prose { padding: 48px 12px 16px; }
+  .v3-prose h2 { font-size: 26px; }
+  .v3-banner p { font-size: 20px; }
 }
 
 /* Section background images that must stay contained (no parallax):
    fills the .block-background slot exactly, clipped to the section. */
-.v2-bgimg {
+.v3-bgimg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -573,7 +573,7 @@
    the left". That version is the better one - it triggers from
    .item-content-wrapper:hover, which is a larger hit area than the inline
    <a> itself, and uses :focus-within rather than :focus-visible on the
-   anchor. It already draws in var(--v2-red), so Task 2's colour correction
+   anchor. It already draws in var(--v3-red), so Task 2's colour correction
    flows through it automatically. Task 3 originally appended a duplicate
    here; it was removed. Do not re-add one. */
 
@@ -584,15 +584,15 @@
   border-radius: 999px;
   padding: 9px 20px;
   transition:
-    background-color .3s var(--v2-ease-out-quart),
-    border-color .3s var(--v2-ease-out-quart),
-    color .3s var(--v2-ease-out-quart);
+    background-color .3s var(--v3-ease-out-quart),
+    border-color .3s var(--v3-ease-out-quart),
+    color .3s var(--v3-ease-out-quart);
 }
 
 .block-header .block-header-item:last-child .item-content:hover {
   background: #fff;
   border-color: #fff;
-  color: var(--v2-navy);
+  color: var(--v3-navy);
 }
 
 /* The pill carries its own affordance; suppress the underline on it. */

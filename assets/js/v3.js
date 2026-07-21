@@ -9,7 +9,7 @@
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(function () {
-      document.documentElement.classList.toggle('v2-scrolled', window.scrollY > 24);
+      document.documentElement.classList.toggle('v3-scrolled', window.scrollY > 24);
       ticking = false;
     });
   }
@@ -27,9 +27,9 @@
   }
 
   /* ---------- accordions (CSR page etc.) ---------- */
-  document.querySelectorAll('.v2-acc__btn').forEach(function (btn) {
+  document.querySelectorAll('.v3-acc__btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var acc = btn.closest('.v2-acc');
+      var acc = btn.closest('.v3-acc');
       var open = acc.classList.toggle('is-open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });

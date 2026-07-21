@@ -51,7 +51,7 @@
   var branch = reduced ? 'reduce' : 'no-preference';
 
   function allCards() {
-    return Array.prototype.slice.call(document.querySelectorAll('.v2-rail__item'));
+    return Array.prototype.slice.call(document.querySelectorAll('.v3-rail__item'));
   }
   /* The 15 real ones. The duplicate set is loop padding, not content. */
   function cards() {
@@ -59,7 +59,7 @@
       return li.getAttribute('aria-hidden') !== 'true';
     });
   }
-  function viewport() { return document.querySelector('.v2-rail__viewport'); }
+  function viewport() { return document.querySelector('.v3-rail__viewport'); }
 
   /* The original slideshow was 1029px. The point of the redesign was to stop
      spending a whole viewport on this section, so the bound is expressed as a
@@ -150,26 +150,26 @@
   });
 
   check('drift matches the motion preference', function () {
-    var track = document.querySelector('.v2-rail__track');
+    var track = document.querySelector('.v3-rail__track');
     if (!track) return { ok: false, detail: 'rail not implemented' };
     var name = getComputedStyle(track).animationName;
     if (reduced) {
       return { ok: name === 'none', detail: '[reduce] animation-name=' + name };
     }
     return {
-      ok: name === 'v2-rail-drift',
+      ok: name === 'v3-rail-drift',
       detail: '[no-preference] animation-name=' + name
     };
   });
 
   check('pause control is present exactly when it is meaningful', function () {
-    var btn = document.querySelector('.v2-rail__toggle');
+    var btn = document.querySelector('.v3-rail__toggle');
     if (reduced) {
       /* Nothing drifts, so a pause button would be a control for nothing. */
       var gone = !btn || getComputedStyle(btn).display === 'none';
       return { ok: gone, detail: '[reduce] toggle hidden=' + gone };
     }
-    if (!btn) return { ok: false, detail: 'no .v2-rail__toggle — WCAG 2.2.2 needs one' };
+    if (!btn) return { ok: false, detail: 'no .v3-rail__toggle — WCAG 2.2.2 needs one' };
     var shown = getComputedStyle(btn).display !== 'none';
     var labelled = !!btn.getAttribute('aria-label');
     var pressable = btn.getAttribute('aria-pressed') !== null;
@@ -213,8 +213,8 @@
       dead.length ? 'dead: ' + dead.join(', ') : linkResults.length + '/' + linkResults.length + ' ok');
 
     var vp = viewport();
-    var rail = document.querySelector('.v2-rail');
-    var track = document.querySelector('.v2-rail__track');
+    var rail = document.querySelector('.v3-rail');
+    var track = document.querySelector('.v3-rail__track');
     if (!vp || !rail || !track) {
       record('the rail actually drifts', false, 'rail not implemented');
       record('pause toggle stops the drift', false, 'rail not implemented');
@@ -262,7 +262,7 @@
             ' over 400ms (want leftward movement)');
       }
     }).then(function () {
-      var btn = document.querySelector('.v2-rail__toggle');
+      var btn = document.querySelector('.v3-rail__toggle');
       if (reduced) {
         record('pause toggle stops the drift', true,
           '[reduce] not applicable — nothing drifts');

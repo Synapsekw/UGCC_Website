@@ -51,10 +51,10 @@ not part of the live site — exclude them when uploading to Hostinger:
 - `assets/img/KP3_GallerytobeUpdated/`
 - `assets/img/MEW-6085-2024_2025_GalleryTobeupdated/`
 
-## V2.0 (this branch)
+## V3.0 (this branch)
 
-Modernization layer on top of the pixel-perfect replica, in `assets/css/v2.css`
-and `assets/js/v2.js` (injected into every page, no other changes):
+Modernization layer on top of the pixel-perfect replica, in `assets/css/v3.css`
+and `assets/js/v3.js` (injected into every page, no other changes):
 
 - Sticky header gains a translucent navy + blur + shadow state once scrolled
 - Nav links: brand-red underline animates in from the left; active page underlined
