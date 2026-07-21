@@ -13,7 +13,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 SRC="assets/img/v3/slide-09.jpg"
-OUT="assets/img/v2"
+OUT="assets/img/v3"
 
 [ -f "$SRC" ] || { echo "missing $SRC" >&2; exit 1; }
 

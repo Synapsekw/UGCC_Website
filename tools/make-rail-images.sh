@@ -7,7 +7,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-SRC="assets/img/v2"
+SRC="assets/img/v3"
 OUT="assets/img/v3/rail"
 mkdir -p "$OUT"
 
