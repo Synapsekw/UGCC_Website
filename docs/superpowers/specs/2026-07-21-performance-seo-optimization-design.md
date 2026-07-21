@@ -38,10 +38,18 @@ Two correctness defects surfaced during the audit:
 
 ## Constraints
 
-- **Deploy target is Hostinger shared hosting** (Apache, `.htaccess`). Netlify
-  is a client preview only. No image CDN, no edge transforms, no build step on
-  the server. Every optimisation must be a build-time artefact committed to
-  the repo.
+- **Deploy target is Netlify**, on a temporary domain until the client hands
+  over `ugcc.com`. `publish = "."`, no build command, so every optimisation
+  must be a build-time artefact committed to the repo. Netlify serves Brotli
+  automatically and honours `netlify.toml` headers.
+  **`README.md` is stale** — it describes a Hostinger/`.htaccess` deployment
+  and must be corrected as part of this work. `.htaccess` stays in the repo
+  (harmless, and it documents the Apache fallback) but is not the tuning
+  surface.
+- **The site-wide `X-Robots-Tag: noindex` in `netlify.toml` is deliberate** and
+  stays until domain handover: the free Netlify tier has no password
+  protection, so it is what keeps the client preview out of search results.
+  SEO work therefore cannot be validated against live search until handover.
 - **Customer content freeze.** Existing copy and existing imagery must not
   change. Re-encoding an image to fewer bytes at identical dimensions and crop
   is explicitly in scope (confirmed 2026-07-21); recropping, recolouring or
@@ -90,8 +98,9 @@ expensive image work happens on an already-clean tree.
   `claude/competent-mendel-e55c1f`. Remove the 4 stale worktrees under
   `.claude/worktrees/`. **`master` is left untouched as the backup.**
 - Delete the 2,616 unreferenced images (297 MB) from the working tree. Git
-  history retains every one. Cuts the Hostinger upload from ~450 MB to ~150 MB
-  before Phase 2 shrinks it further.
+  history retains every one. Cuts the deployed footprint from ~450 MB to
+  ~150 MB before Phase 2 shrinks it further, and cuts clone/deploy time with
+  it.
 
 Verification: `npx vitest run` stays green (82 tests); the About page renders
 three filled Expertise columns at 1280px; a re-run of the reference scan
@@ -133,8 +142,19 @@ gates on it.
   to the handful actually exercised.
 - `<link rel="preload" as="font" crossorigin>` for the 2–3 fonts used above
   the fold. `font-display: swap` is already set on all 55 and stays.
-- `.htaccess`: extend `mod_deflate` coverage, lengthen immutable-asset expiry,
-  enable Keep-Alive.
+- `netlify.toml`: Netlify already Brotli-compresses text assets, so the win
+  here is cache policy, not compression. Give the pruned fonts an immutable
+  year (`assets/fonts/*` currently has no header rule at all), and move the
+  newly versioned CSS filenames onto the same immutable policy the images
+  already use, since a content-addressed name can no longer go stale.
+- Correct `README.md`: it documents a Hostinger upload flow and a ~758 MB
+  footprint, both wrong after this pass.
+
+Note on expected gains: because Netlify already serves Brotli, the raw-byte
+CSS reduction overstates transfer savings — `main.css` is 358 KB raw but
+37.8 KB gzipped. The real wins here are parse/style-recalc cost on the 1,193
+dead selectors, the eliminated render-blocking round trips, and the font
+preload closing the swap gap.
 
 Verification: computed styles on a sample of pages match pre-change values;
 vitest green; no 404s in the preview network log.
@@ -165,10 +185,10 @@ narrow:
   freeze is not touched.
 - Trim the 6 meta descriptions over 165 characters to avoid SERP truncation.
 - Fill the empty `og:image:alt` and `twitter:image:alt`.
-- Document the `netlify.toml` `X-Robots-Tag: noindex` on `/*`. It is correct
-  for the preview and Apache ignores the file, so production is unaffected —
-  but it is an unflagged hazard if the config is ever reused, and the
-  launch checklist should name it.
+- Leave the `X-Robots-Tag: noindex` in place — it is deliberate and must
+  survive this pass. Add it to a short launch checklist in the README as the
+  one switch to flip at domain handover, alongside verifying the absolute
+  `ugcc.com` canonical/OG URLs already in the pages.
 
 A full keyword and content SEO pass is explicitly deferred to a separate
 session; this phase only closes mechanical gaps.
