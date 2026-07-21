@@ -64,6 +64,108 @@ Read these before Task 1. They are established in the repo, not invented here.
 
 Zero-risk cleanup first, so the expensive image work happens on a clean tree.
 
+### Task 0: Repair the v2→v3 rename fallout
+
+The suite is red: 22 of 82 tests fail. Commit `89b06a6` renamed the design layer but left five files asserting v2 paths. **Nothing downstream can be verified until this is green**, so it goes first.
+
+**Files:**
+- Modify: `tools/projects-hub-check.js`, `tools/hero-check.js`, `tools/careers-check.js`, `tools/projects-check.js`, `tests/business-line.test.mjs`
+
+- [ ] **Step 1: Confirm the failure and its shape**
+
+```bash
+npx vitest run 2>&1 | grep -E 'Test Files|Tests '
+node tools/projects-hub-check.js; echo "exit=$?"
+```
+
+Expected: `22 failed | 60 passed (82)`, and the checker exits 1 with `12. no hero-current-*.avif found on disk`.
+
+- [ ] **Step 2: Prove the asset actually exists — the path is wrong, not the file**
+
+```bash
+ls assets/img/v3/ | grep hero-current
+ls assets/img/v2 2>&1 | head -1
+```
+
+Expected: `hero-current-{960,1440,1920}.avif` present under v3; `assets/img/v2` reports **No such file or directory**. This is what makes it a stale-path bug rather than a missing asset.
+
+- [ ] **Step 3: List every stale reference before changing any of them**
+
+```bash
+grep -rn "assets/img/v2\|v2\.css\|v2\.js\|'v2-\|\"v2-" tools/*.js tests/*.mjs
+```
+
+Expected: exactly the eight hits below. **If the list differs, work from the live output, not this table** — another session may have moved things again.
+
+| File:line | Stale token |
+| --- | --- |
+| `tools/projects-hub-check.js:331` | `assets/img/v2` |
+| `tools/projects-hub-check.js:341` | `assets/img/v2` |
+| `tools/hero-check.js:373` | `v2.js` |
+| `tools/hero-check.js:378` | `v2.css` |
+| `tools/careers-check.js:201` | `v2.css` |
+| `tools/projects-check.js:64` | `v2.css` |
+| `tests/business-line.test.mjs:45` | `v2.css` |
+| `tests/business-line.test.mjs:70` | `v2-` class prefix |
+
+- [ ] **Step 4: Rewrite them, scoped to these files only**
+
+The rename keys on the hyphen for class/variable prefixes — the page builder emits custom properties like `--v2b806092` with no hyphen, and matching those would unstyle the site. These five files contain no builder hashes, but keep the same discipline:
+
+```bash
+sed -i '' \
+  -e 's|assets/img/v2|assets/img/v3|g' \
+  -e 's|v2\.css|v3.css|g' \
+  -e 's|v2\.js|v3.js|g' \
+  -e 's|v2-|v3-|g' \
+  tools/projects-hub-check.js tools/hero-check.js tools/careers-check.js \
+  tools/projects-check.js tests/business-line.test.mjs
+```
+
+- [ ] **Step 5: Verify no stale token survives and no builder hash was harmed**
+
+```bash
+grep -rn "assets/img/v2\|v2\.css\|v2\.js\|'v2-\|\"v2-" tools/*.js tests/*.mjs || echo "clean"
+grep -rn -- '--v2[a-z0-9]' tools/*.js tests/*.mjs || echo "no builder hashes touched"
+```
+
+Expected: `clean`, and `no builder hashes touched`.
+
+- [ ] **Step 6: Run every checker directly, then the suite**
+
+```bash
+for c in tools/*-check.js; do printf "%-34s " "$c"; node "$c" >/dev/null 2>&1 && echo OK || echo FAIL; done
+npx vitest run 2>&1 | grep -E 'Test Files|Tests '
+```
+
+Expected: every checker `OK`, and `Test Files 3 passed (3)` / `Tests 82 passed (82)`.
+
+**If any checker still fails**, read its output in full before editing further — a second, unrelated breakage may be hiding behind the path bug.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add tools/projects-hub-check.js tools/hero-check.js tools/careers-check.js \
+        tools/projects-check.js tests/business-line.test.mjs
+git commit -m "fix(tests): point the checkers at v3 after the design-layer rename
+
+89b06a6 renamed assets/img/v2 -> v3, v2.css -> v3.css and v2.js -> v3.js
+across the build, but five checkers and fixtures kept asserting v2. 22 of 82
+tests were failing.
+
+projects-hub-check.js shows the shape of it: line 366 was renamed, 331 and
+341 were not, so largestVariant() read a directory that no longer exists and
+check 12 reported hero-current-*.avif missing — while the file sat in
+assets/img/v3 the whole time.
+
+This went unnoticed because CI only writes a push summary and never runs the
+suite. Task 15 closes that.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+```
+
+---
+
 ### Task 1: Restore the About page's Construction image
 
 V2 references `about-engineering.jpg` and `about-procurement.jpg` but has **zero** references to `about-construction.jpg`, which exists on disk at 198 KB. That Expertise column renders blank. `master`'s commit `4634868` fixed this, but V2's About markup changed afterwards, so this is a port, not a cherry-pick.
@@ -92,13 +194,13 @@ const html = readFileSync(join(repo, 'about-contractor-kuwait/index.html'), 'utf
 const count = (needle) => html.split(needle).length - 1;
 
 describe('About page Expertise row', () => {
-  it('references all three v2 expertise photos', () => {
+  it('references all three v3 expertise photos', () => {
     expect(count('about-engineering.jpg')).toBeGreaterThan(0);
     expect(count('about-construction.jpg')).toBeGreaterThan(0);
     expect(count('about-procurement.jpg')).toBeGreaterThan(0);
   });
 
-  it('has no dangling srcset pointing at pre-v2 expertise assets', () => {
+  it('has no dangling srcset pointing at pre-v3 expertise assets', () => {
     expect(count('editprocurement.jpg')).toBe(0);
     expect(count('media-center-banner')).toBe(0);
   });
@@ -130,7 +232,7 @@ Apply the same four remappings master made, against V2's current markup:
 | Construction | mobile | `media-center-banner` | `about-construction.jpg` |
 | Procurement | both | `editprocurement.jpg` | `about-procurement.jpg` |
 
-Also drop the `srcset`/`sizes` left dangling on those slots (they name pre-v2 assets), and set the panned slot's dimensions to the panorama's true aspect: `width="1371"` desktop, `width="844"` mobile, from a 1920x728 source.
+Also drop the `srcset`/`sizes` left dangling on those slots (they name pre-v3 assets), and set the panned slot's dimensions to the panorama's true aspect: `width="1371"` desktop, `width="844"` mobile, from a 1920x728 source.
 
 - [ ] **Step 4: Verify the test passes and nothing else broke**
 
@@ -163,7 +265,7 @@ Ported from master's 4634868 onto V2's current markup. V2 referenced
 about-engineering.jpg and about-procurement.jpg but never
 about-construction.jpg, so that column rendered blank.
 
-Test pins all three photos and asserts the pre-v2 assets stay gone.
+Test pins all three photos and asserts the pre-v3 assets stay gone.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -172,33 +274,52 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ### Task 2: Delete merged branches and stale worktrees
 
-All six are 0 commits ahead of V2 — fully absorbed. **`master` is 1 commit ahead and is the backup: do not touch it.**
+Six local branches are 0 commits ahead of V3 — fully absorbed.
+
+**Three branches carry unmerged parallel work and must NOT be deleted:**
+
+| Branch | vs V3 | Why it stays |
+| --- | --- | --- |
+| `v2-basic` = `origin/V2` | 22 ahead | separate line of work; `origin/V2` was repointed to it |
+| `master-july2026-changes` = `origin/master` | 21 ahead | separate line of work |
+| `master` (local) | 1 ahead | the backup, and holds the About fix ported in Task 1 |
 
 **Files:** none (git refs only)
 
-- [ ] **Step 1: Re-verify each branch is fully merged before deleting anything**
+- [ ] **Step 1: Re-verify every branch's position before deleting anything**
 
 ```bash
-for b in projects-hub-tweaks projects-redesign hero-recompose \
-         claude/ecstatic-sutherland-1dd1dd claude/elated-lumiere-80daf9 \
-         claude/competent-mendel-e55c1f; do
-  printf "%-40s ahead-of-V2: " "$b"
-  git rev-list --count "V2..$b"
+for b in $(git for-each-ref --format='%(refname:short)' refs/heads); do
+  printf "%-40s " "$b"
+  git rev-list --left-right --count "89b06a6...$b" \
+    | awk '{printf "behind:%-5s ahead:%s\n", $1, $2}'
 done
 ```
 
-Expected: `0` for all six. **If any prints non-zero, stop and report it** — that branch holds unmerged work.
+Expected: `ahead:0` for the six deletion candidates, and `ahead:22` / `ahead:21` / `ahead:1` for `v2-basic`, `master-july2026-changes` and `master` respectively.
+
+**If any deletion candidate shows `ahead` greater than 0, stop and report it** — that branch holds unmerged work and the list in this plan is out of date.
 
 - [ ] **Step 2: Remove the four stale worktrees**
 
 ```bash
 git worktree list
+```
+
+Six worktrees exist. **Remove only these four** — they back branches being deleted in Step 3:
+
+```bash
 git worktree remove .claude/worktrees/competent-mendel-e55c1f
 git worktree remove .claude/worktrees/ecstatic-sutherland-1dd1dd
 git worktree remove .claude/worktrees/elated-lumiere-80daf9
 git worktree remove .claude/worktrees/master-about-fix
 git worktree prune
 ```
+
+**Leave these two alone** — they back the active parallel branches and another session may be working in them right now:
+
+- `.claude/worktrees/master-july2026` → `master-july2026-changes`
+- `.claude/worktrees/v2-basic` → `v2-basic`
 
 If any refuses for uncommitted changes, inspect with `git -C <path> status` and report rather than forcing.
 
@@ -1100,7 +1221,7 @@ for (const page of allPages) {
         is what a wide viewport actually fetches. */
   let worst = 0;
   for (const m of html.matchAll(/<picture>[\s\S]*?<\/picture>/g)) {
-    const jpgs = [...m[0].matchAll(/(\/assets\/img\/v2\/resp\/[^"\s]+\.jpg)\s+(\d+)w/g)];
+    const jpgs = [...m[0].matchAll(/(\/assets\/img\/v3\/resp\/[^"\s]+\.jpg)\s+(\d+)w/g)];
     if (!jpgs.length) continue;
     const biggest = jpgs.sort((a, b) => Number(b[2]) - Number(a[2]))[0][1];
     worst += sizeOf(biggest.slice(1)) || 0;
@@ -1754,7 +1875,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ### Task 15: Add `package.json` and make CI run the tests
 
-CI currently only writes a push summary. The 82 tests pass but nothing enforces it, and the toolchain depends on the npx cache.
+CI currently only writes a push summary. Nothing enforces the suite — which is exactly how the v2→v3 rename shipped 22 failing tests unnoticed (Task 0). The toolchain also depends on the npx cache.
 
 **Files:** Create: `package.json`, `.github/workflows/test.yml`; Modify: `vitest.config.mjs`
 
