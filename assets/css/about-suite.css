@@ -853,6 +853,19 @@ picture > source {
   color: var(--as-body-light);
 }
 
+/* Red-keyed variant, the card-scale counterpart of .as-pill--key: it singles
+   out the one certification a section is built around rather than a peer in
+   a set. The 3px inline-start rule IS the treatment — a red fill would drop
+   the 15px body copy below 4.5:1, and a full red border reads as an alert
+   rather than an emphasis. padding-inline-start drops to 25px so the keyed
+   card's text still aligns with its unkeyed neighbour across the grid gap. */
+.as-card--key {
+  border-color: rgba(212, 28, 34, .28);
+  border-inline-start: 3px solid var(--v3-red, #d41c22);
+  padding-inline-start: 25px;
+  background: rgba(212, 28, 34, .035);
+}
+
 /* ---- inverted onto navy ---- */
 .as-section--navy .as-card {
   background: rgba(255, 255, 255, .04);
@@ -865,11 +878,18 @@ picture > source {
 .as-section--navy .as-card p { color: var(--as-body-dark); }
 .as-section--navy .as-card--tile { background: transparent; }
 
+.as-section--navy .as-card--key {
+  border-color: rgba(232, 99, 94, .4);
+  border-inline-start-color: var(--v3-red-text, #e8635e);
+  background: rgba(232, 99, 94, .1);
+}
+
 @media (max-width: 920px) {
   .as-cards,
   .as-cards--2,
   .as-cards--3 { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .as-card { padding: 24px; }
+  .as-card--key { padding-inline-start: 21px; }
 }
 
 
