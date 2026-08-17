@@ -1,0 +1,548 @@
+{
+ "assets/img/33c500ff-ugcc_naviblue_horizontal_fullbanner-photoroom-Awv83OWbkGSy0kpR.png": {
+  "widths": [
+   133,
+   266,
+   342,
+   684
+  ],
+  "sizes": "(max-width:600px) 133px, 342px",
+  "src_w": 768
+ },
+ "assets/img/v2/slide-01.jpg": {
+  "widths": [
+   398,
+   796,
+   1306,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-02.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-03.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-04.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-05.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-06.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-07.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1600
+  ],
+  "sizes": "100vw",
+  "src_w": 1600
+ },
+ "assets/img/v2/slide-08.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-09.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-10.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-11.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-12.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-13.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-14.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/slide-15.jpg": {
+  "widths": [
+   394,
+   788,
+   1293,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/stock-5a3dc0e1-abstract-accomplishment-animation-architecture-7235006.jpeg": {
+  "widths": [
+   390,
+   780,
+   1200
+  ],
+  "sizes": "100vw",
+  "src_w": 1200
+ },
+ "assets/img/v2/about-engineering.jpg": {
+  "widths": [
+   297,
+   328,
+   594,
+   656
+  ],
+  "sizes": "(max-width:600px) 328px, 297px",
+  "src_w": 1024
+ },
+ "assets/img/v2/about-construction-bridge.jpg": {
+  "widths": [
+   297,
+   328,
+   493
+  ],
+  "sizes": "(max-width:600px) 328px, 297px",
+  "src_w": 493
+ },
+ "assets/img/v2/about-procurement.jpg": {
+  "widths": [
+   297,
+   328,
+   594,
+   656
+  ],
+  "sizes": "(max-width:600px) 328px, 297px",
+  "src_w": 1054
+ },
+ "assets/img/v2/hero-current-cropped.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/b6aa3143-cover-mePgoLy6gZHJ2RJE.jpg": {
+  "widths": [
+   390,
+   768
+  ],
+  "sizes": "100vw",
+  "src_w": 768
+ },
+ "assets/img/v2/card-kp3.jpg": {
+  "widths": [
+   328,
+   400,
+   656,
+   800
+  ],
+  "sizes": "(max-width:600px) 328px, 400px",
+  "src_w": 1920
+ },
+ "assets/img/3fc32749-cbe-gal-04-a-edit-YbN4PZqjykhNzD7x.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 2800
+ },
+ "assets/img/v2/hero-kp3-banner.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-bizlines.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-civil-completed.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 2800
+ },
+ "assets/img/0df45ec9-cover-AzGMBZ95W8tqw0VQ.JPG": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1440
+  ],
+  "sizes": "100vw",
+  "src_w": 1440
+ },
+ "assets/img/d77048a1-picture2-1-pKDxGNfmrARsgc0e.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1440
+  ],
+  "sizes": "100vw",
+  "src_w": 1440
+ },
+ "assets/img/v2/div-roads.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/div-civil.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/div-building.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/div-micro.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1701
+  ],
+  "sizes": "100vw",
+  "src_w": 1701
+ },
+ "assets/img/v2/div-water.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/div-electro.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1840
+  ],
+  "sizes": "100vw",
+  "src_w": 1840
+ },
+ "assets/img/v2/hero-contact.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-credentials.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-csr.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/dd531598-cover_kouna2r.jpg.840x605_q90_format-webp-6o4ShRXTDebtpCP1.jpg": {
+  "widths": [
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-equipment.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/facilities-banner.jpg": {
+  "widths": [
+   390,
+   780,
+   1024
+  ],
+  "sizes": "100vw",
+  "src_w": 1024
+ },
+ "assets/img/v2/hero-hsse.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1672
+  ],
+  "sizes": "100vw",
+  "src_w": 1672
+ },
+ "assets/img/v2/kp3-1.jpg": {
+  "widths": [
+   168
+  ],
+  "sizes": "84px",
+  "src_w": 1920
+ },
+ "assets/img/v2/kp3-3.jpg": {
+  "widths": [
+   578,
+   1156
+  ],
+  "sizes": "578px",
+  "src_w": 1920
+ },
+ "assets/img/v2/kp3-5.jpg": {
+  "widths": [
+   1011,
+   1920
+  ],
+  "sizes": "1011px",
+  "src_w": 1920
+ },
+ "assets/img/v2/kp3-7.jpg": {
+  "widths": [
+   578,
+   1156
+  ],
+  "sizes": "578px",
+  "src_w": 1920
+ },
+ "assets/img/v2/labs-overview.jpg": {
+  "widths": [
+   390,
+   780,
+   1024
+  ],
+  "sizes": "100vw",
+  "src_w": 1024
+ },
+ "assets/img/v2/mew-1.jpg": {
+  "widths": [
+   168
+  ],
+  "sizes": "84px",
+  "src_w": 1920
+ },
+ "assets/img/v2/mew-3.jpg": {
+  "widths": [
+   827,
+   1654
+  ],
+  "sizes": "827px",
+  "src_w": 1920
+ },
+ "assets/img/v2/mew-5.jpg": {
+  "widths": [
+   780,
+   1560
+  ],
+  "sizes": "780px",
+  "src_w": 1920
+ },
+ "assets/img/3ce7e1ad-owwsc-t-2459831-2023-d103-2024-2-7Fd0o2456EpuwJxW.webp": {
+  "widths": [
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/01daa168-cover-mePgoLy6gZHJ2RJE.jpg": {
+  "widths": [
+   1280,
+   1600
+  ],
+  "sizes": "100vw",
+  "src_w": 1600
+ },
+ "assets/img/v2/hero-plants.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1286
+  ],
+  "sizes": "100vw",
+  "src_w": 1286
+ },
+ "assets/img/v2/plants-overview.jpg": {
+  "widths": [
+   480,
+   960,
+   1307,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/v2/hero-quality.jpg": {
+  "widths": [
+   390,
+   780,
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ },
+ "assets/img/ff772a7e-60-mnl4x5okE6sxOWwl.png": {
+  "widths": [
+   1280,
+   1440
+  ],
+  "sizes": "100vw",
+  "src_w": 1440
+ },
+ "assets/img/40cb68d5-cover-4-m5K85rOLGvIqan3a.jpg": {
+  "widths": [
+   1280,
+   1440
+  ],
+  "sizes": "100vw",
+  "src_w": 1440
+ },
+ "assets/img/46aefbb3-mew-6085-2024-2025-3-nOVym5yIPWzXoQyM.webp": {
+  "widths": [
+   1280,
+   1920
+  ],
+  "sizes": "100vw",
+  "src_w": 1920
+ }
+}
