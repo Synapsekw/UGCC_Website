@@ -10,7 +10,7 @@ ladder carries over untouched and responsive behaviour cannot regress. The
 original stays on disk and remains the <img> fallback.
 
 Skipped: logos/icons (small flat art AVIF does not beat), anything under 20KB
-(an extra request costs more than it saves), and any twin that comes out no
+(below which AVIF cannot beat the request overhead), and any twin that comes out no
 smaller than its source.
 
 AVIF q60 is the setting benchmarked for this repo: ~85% saving at a mean
@@ -22,7 +22,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 QUALITY = 60
 OUT_DIR = 'assets/img/v2/avif'
-MIN_BYTES = 20 * 1024
+MIN_BYTES = 4 * 1024
 SKIP_DIRS = {'node_modules', '.git', '.claude', 'assets', 'tools', 'tests', 'docs', 'netlify'}
 LOGO_HINTS = ('logo', 'icon', 'favicon', 'android-chrome', 'apple-touch')
 RASTER = ('.jpg', '.jpeg', '.png', '.webp')
