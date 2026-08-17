@@ -9,10 +9,42 @@ cd "$(dirname "$0")/.."
 OUT=assets/img/v3/proj
 mkdir -p "$OUT"
 
+# sips writes AVIF that sometimes carries an undecodable image grid: it reports
+# the right dimensions and exits 0, but browsers paint nothing. It bit
+# hero-projects-1440.avif, which is why the projects hub cover was blank at
+# viewport widths where the 1440 rung wins. Every AVIF this script writes is
+# therefore decoded before it is accepted, and re-encoded with Pillow — the
+# encoder make-responsive-images.py uses for the other 838 files on disk — when
+# the decode fails. Same quality (60) either way.
+reencode_avif () { # reencode_avif <src> <dst> <width>
+  python3 - "$1" "$2" "$3" <<'PY'
+import sys
+from PIL import Image
+src, dst, width = sys.argv[1], sys.argv[2], int(sys.argv[3])
+with Image.open(src) as im:
+    im = im.convert('RGB')
+    im.thumbnail((width, 10 ** 6), Image.LANCZOS)
+    im.save(dst, 'AVIF', quality=60)
+PY
+}
+
+avif_decodes () { python3 -c "
+from PIL import Image
+import sys
+with Image.open(sys.argv[1]) as im: im.load()
+" "$1" >/dev/null 2>&1; }
+
 emit () { # emit <src> <base> <width>  -> base-<w>.jpg + base-<w>.avif
   local src=$1 base=$2 w=$3
   [ -f "$base-$w.jpg" ]  || sips --resampleWidth "$w" -s format jpeg -s formatOptions 80 "$src" --out "$base-$w.jpg"  >/dev/null
-  [ -f "$base-$w.avif" ] || sips --resampleWidth "$w" -s format avif -s formatOptions 60 "$src" --out "$base-$w.avif" >/dev/null
+  if [ ! -f "$base-$w.avif" ]; then
+    sips --resampleWidth "$w" -s format avif -s formatOptions 60 "$src" --out "$base-$w.avif" >/dev/null
+    if ! avif_decodes "$base-$w.avif"; then
+      echo "  sips wrote an undecodable $base-$w.avif — re-encoding with Pillow" >&2
+      reencode_avif "$src" "$base-$w.avif" "$w"
+      avif_decodes "$base-$w.avif" || { echo "FATAL: $base-$w.avif still will not decode" >&2; exit 1; }
+    fi
+  fi
 }
 
 while IFS=$'\t' read -r slug status lines src; do
