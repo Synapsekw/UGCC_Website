@@ -398,6 +398,18 @@
   box-shadow: 0 18px 38px -20px rgba(0, 21, 33, .4);
 }
 
+/* Red-keyed variant: singles out the one certification the section is built
+   around rather than a peer in a set. The 3px inline-start rule is the whole
+   treatment — a red fill would drop the 15px body copy below 4.5:1. The
+   compensated inline-start padding keeps its text aligned with the neighbour
+   card across the grid gap. */
+.v2-card--key {
+  border-color: rgba(211, 18, 37, .28);
+  border-inline-start: 3px solid var(--v2-red);
+  padding-inline-start: 25px;
+  background: rgba(211, 18, 37, .035);
+}
+
 .v2-card h3 {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
