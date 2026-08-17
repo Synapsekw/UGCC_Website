@@ -246,7 +246,7 @@ class GlassChatWidget {
                 <div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
                 <div class="chat-input">
                     <input type="text" placeholder="Type a message..." />
-                    <button class="send-btn"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                    <button class="send-btn" type="button" aria-label="Send message"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
                 </div>
             </div>
         `;

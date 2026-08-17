@@ -603,3 +603,59 @@
   .ka { padding: 48px 16px 56px; }
   .ka__grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
+
+/* ---------- screen-reader-only text ----------
+   Clip rather than display:none, so the words stay in the accessibility tree
+   and in innerText while being invisible on screen. */
+.v2-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- slideshow dots: 24px touch targets ----------
+   The builder paints a 10px dot and lets the button be 10px too, which is
+   under the 24x24 minimum of WCAG 2.5.8 and leaves only 18px between centres.
+   Grow the button to 24x24 and drop the flex gap, so the hit area meets the
+   minimum on all four sides while the painted dot stays exactly 10px. The row
+   gets wider by 6px per dot; nothing else about it changes. Fifteen 24px dots
+   need 360px, which is more than a 320px phone has, so the row is capped at
+   the viewport and the dots flex-shrink evenly rather than clipping — they
+   hold the full 24px from 384px up, which covers every emulated mobile.
+   !important needed: the builder's scoped [data-v-*] rules outrank a plain
+   class selector here, same as the hover rules above. */
+.slideshow__dots {
+  gap: 0 !important;
+  max-width: calc(100vw - 24px);
+}
+.slideshow__dots .dot {
+  flex: 0 1 24px;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0;
+  border: 0;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+  display: grid;
+  place-items: center;
+}
+.slideshow__dots .dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50px;
+  background-color: var(--v7c665e7e, #fff);
+  opacity: .5;
+  transition: opacity .2s ease;
+}
+.slideshow__dots .dot--current::before {
+  opacity: 1;
+}

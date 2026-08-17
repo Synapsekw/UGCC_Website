@@ -7,10 +7,23 @@
   command = ""
 
 # Keep the client preview out of search engines (free Netlify has no password).
+# The security headers below are the ones Lighthouse flags as High severity and
+# that a static site can set without touching its markup. No Content-Security-
+# Policy: the builder's output carries inline <style> blocks and inline style
+# attributes on nearly every element, so any policy strict enough to score
+# would have to allow 'unsafe-inline' anyway, which buys nothing.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
+    # Nobody should be framing the site; blocks clickjacking.
+    X-Frame-Options = "DENY"
+    # Isolate the top-level window from anything it opens.
+    Cross-Origin-Opener-Policy = "same-origin"
+    # Never let a browser second-guess a declared Content-Type.
+    X-Content-Type-Options = "nosniff"
+    # Send the full URL same-origin, only the origin cross-origin, nothing to http.
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
 # Chatbot serverless function (dependency-free; native fetch to OpenAI).
 [build.environment]
