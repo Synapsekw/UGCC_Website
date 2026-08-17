@@ -98,12 +98,37 @@ for (const page of allPages) {
     '3. ' + label + ': worst-case image weight ' + (worst / 1e6).toFixed(2)
     + 'MB exceeds the ' + (PAGE_BUDGET_BYTES / 1e6).toFixed(1) + 'MB budget');
 
-  /* 4. Exactly one LCP image, and it stays small. */
+  /* 4. Exactly one LCP candidate, and it stays small.
+
+        A page whose hero is a <video> has no <img> to prioritise: what paints
+        first is the poster, so that is what gets preloaded, by plain href.
+        Those pages are checked against the poster instead. */
+  const heroVideo = html.match(/<video[^>]*\bposter="([^"]+)"[^>]*>/);
   const highs = (html.match(/fetchpriority="high"/g) || []).length;
+  const preload = html.match(/<link rel="preload" as="image"[^>]*>/);
+
+  /* Which branch applies is decided by whether the page prioritises an <img>,
+     not merely by whether a <video> exists. The homepage has BOTH a background
+     video and an image LCP, and must still be held to the image rules. */
+  if (highs === 0 && heroVideo) {
+    check(!!preload, '4. ' + label + ': hero <video> but no poster preload');
+    if (preload) {
+      const href = preload[0].match(/\bhref="([^"]+)"/);
+      check(!!href && href[1] === heroVideo[1],
+        '4. ' + label + ': poster preload does not match the <video> poster');
+      const size = href ? sizeOf(href[1].slice(1)) : null;
+      check(size !== null && size <= LCP_BUDGET_BYTES,
+        '4. ' + label + ': poster ' + (href ? href[1] : '?') + ' is '
+        + (size === null ? 'missing' : (size / 1024).toFixed(1) + 'KB')
+        + ', budget <= ' + (LCP_BUDGET_BYTES / 1024) + 'KB');
+    }
+    /* The video itself must be deferred, or it competes with the poster. */
+    check(/<video[^>]*\bdata-src="/.test(html) && /<video[^>]*preload="none"/.test(html),
+      '4. ' + label + ': hero <video> must carry data-src and preload="none"');
+  } else {
   check(highs === 1,
     '4. ' + label + ': ' + highs + ' images marked fetchpriority="high", want exactly 1');
 
-  const preload = html.match(/<link rel="preload" as="image"[^>]*>/);
   check(!!preload, '4. ' + label + ': no LCP preload');
   if (preload) {
     const srcset = preload[0].match(/imagesrcset="([^"]+)"/);
@@ -130,6 +155,7 @@ for (const page of allPages) {
         + (size === null ? 'missing' : (size / 1024).toFixed(1) + 'KB')
         + ', budget <= ' + (LCP_BUDGET_BYTES / 1024) + 'KB');
     }
+  }
   }
 
   /* 5. Every <picture> offers AVIF — otherwise the rewrite regressed. */
