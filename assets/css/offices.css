@@ -28,7 +28,11 @@
   /* Local tokens. The hairline is reused by every divider in the block, so
      changing the block's contrast is a one-line edit. */
   --off-hair: rgba(255, 255, 255, .16);
-  --off-dim: rgba(255, 255, 255, .45);
+  /* .55, not .45: at .45 the 10.5px uppercase labels composite to #738a97 on
+     the #002a41 band and land at 4.12:1, under the 4.5:1 floor for small text
+     (Lighthouse a11y, axe color-contrast). .55 reads 5.45:1 — headroom enough
+     that a future tweak to the band colour does not silently re-break it. */
+  --off-dim: rgba(255, 255, 255, .55);
   --off-body: rgba(255, 255, 255, .82);
 }
 
