@@ -344,8 +344,11 @@ check(badDescriptors.length === 0,
     try { return fs.statSync(path.join(root, relPath)).size; } catch (e) { return null; }
   }
 
-  const heroProjectsPreferred = 'assets/img/v3/hero-projects-1920.avif';
-  const heroProjectsFile = exists(heroProjectsPreferred) ? heroProjectsPreferred : largestVariant('hero-projects');
+  /* Widest rung on disk, not a hardcoded width: the hero ladder stops at the
+     source frame's own width, so hero-projects tops out at 1440 (its Duqm Port
+     export is 1440px wide) and naming a 1920 file here would both miss the real
+     budget and register as a phantom reference in find-orphan-assets.py. */
+  const heroProjectsFile = largestVariant('hero-projects');
   if (!heroProjectsFile) {
     check(false, '12. no hero-projects-*.avif found on disk');
   } else {
