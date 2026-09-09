@@ -704,7 +704,14 @@
 .v2-banner--photo {
   position: relative;
   overflow: hidden;
-  padding: 140px 16px;
+  padding: 96px 16px;
+  /* Track the photograph's own 16:9 shape so (nearly) all of it shows,
+     capped so the band never swallows the whole viewport. */
+  aspect-ratio: 16 / 9;
+  max-height: 76vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .v2-banner--photo .v2-banner__bg {
   position: absolute;
