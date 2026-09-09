@@ -705,10 +705,9 @@
   position: relative;
   overflow: hidden;
   padding: 96px 16px;
-  /* Track the photograph's own 16:9 shape so (nearly) all of it shows,
-     capped so the band never swallows the whole viewport. */
-  aspect-ratio: 16 / 9;
-  max-height: 76vh;
+  /* Half the photograph's 16:9 — a wide band showing its centred middle. */
+  aspect-ratio: 32 / 9;
+  max-height: 48vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -719,6 +718,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
 }
 .v2-banner--photo::after {
   content: "";
