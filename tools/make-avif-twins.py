@@ -63,6 +63,12 @@ def encode(job):
         return (0, 0, 0, 0)
     try:
         with Image.open(rel) as im:
+            # Transparency would be flattened by the RGB convert below; such
+            # images (logo cut-outs) must keep their original format.
+            if im.mode in ('RGBA', 'LA', 'P'):
+                alpha = im.convert('RGBA').getchannel('A')
+                if alpha.getextrema()[0] < 255:
+                    return (0, 0, 0, 0)
             im = im.convert('RGB')
             im.save(dst, 'AVIF', quality=QUALITY)
     except Exception as e:
