@@ -738,3 +738,14 @@
 #OUnlaLixAV .block-background__overlay {
   background-color: #002a41;
 }
+
+/* --- Home page typography parity -------------------------------------------
+   Same treatment as the About suite: the builder's black headings go navy
+   (WHO ARE WE, the 01-07 service numbers, THE POWER OF EXPERIENCE, CAREERS)
+   and justified paragraphs go left. */
+#u7vIc0iRh h4 span, #zZFMdo h3 span, #Jways5TtQ h3 span {
+  color: #002a41 !important;
+}
+#u7vIc0iRh p, #zd_fdi p {
+  text-align: left !important;
+}
