@@ -704,6 +704,9 @@
 .v2-banner--photo {
   position: relative;
   overflow: hidden;
+  /* Flush against the section above: the base 48px margin-top opens a
+     see-through slot onto the builder's dark page background. */
+  margin-top: 0;
   padding: 96px 16px;
   /* Half the photograph's 16:9 — a wide band showing its centred middle. */
   aspect-ratio: 32 / 9;
