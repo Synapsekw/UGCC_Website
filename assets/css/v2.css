@@ -659,3 +659,14 @@
 .slideshow__dots .dot--current::before {
   opacity: 1;
 }
+
+/* --- Credentials banner heading -------------------------------------------
+   The builder's mobile h1 size (--h1-m-font-size: 60px) sets "CREDENTIALS"
+   wider than its 89%-of-viewport column, and break-spaces then splits the
+   word ("CREDENTIA / LS"). Scale the one long-word banner heading with the
+   viewport instead; 60px still applies from tablet width up. */
+@media (max-width: 767px) {
+  #z84DQ4 h1 {
+    font-size: clamp(38px, 13vw, 60px);
+  }
+}
