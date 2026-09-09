@@ -77,6 +77,14 @@
   var pending = [].slice.call(document.querySelectorAll('video[data-src]'));
   if (!pending.length) return;
 
+  /* Phones keep the poster still: a multi-megabyte background loop on a
+     412px viewport is pure data cost, and it is the page's LCP. Every
+     deferred video carries a poster of the same footage. */
+  if (window.matchMedia('(max-width: 640px)').matches) {
+    pending = pending.filter(function (v) { return !v.poster; });
+    if (!pending.length) return;
+  }
+
   function load(video) {
     if (video.dataset.loaded) return;
     video.dataset.loaded = '1';
@@ -145,6 +153,10 @@
     sweep();
   }
 
-  if (document.readyState === 'complete') start();
-  else window.addEventListener('load', start, { once: true });
+  /* DOMContentLoaded, not load: the hero files are now small faststart
+     encodes, and waiting for the full load event pushed the hero's first
+     frame (the LCP paint) seconds later. Below-fold videos still wait for
+     the sweep to bring them near the viewport. */
+  if (document.readyState !== 'loading') start();
+  else document.addEventListener('DOMContentLoaded', start, { once: true });
 })();
