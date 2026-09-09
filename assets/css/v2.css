@@ -696,3 +696,29 @@
 .v2-prose__inner > .ka__eyebrow + h2 {
   font-size: clamp(28px, 3.4vw, 40px);
 }
+
+/* --- Ribbon bands with a photograph behind the statement -------------------
+   v2-banner--photo layers a cover image under the navy band: the image,
+   then a navy tint (::after paints over the img child), then the sentence
+   lifted above both. The plain .v2-banner stays available. */
+.v2-banner--photo {
+  position: relative;
+  overflow: hidden;
+}
+.v2-banner--photo .v2-banner__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.v2-banner--photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 42, 65, .82);
+}
+.v2-banner--photo p {
+  position: relative;
+  z-index: 1;
+}
