@@ -749,3 +749,8 @@
 #u7vIc0iRh p, #zd_fdi p {
   text-align: left !important;
 }
+
+/* Contact page typography parity: the builder's black headings go navy. */
+#fyIcYSMGB_ h5 span, #fyIcYSMGB_ h6 span {
+  color: #002a41 !important;
+}
