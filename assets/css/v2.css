@@ -754,3 +754,8 @@
 #fyIcYSMGB_ h5 span, #fyIcYSMGB_ h6 span {
   color: #002a41 !important;
 }
+
+/* Laboratories typography parity: Overview and the specimen labels go navy. */
+#z-GSWN h5 span {
+  color: #002a41 !important;
+}
