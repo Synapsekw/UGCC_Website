@@ -670,3 +670,29 @@
     font-size: clamp(38px, 13vw, 60px);
   }
 }
+
+/* --- About-suite parity ----------------------------------------------------
+   The About page's builder sections (intro, Expertise, History) kept the
+   builder's black headings and justified text after the rest of the suite
+   moved to the v2 palette. Harmonize them in place: navy section titles,
+   red item titles (the ka-card accent), left-aligned body. !important
+   because the builder writes color on inline <span> styles. */
+#d7vVUBPLo h6 span, #zgeoS_ h4 span, #z16m9M h4 span,
+#z16m9M h6 span {
+  color: #002a41 !important;
+}
+#zgeoS_ h6 span {
+  color: #c8102e !important;
+}
+#zgeoS_ h4, #z16m9M h4 {
+  font-size: clamp(28px, 3.4vw, 40px) !important;
+}
+#d7vVUBPLo p, #zgeoS_ p, #z16m9M p {
+  text-align: left !important;
+}
+
+/* The lead heading that follows an inserted eyebrow steps up to the
+   ka-title scale, so every suite page opens with the same rhythm. */
+.v2-prose__inner > .ka__eyebrow + h2 {
+  font-size: clamp(28px, 3.4vw, 40px);
+}
