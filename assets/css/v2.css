@@ -704,6 +704,7 @@
 .v2-banner--photo {
   position: relative;
   overflow: hidden;
+  padding: 140px 16px;
 }
 .v2-banner--photo .v2-banner__bg {
   position: absolute;
