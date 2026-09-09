@@ -733,3 +733,8 @@
   position: relative;
   z-index: 1;
 }
+
+/* Contact banner: navy tint instead of the builder's neutral dark overlay. */
+#OUnlaLixAV .block-background__overlay {
+  background-color: #002a41;
+}
