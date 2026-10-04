@@ -160,3 +160,38 @@
   if (document.readyState !== 'loading') start();
   else document.addEventListener('DOMContentLoaded', start, { once: true });
 })();
+
+/* ---------- contact form: AJAX submit to Netlify Forms (progressive enhancement) ---------- */
+(function () {
+  'use strict';
+  var form = document.querySelector('form.v2-contact__form');
+  if (!form) return;
+  var status = form.querySelector('.v2-contact__status');
+  var btn = form.querySelector('.v2-contact__btn');
+  function setStatus(msg, ok) {
+    if (!status) return;
+    status.textContent = msg;
+    status.hidden = false;
+    status.classList.toggle('v2-contact__status--ok', ok);
+    status.classList.toggle('v2-contact__status--err', !ok);
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (form.reportValidity && !form.reportValidity()) return;
+    var data = new URLSearchParams(new FormData(form));
+    if (btn) btn.disabled = true;
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: data.toString()
+    }).then(function (r) {
+      if (!r.ok) throw new Error('status ' + r.status);
+      form.reset();
+      setStatus('Thank you — your message has been sent.', true);
+    }).catch(function () {
+      setStatus('Sorry, something went wrong. Please email ugcc@ugcc.com.', false);
+    }).finally(function () {
+      if (btn) btn.disabled = false;
+    });
+  });
+})();

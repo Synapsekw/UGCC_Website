@@ -759,3 +759,95 @@
 #z-GSWN h5 span {
   color: #002a41 !important;
 }
+
+/* ---------- contact form (V2 addition — Netlify Forms) ---------- */
+.v2-contact { max-width: 1224px; margin: 0 auto; padding: 8px 24px 64px; }
+.v2-contact__card {
+  background: #fff; border: 1px solid #e3e6e9; border-radius: 14px;
+  padding: 32px; box-shadow: 0 10px 30px rgba(0, 42, 65, .08);
+}
+.v2-contact__title { color: var(--v2-navy); font-size: 1.6rem; margin: 0 0 6px; }
+.v2-contact__intro { color: #33424e; margin: 0 0 22px; }
+.v2-contact__form { display: grid; gap: 16px; }
+.v2-contact__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.v2-contact__form input, .v2-contact__form textarea {
+  width: 100%; font: inherit; color: var(--v2-navy); background: #fbfcfd;
+  border: 1px solid #c9d2da; border-radius: 8px; padding: 13px 15px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.v2-contact__form textarea { resize: vertical; min-height: 150px; }
+.v2-contact__form input:focus, .v2-contact__form textarea:focus {
+  outline: none; border-color: var(--v2-navy);
+  box-shadow: 0 0 0 3px rgba(211, 18, 37, .18);
+}
+.v2-contact__btn {
+  justify-self: start; font: inherit; font-weight: 700; letter-spacing: .02em;
+  color: #fff; background: #d31225; border: 0; border-radius: 8px;
+  padding: 13px 34px; cursor: pointer;
+  transition: transform .1s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.v2-contact__btn:hover { background: #b60f1f; box-shadow: 0 6px 16px rgba(211, 18, 37, .3); }
+.v2-contact__btn:active { transform: translateY(1px); }
+.v2-contact__btn[disabled] { opacity: .6; cursor: default; }
+.v2-contact__hp { position: absolute; left: -9999px; height: 0; overflow: hidden; }
+.v2-contact__status { margin: 2px 0 0; font-weight: 600; }
+.v2-contact__status--ok { color: #0a7d2c; }
+.v2-contact__status--err { color: #d31225; }
+@media (max-width: 680px) {
+  .v2-contact__row { grid-template-columns: 1fr; }
+  .v2-contact__card { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .v2-contact__btn { transition: none; } }
+
+/* ---------- simple current-project pages (V2 additions: no media) ---------- */
+.v2-proj-cover { background: var(--v2-navy); color: #fff; padding: 150px 24px 72px; text-align: center; }
+.v2-proj-cover__inner { max-width: 1100px; margin: 0 auto; }
+.v2-proj-cover__title {
+  font-family: 'Hammersmith One', sans-serif; font-weight: 400; line-height: 1.25;
+  font-size: clamp(1.55rem, 3.2vw, 2.5rem); margin: 0 0 16px; color: #fff;
+}
+.v2-proj-cover__code {
+  display: inline-block; font-weight: 700; letter-spacing: .04em; color: #fff;
+  background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 6px; padding: 6px 14px; margin: 0;
+}
+.v2-proj-facts { max-width: 1224px; margin: 0 auto; padding: 56px 24px 72px; }
+.v2-proj-facts__tag {
+  display: inline-block; font-weight: 700; font-size: .85rem; letter-spacing: .04em;
+  text-transform: uppercase; color: #d31225; margin: 0 0 10px;
+}
+.v2-proj-facts__h { color: var(--v2-navy); font-size: 1.8rem; margin: 0 0 26px; }
+.v2-proj-facts__grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 26px 32px; margin: 0;
+}
+.v2-proj-facts__cell dt { font-weight: 700; color: var(--v2-navy); margin: 0 0 4px; font-size: 1.05rem; }
+.v2-proj-facts__cell dd { margin: 0; color: #33424e; line-height: 1.5; }
+@media (max-width: 600px) { .v2-proj-cover { padding-top: 120px; } }
+
+/* ---------- blue thumbnail tiles for new current projects (no image) ---------- */
+.v2-tile {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  aspect-ratio: 1 / 1; width: 100%; padding: 22px;
+  background: var(--v2-navy); color: #fff; border-radius: 12px;
+  font-family: 'Hammersmith One', sans-serif; font-weight: 400; line-height: 1.3;
+  font-size: clamp(.95rem, 1.5vw, 1.15rem);
+  box-shadow: 0 8px 22px rgba(0, 42, 65, .18);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.v2-tile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0, 42, 65, .28); }
+@media (prefers-reduced-motion: reduce) { .v2-tile { transition: none; } }
+
+/* ---------- tile grid for appended current projects ---------- */
+.v2-tilegrid { max-width: 1224px; margin: 0 auto; padding: 8px 24px 16px; }
+.v2-tilegrid__inner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.v2-tilegrid__card { display: flex; flex-direction: column; gap: 12px; text-decoration: none; }
+.v2-tilegrid__title { color: var(--v2-navy); text-align: center; font-weight: 600; line-height: 1.4; font-size: .98rem; }
+.v2-tilegrid__card:hover .v2-tilegrid__title { color: #d31225; }
+@media (max-width: 820px) { .v2-tilegrid__inner { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .v2-tilegrid__inner { grid-template-columns: 1fr; } }
+
+/* ---------- simple project pages: navy header so white logo/nav stay legible ---------- */
+.v2-simplepage .block-header { background-color: var(--v2-navy); }
+.v2-simplepage body { background: #fff; }
+.v2-proj-facts { background: #fff; }
