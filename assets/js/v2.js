@@ -55,7 +55,8 @@
 })();
 
 /* ---------- deferred background video ----------
-   The three background videos total 26.7MB. The homepage one was preload=auto
+   The background videos are heavy (the homepage hero alone is a 12.9MB 1080p
+   loop). The homepage one was preload=auto
    and autoplay, so it competed with the LCP image on every visit; the About
    pair were preload=metadata but still fetched in full to satisfy autoplay.
 
