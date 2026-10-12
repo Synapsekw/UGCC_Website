@@ -93,6 +93,7 @@
       });
       dots.forEach(function (d, i) {
         d.classList.toggle('dot--current', i === current);
+        d.setAttribute('aria-current', i === current ? 'true' : 'false');
       });
     }
 

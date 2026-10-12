@@ -398,6 +398,18 @@
   box-shadow: 0 18px 38px -20px rgba(0, 21, 33, .4);
 }
 
+/* Red-keyed variant: singles out the one certification the section is built
+   around rather than a peer in a set. The 3px inline-start rule is the whole
+   treatment — a red fill would drop the 15px body copy below 4.5:1. The
+   compensated inline-start padding keeps its text aligned with the neighbour
+   card across the grid gap. */
+.v2-card--key {
+  border-color: rgba(211, 18, 37, .28);
+  border-inline-start: 3px solid var(--v2-red);
+  padding-inline-start: 25px;
+  background: rgba(211, 18, 37, .035);
+}
+
 .v2-card h3 {
   font-family: var(--font-primary, 'Hammersmith One', sans-serif);
   font-weight: 400;
@@ -591,3 +603,239 @@
   .ka { padding: 48px 16px 56px; }
   .ka__grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
+
+/* ---------- screen-reader-only text ----------
+   Clip rather than display:none, so the words stay in the accessibility tree
+   and in innerText while being invisible on screen. */
+.v2-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- slideshow dots: 24px touch targets ----------
+   The builder paints a 10px dot and lets the button be 10px too, which is
+   under the 24x24 minimum of WCAG 2.5.8 and leaves only 18px between centres.
+   Grow the button to 24x24 and drop the flex gap, so the hit area meets the
+   minimum on all four sides while the painted dot stays exactly 10px. The row
+   gets wider by 6px per dot; nothing else about it changes. Fifteen 24px dots
+   need 360px, which is more than a 320px phone has, so the row is capped at
+   the viewport and the dots flex-shrink evenly rather than clipping — they
+   hold the full 24px from 384px up, which covers every emulated mobile.
+   !important needed: the builder's scoped [data-v-*] rules outrank a plain
+   class selector here, same as the hover rules above. */
+.slideshow__dots {
+  gap: 0 !important;
+  max-width: calc(100vw - 24px);
+}
+.slideshow__dots .dot {
+  flex: 0 1 24px;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0;
+  border: 0;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+  display: grid;
+  place-items: center;
+}
+.slideshow__dots .dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50px;
+  background-color: var(--v7c665e7e, #fff);
+  opacity: .5;
+  transition: opacity .2s ease;
+}
+.slideshow__dots .dot--current::before {
+  opacity: 1;
+}
+
+/* --- Credentials banner heading -------------------------------------------
+   The builder's mobile h1 size (--h1-m-font-size: 60px) sets "CREDENTIALS"
+   wider than its 89%-of-viewport column, and break-spaces then splits the
+   word ("CREDENTIA / LS"). Scale the one long-word banner heading with the
+   viewport instead; 60px still applies from tablet width up. */
+@media (max-width: 767px) {
+  h1 {
+    font-size: clamp(34px, 12.5vw, 60px) !important;
+  }
+}
+
+/* --- About-suite parity ----------------------------------------------------
+   The About page's builder sections (intro, Expertise, History) kept the
+   builder's black headings and justified text after the rest of the suite
+   moved to the v2 palette. Harmonize them in place: navy section titles,
+   red item titles (the ka-card accent), left-aligned body. !important
+   because the builder writes color on inline <span> styles. */
+#d7vVUBPLo h6 span, #zgeoS_ h4 span, #z16m9M h4 span,
+#z16m9M h6 span {
+  color: #002a41 !important;
+}
+#zgeoS_ h6 span {
+  color: #c8102e !important;
+}
+#zgeoS_ h4, #z16m9M h4 {
+  font-size: clamp(28px, 3.4vw, 40px) !important;
+}
+#d7vVUBPLo p, #zgeoS_ p, #z16m9M p {
+  text-align: left !important;
+}
+
+/* The lead heading that follows an inserted eyebrow steps up to the
+   ka-title scale, so every suite page opens with the same rhythm. */
+.v2-prose__inner > .ka__eyebrow + h2 {
+  font-size: clamp(28px, 3.4vw, 40px);
+}
+
+/* --- Ribbon bands with a photograph behind the statement -------------------
+   v2-banner--photo layers a cover image under the navy band: the image,
+   then a navy tint (::after paints over the img child), then the sentence
+   lifted above both. The plain .v2-banner stays available. */
+.v2-banner--photo {
+  position: relative;
+  overflow: hidden;
+  /* Flush against the section above: the base 48px margin-top opens a
+     see-through slot onto the builder's dark page background. */
+  margin-top: 0;
+  padding: 96px 16px;
+  /* Half the photograph's 16:9 — a wide band showing its centred middle. */
+  aspect-ratio: 32 / 9;
+  max-height: 48vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.v2-banner--photo .v2-banner__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+.v2-banner--photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 42, 65, .82);
+}
+.v2-banner--photo p {
+  position: relative;
+  z-index: 1;
+}
+
+/* Contact banner: navy tint instead of the builder's neutral dark overlay. */
+#OUnlaLixAV .block-background__overlay {
+  background-color: #002a41;
+}
+
+/* --- Home page typography parity -------------------------------------------
+   Same treatment as the About suite: the builder's black headings go navy
+   (WHO ARE WE, the 01-07 service numbers, THE POWER OF EXPERIENCE, CAREERS)
+   and justified paragraphs go left. */
+#u7vIc0iRh h4 span, #zZFMdo h3 span, #Jways5TtQ h3 span {
+  color: #002a41 !important;
+}
+#u7vIc0iRh p, #zd_fdi p {
+  text-align: left !important;
+}
+
+/* Contact page typography parity: the builder's black headings go navy. */
+#fyIcYSMGB_ h5 span, #fyIcYSMGB_ h6 span {
+  color: #002a41 !important;
+}
+
+/* Laboratories typography parity: Overview and the specimen labels go navy. */
+#z-GSWN h5 span {
+  color: #002a41 !important;
+}
+
+/* ---------- contact form (V2 addition — Netlify Forms) ---------- */
+.v2-contact { max-width: 1224px; margin: 0 auto; padding: 8px 24px 64px; }
+.v2-contact__card {
+  background: #fff; border: 1px solid #e3e6e9; border-radius: 14px;
+  padding: 32px; box-shadow: 0 10px 30px rgba(0, 42, 65, .08);
+}
+.v2-contact__title { color: var(--v2-navy); font-size: 1.6rem; margin: 0 0 6px; }
+.v2-contact__intro { color: #33424e; margin: 0 0 22px; }
+.v2-contact__form { display: grid; gap: 16px; }
+.v2-contact__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.v2-contact__form input, .v2-contact__form textarea {
+  width: 100%; font: inherit; color: var(--v2-navy); background: #fbfcfd;
+  border: 1px solid #c9d2da; border-radius: 8px; padding: 13px 15px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.v2-contact__form textarea { resize: vertical; min-height: 150px; }
+.v2-contact__form input:focus, .v2-contact__form textarea:focus {
+  outline: none; border-color: var(--v2-navy);
+  box-shadow: 0 0 0 3px rgba(211, 18, 37, .18);
+}
+.v2-contact__btn {
+  justify-self: start; font: inherit; font-weight: 700; letter-spacing: .02em;
+  color: #fff; background: #d31225; border: 0; border-radius: 8px;
+  padding: 13px 34px; cursor: pointer;
+  transition: transform .1s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.v2-contact__btn:hover { background: #b60f1f; box-shadow: 0 6px 16px rgba(211, 18, 37, .3); }
+.v2-contact__btn:active { transform: translateY(1px); }
+.v2-contact__btn[disabled] { opacity: .6; cursor: default; }
+.v2-contact__hp { position: absolute; left: -9999px; height: 0; overflow: hidden; }
+.v2-contact__status { margin: 2px 0 0; font-weight: 600; }
+.v2-contact__status--ok { color: #0a7d2c; }
+.v2-contact__status--err { color: #d31225; }
+@media (max-width: 680px) {
+  .v2-contact__row { grid-template-columns: 1fr; }
+  .v2-contact__card { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .v2-contact__btn { transition: none; } }
+
+/* ---------- simple current-project pages (V2 additions: no media) ---------- */
+.v2-proj-cover { background: var(--v2-navy); color: #fff; padding: 150px 24px 72px; text-align: center; }
+.v2-proj-cover__inner { max-width: 1100px; margin: 0 auto; }
+.v2-proj-cover__title {
+  font-family: 'Hammersmith One', sans-serif; font-weight: 400; line-height: 1.25;
+  font-size: clamp(1.55rem, 3.2vw, 2.5rem); margin: 0 0 16px; color: #fff;
+}
+.v2-proj-cover__code {
+  display: inline-block; font-weight: 700; letter-spacing: .04em; color: #fff;
+  background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 6px; padding: 6px 14px; margin: 0;
+}
+.v2-proj-facts { max-width: 1224px; margin: 0 auto; padding: 56px 24px 72px; }
+.v2-proj-facts__tag {
+  display: inline-block; font-weight: 700; font-size: .85rem; letter-spacing: .04em;
+  text-transform: uppercase; color: #d31225; margin: 0 0 10px;
+}
+.v2-proj-facts__h { color: var(--v2-navy); font-size: 1.8rem; margin: 0 0 26px; }
+.v2-proj-facts__grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 26px 32px; margin: 0;
+}
+.v2-proj-facts__cell dt { font-weight: 700; color: var(--v2-navy); margin: 0 0 4px; font-size: 1.05rem; }
+.v2-proj-facts__cell dd { margin: 0; color: #33424e; line-height: 1.5; }
+@media (max-width: 600px) { .v2-proj-cover { padding-top: 120px; } }
+
+/* ---------- project cards without a photograph (navy fill in the real card slot) ----------
+   The card is a clone of the builder's own GridImage, so shape, size, radius and
+   the reveal animation are identical; only the picture is replaced by this box. */
+.image .image__image.v2-noimg {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 16px; background: var(--v2-navy); color: #fff;
+  font-family: 'Hammersmith One', sans-serif; font-weight: 400; line-height: 1.3;
+  font-size: clamp(.9rem, 1.25vw, 1.1rem); letter-spacing: .01em;
+}
+
+/* ---------- simple project pages: navy header so white logo/nav stay legible ---------- */
+.v2-simplepage .block-header { background-color: var(--v2-navy); }
+.v2-simplepage body { background: #fff; }
+.v2-proj-facts { background: #fff; }
