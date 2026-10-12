@@ -839,3 +839,27 @@
 .v2-simplepage .block-header { background-color: var(--v2-navy); }
 .v2-simplepage body { background: #fff; }
 .v2-proj-facts { background: #fff; }
+
+/* ---------- home hero fills the first screen on every screen size ----------
+   The builder sizes the hero with fixed rows (950px + header = 1073px), so on
+   screens taller than that (ultrawide/1440p monitors, iPad portrait, tall
+   phones) the navy About section showed under the video. min-height grows the
+   section to the viewport; the background video already covers the section. */
+#aCqA2TkE7 {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* ---------- desktop menu stays on one line at 920-1099px ----------
+   At these widths "Contact Us" wrapped to a second line, which made the header
+   taller and opened a white strip above the hero on every page. */
+@media screen and (width >= 920px) and (width < 1100px) {
+  .block-header__nav-links.block-header__nav-links {
+    column-gap: clamp(12px, calc((100vw - 920px) * 0.18 + 12px), 46px);
+    flex-wrap: nowrap;
+  }
+  .block-header__nav-links.block-header__nav-links a {
+    white-space: nowrap;
+    font-size: 15px;
+  }
+}
