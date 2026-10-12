@@ -156,8 +156,14 @@ class GlassChatWidget {
     format(text) {
         let h = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         h = h.replace(/\[([^\]]+)\]\(\s*((?:\/(?!\/)|https:\/\/(?:www\.)?ugcc\.com\/?)[^\s)]*)\s*\)/g,
-            (m, label, href) => `<a href="${href}">${label}</a>`);
+            (m, label, href) => {
+                // Keep visitors on THIS site: a ugcc.com link becomes a relative path,
+                // so it works on the preview today and on ugcc.com after go-live.
+                const path = href.replace(/^https:\/\/(?:www\.)?ugcc\.com/, '') || '/';
+                return `<a href="${path}">${label}</a>`;
+            });
         h = h.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+        h = h.replace(/^\s*#{1,6}\s+(.+)$/gm, '<strong>$1</strong>');
         h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         h = h.replace(/^\s*[-*•]\s+/gm, '• ');
         return h.replace(/\n/g, '<br>');
