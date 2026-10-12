@@ -1,0 +1,13 @@
+{
+  "name": "ugcc-website",
+  "private": true,
+  "type": "module",
+  "description": "UGCC static site + chatbot function. No build step; Netlify installs dependencies for the function.",
+  "scripts": {
+    "test": "npx -y vitest@2 run",
+    "knowledge": "python3 tools/knowledge/build_context.py"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}

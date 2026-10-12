@@ -38,6 +38,7 @@ class GlassChatWidget {
             container: shadow.querySelector('.chat-container'),
             launcher: shadow.querySelector('.chat-launcher'),
             closeBtn: shadow.querySelector('.close-btn'),
+            resetBtn: shadow.querySelector('.reset-btn'),
             messages: shadow.querySelector('.chat-messages'),
             input: shadow.querySelector('.chat-input input'),
             sendBtn: shadow.querySelector('.send-btn'),
@@ -46,34 +47,80 @@ class GlassChatWidget {
 
         this.elements.launcher.addEventListener('click', () => this.toggleChat());
         this.elements.closeBtn.addEventListener('click', () => this.toggleChat());
+        this.elements.resetBtn.addEventListener('click', () => this.resetChat());
+        // Links in answers open site pages. The conversation is saved, so it is
+        // still there on the next page. On phones the chat covers the screen,
+        // so close it first and let the visitor see the page they asked for.
+        this.elements.messages.addEventListener('click', (e) => {
+            const a = e.target.closest && e.target.closest('a');
+            if (a && window.innerWidth <= 480) { this.state.open = false; this.save(); }
+        });
         this.elements.sendBtn.addEventListener('click', () => this.sendMessage());
         this.elements.input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendMessage();
         });
 
-        if (this.elements.messages.children.length === 0) {
-            this.addMessage(this.welcomeMessage, 'bot');
+        // Restore this tab's conversation (sessionStorage: per tab, cleared when
+        // the tab closes). Only the last few turns are ever sent to the server,
+        // so a long saved conversation does not increase token usage.
+        this.state = this.load();
+        this.addMessage(this.welcomeMessage, 'bot', false);
+        this.state.msgs.forEach((m) => this.addMessage(m.text, m.sender, false));
+        if (this.state.open) this.setOpen(true, false);
+    }
+
+    load() {
+        try {
+            const raw = sessionStorage.getItem(GlassChatWidget.STORE_KEY);
+            const st = raw ? JSON.parse(raw) : null;
+            if (st && Array.isArray(st.msgs) && Array.isArray(st.history)) return st;
+        } catch (e) { /* storage blocked: start fresh */ }
+        return { msgs: [], history: [], open: false };
+    }
+
+    save() {
+        try {
+            this.state.msgs = this.state.msgs.slice(-40);
+            this.state.history = this.state.history.slice(-12);
+            sessionStorage.setItem(GlassChatWidget.STORE_KEY, JSON.stringify(this.state));
+        } catch (e) { /* storage full or blocked: keep working without saving */ }
+    }
+
+    resetChat() {
+        this.state = { msgs: [], history: [], open: true };
+        this.save();
+        this.elements.messages.innerHTML = '';
+        this.addMessage(this.welcomeMessage, 'bot', false);
+        this.elements.input.focus();
+    }
+
+    setOpen(open, focus = true) {
+        this.elements.container.classList.toggle('open', open);
+        this.elements.launcher.classList.toggle('hidden', open);
+        if (open) {
+            this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
+            if (focus) setTimeout(() => this.elements.input.focus(), 100);
         }
     }
 
     toggleChat() {
-        this.elements.container.classList.toggle('open');
-        this.elements.launcher.classList.toggle('hidden');
-        if (this.elements.container.classList.contains('open')) {
-            setTimeout(() => this.elements.input.focus(), 100);
-        }
+        const open = !this.elements.container.classList.contains('open');
+        this.setOpen(open);
+        this.state.open = open;
+        this.save();
     }
 
     async sendMessage() {
         const text = this.elements.input.value.trim();
-        if (!text) return;
+        if (!text || this._sending) return;
+        this._sending = true;
 
         this.addMessage(text, 'user');
         this.elements.input.value = '';
         this.showTyping();
 
-        this._history = this._history || [];
-        this._history.push({ role: 'user', content: text });
+        this.state.history.push({ role: 'user', content: text });
+        this.save();
 
         try {
             const response = await fetch(this.webhookUrl, {
@@ -82,13 +129,13 @@ class GlassChatWidget {
                 body: JSON.stringify({
                     message: text,
                     sessionId: this.sessionId,
-                    history: this._history.slice(-6)
+                    history: this.state.history.slice(-6)
                 })
             });
 
             const data = await response.json();
             const botReply = data.output || data.error || "Sorry, something went wrong.";
-            this._history.push({ role: 'assistant', content: botReply });
+            if (data.output && !data.limited) this.state.history.push({ role: 'assistant', content: botReply });
 
             this.hideTyping();
             this.addMessage(botReply, 'bot');
@@ -96,15 +143,37 @@ class GlassChatWidget {
         } catch (error) {
             console.error('Widget Error:', error);
             this.hideTyping();
-            this.addMessage("Connection error. Please try again.", 'bot');
+            this.addMessage("Connection error. Please try again.", 'bot', false);
+        } finally {
+            this._sending = false;
+            this.save();
         }
     }
 
-    addMessage(text, sender) {
+    // Safe formatting for answers: everything is HTML-escaped first, then only
+    // these are turned into markup: links to pages of THIS site (or ugcc.com),
+    // **bold**, "- " bullet lines and line breaks. Any other link stays as text.
+    format(text) {
+        let h = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        h = h.replace(/\[([^\]]+)\]\(\s*((?:\/(?!\/)|https:\/\/(?:www\.)?ugcc\.com\/?)[^\s)]*)\s*\)/g,
+            (m, label, href) => {
+                // Keep visitors on THIS site: a ugcc.com link becomes a relative path,
+                // so it works on the preview today and on ugcc.com after go-live.
+                const path = href.replace(/^https:\/\/(?:www\.)?ugcc\.com/, '') || '/';
+                return `<a href="${path}">${label}</a>`;
+            });
+        h = h.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+        h = h.replace(/^\s*#{1,6}\s+(.+)$/gm, '<strong>$1</strong>');
+        h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        h = h.replace(/^\s*[-*•]\s+/gm, '• ');
+        return h.replace(/\n/g, '<br>');
+    }
+
+    addMessage(text, sender, persist = true) {
         const div = document.createElement('div');
         div.className = `message ${sender}`;
-        const formattedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
-        div.innerHTML = `<div class="bubble">${formattedText}</div>`;
+        div.innerHTML = `<div class="bubble">${this.format(text)}</div>`;
+        if (persist) { this.state.msgs.push({ text, sender }); this.save(); }
         this.elements.messages.appendChild(div);
         this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
     }
@@ -206,6 +275,11 @@ class GlassChatWidget {
             .bubble { padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.5; color: white; }
             .message.user .bubble { background: linear-gradient(135deg, var(--primary), #a00f1c); border-bottom-right-radius: 4px; }
             .message.bot .bubble { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.05); border-bottom-left-radius: 4px; }
+            .bubble a { color: #ffffff; text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 3px; text-decoration-thickness: 2px; }
+            .bubble a:hover { text-decoration-color: #ffffff; }
+            .header-actions { display: flex; align-items: center; gap: 4px; }
+            .reset-btn { background: none; border: none; cursor: pointer; color: #ffffff; opacity: 0.7; font-size: 13px; padding: 6px 8px; border-radius: 8px; }
+            .reset-btn:hover { opacity: 1; background: rgba(255,255,255,0.08); }
 
             .typing-indicator { display: none; gap: 6px; padding: 12px 18px; background: rgba(255,255,255,0.05); border-radius: 20px; width: fit-content; margin-left: 24px; margin-bottom: 12px; }
             .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.6); border-radius: 50%; animation: bounce 1.4s infinite; }
@@ -240,7 +314,10 @@ class GlassChatWidget {
             <div class="chat-container">
                 <div class="chat-header">
                     <span class="header-title">${this.chatTitle}</span>
-                    <button class="close-btn">&times;</button>
+                    <div class="header-actions">
+                        <button class="reset-btn" type="button" title="Start a new conversation">New chat</button>
+                        <button class="close-btn" type="button" aria-label="Close chat">&times;</button>
+                    </div>
                 </div>
                 <div class="chat-messages"></div>
                 <div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
@@ -252,6 +329,8 @@ class GlassChatWidget {
         `;
     }
 }
+
+GlassChatWidget.STORE_KEY = 'ugccChat.v1';
 
 /* Self-initialize once per page (replaces the old per-page init block). */
 document.addEventListener('DOMContentLoaded', function () {

@@ -62,3 +62,23 @@ and `assets/js/v2.js` (injected into every page, no other changes):
 - `prefers-reduced-motion` fully respected
 
 To ship V1 instead, `git checkout master`.
+
+## Website chatbot (UGCC Assistant)
+
+- Widget: `assets/js/chat-widget.js` → `POST /api/chat` → Netlify function `netlify/functions/chat.mjs`.
+- Model: OpenAI Responses API, `gpt-4o-mini` by default (override with the `CHAT_MODEL` env var in Netlify).
+  Needs `OPENAI_API_KEY` set in Netlify. Set a monthly usage limit on that key in the OpenAI dashboard.
+- Knowledge: the whole website is compiled into `netlify/functions/knowledge.mjs` (company pages, a
+  structured index of every project page, and the company-profile PDF) and sent with every question.
+  The old OpenAI vector store (`OPENAI_VECTOR_STORE_ID`) is no longer used.
+- **After any content change, rebuild the knowledge and commit it:**
+  `pip install -r tools/knowledge/requirements.txt && python3 tools/knowledge/build_context.py`
+- Answers link projects/pages to their site pages; the widget only turns links to this site into
+  clickable links (everything else is shown as plain text).
+- The conversation is kept per browser tab (sessionStorage) while visitors move between pages; only the
+  last 6 turns are sent to the server, so this does not add cost. "New chat" clears it.
+- **Spend controls** (Netlify Blobs, store `chat-usage`): `CHAT_LIMIT_PER_VISITOR_DAY` (default 30) and
+  `CHAT_LIMIT_SITE_DAY` (default 300) env vars, plus 12 requests/minute per session. ~47k input tokens per
+  question ≈ $0.004–0.007 with gpt-4o-mini, so the default site cap bounds spend at about $2/day.
+- Safeguards live in `RULES` in `chat.mjs`: answers only from the knowledge base; declines politics,
+  religion, other companies, legal/financial/medical advice and off-topic requests.
