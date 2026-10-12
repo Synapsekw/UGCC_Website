@@ -73,5 +73,12 @@ To ship V1 instead, `git checkout master`.
   The old OpenAI vector store (`OPENAI_VECTOR_STORE_ID`) is no longer used.
 - **After any content change, rebuild the knowledge and commit it:**
   `pip install -r tools/knowledge/requirements.txt && python3 tools/knowledge/build_context.py`
+- Answers link projects/pages to their site pages; the widget only turns links to this site into
+  clickable links (everything else is shown as plain text).
+- The conversation is kept per browser tab (sessionStorage) while visitors move between pages; only the
+  last 6 turns are sent to the server, so this does not add cost. "New chat" clears it.
+- **Spend controls** (Netlify Blobs, store `chat-usage`): `CHAT_LIMIT_PER_VISITOR_DAY` (default 30) and
+  `CHAT_LIMIT_SITE_DAY` (default 300) env vars, plus 12 requests/minute per session. ~47k input tokens per
+  question ≈ $0.004–0.007 with gpt-4o-mini, so the default site cap bounds spend at about $2/day.
 - Safeguards live in `RULES` in `chat.mjs`: answers only from the knowledge base; declines politics,
   religion, other companies, legal/financial/medical advice and off-topic requests.

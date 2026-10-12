@@ -91,3 +91,29 @@ describe("extractText", () => {
     expect(extractText({ output: [] })).toBe("");
   });
 });
+
+describe("daily usage caps", async () => {
+  const { overDailyCap, hashIp } = await import("../netlify/functions/chat.mjs");
+  it("allows normal use", () => {
+    expect(overDailyCap({ site: 10, visitor: 2 })).toBe(null);
+  });
+  it("blocks a visitor at the per-visitor cap (default 30/day)", () => {
+    expect(overDailyCap({ site: 10, visitor: 30 })).toBe("visitor");
+  });
+  it("blocks everyone at the site cap (default 300/day), which wins over the visitor cap", () => {
+    expect(overDailyCap({ site: 300, visitor: 30 })).toBe("site");
+  });
+  it("stores visitors as a short one-way hash, never the raw IP", async () => {
+    const h = await hashIp("203.0.113.7");
+    expect(h).toMatch(/^[0-9a-f]{24}$/);
+    expect(h).not.toContain("203");
+    expect(await hashIp("203.0.113.7")).toBe(h);
+  });
+});
+
+describe("link instructions", () => {
+  it("asks the model to link projects to their own site pages only", () => {
+    expect(RULES).toMatch(/clickable Markdown link/);
+    expect(RULES).toMatch(/never link to other websites/);
+  });
+});

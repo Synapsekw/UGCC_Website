@@ -33,7 +33,8 @@ SCOPE AND SAFEGUARDS
 
 STYLE
 - Reply in the user's language: Arabic for Arabic questions, otherwise English.
-- Be concise, professional and friendly. Use short paragraphs; use a bullet list when listing several projects.
+- Be concise, professional and friendly. Use short paragraphs; use a bullet list ("- ") when listing several projects.
+- Whenever you name a project or a website page, make it a clickable Markdown link to its page path from the knowledge base, for example [Cairo Street Development Project](/ra200/) or [Contact Us](/contact-us/). Only link to page paths that appear in the knowledge base; never invent a path and never link to other websites.
 - Write plain text without citation markers, footnotes or bracketed source numbers.`;
 
 export const SYSTEM_PROMPT = `${KNOWLEDGE}\n\n=== END OF KNOWLEDGE BASE ===\n\n${RULES}`;
@@ -70,6 +71,48 @@ export function rateLimited(key, now = Date.now()) {
 
 // Remove citation artifacts the model sometimes leaks into prose:
 // OpenAI's 【..†source】 markers and markdown links whose target is a bare index.
+// Durable daily caps (Netlify Blobs), the real spend control:
+//  - per visitor (hashed IP) per day:   CHAT_LIMIT_PER_VISITOR_DAY (default 30)
+//  - whole site per day:                CHAT_LIMIT_SITE_DAY        (default 300)
+// At ~47k input tokens per question (~$0.004-0.007 with gpt-4o-mini), the
+// default site cap bounds worst-case spend at roughly $2/day (~$60/month).
+// Fails open (logs) if Blobs is unavailable, so the bot never breaks over it.
+const PER_VISITOR_DAY = Number(process.env.CHAT_LIMIT_PER_VISITOR_DAY || 30);
+const SITE_DAY = Number(process.env.CHAT_LIMIT_SITE_DAY || 300);
+
+export async function hashIp(ip) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`ugcc:${ip}`));
+  return [...new Uint8Array(buf)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export function overDailyCap({ site, visitor }) {
+  if (site >= SITE_DAY) return "site";
+  if (visitor >= PER_VISITOR_DAY) return "visitor";
+  return null;
+}
+
+async function checkAndCountDaily(ip) {
+  try {
+    const { getStore } = await import("@netlify/blobs");
+    const store = getStore({ name: "chat-usage", consistency: "strong" });
+    const day = new Date().toISOString().slice(0, 10);
+    const siteKey = `${day}/site`;
+    const visitorKey = `${day}/v/${await hashIp(ip || "unknown")}`;
+    const [site, visitor] = (await Promise.all([store.get(siteKey), store.get(visitorKey)])).map((x) => Number(x || 0));
+    const blocked = overDailyCap({ site, visitor });
+    if (!blocked) await Promise.all([store.set(siteKey, String(site + 1)), store.set(visitorKey, String(visitor + 1))]);
+    return blocked;
+  } catch (e) {
+    console.error("usage cap check skipped:", e?.message);
+    return null;
+  }
+}
+
+const LIMIT_MSG = {
+  visitor: "You've reached today's limit for the assistant. Please contact UGCC directly: +965 220 542 50, ugcc@ugcc.com, or the Contact Us page (/contact-us/).",
+  site: "The assistant is unavailable for the rest of today. Please contact UGCC directly: +965 220 542 50, ugcc@ugcc.com, or the Contact Us page (/contact-us/).",
+};
+
 export function cleanText(text) {
   return text
     .replace(/【[^】]*】/g, "")
@@ -115,7 +158,7 @@ function corsHeaders(origin) {
   };
 }
 
-export default async (req) => {
+export default async (req, context) => {
   const origin = req.headers.get("origin");
   const headers = corsHeaders(origin);
   if (req.method === "OPTIONS") return new Response("", { status: 204, headers });
@@ -139,6 +182,10 @@ export default async (req) => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey)
     return new Response(JSON.stringify({ error: "Server not configured." }), { status: 500, headers });
+
+  const ip = context?.ip || req.headers.get("x-nf-client-connection-ip") || req.headers.get("x-forwarded-for") || "";
+  const blocked = await checkAndCountDaily(ip);
+  if (blocked) return new Response(JSON.stringify({ output: LIMIT_MSG[blocked], limited: blocked }), { status: 200, headers });
 
   try {
     const r = await fetch(`${OPENAI}/responses`, {
