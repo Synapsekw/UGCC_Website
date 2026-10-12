@@ -62,3 +62,16 @@ and `assets/js/v2.js` (injected into every page, no other changes):
 - `prefers-reduced-motion` fully respected
 
 To ship V1 instead, `git checkout master`.
+
+## Website chatbot (UGCC Assistant)
+
+- Widget: `assets/js/chat-widget.js` → `POST /api/chat` → Netlify function `netlify/functions/chat.mjs`.
+- Model: OpenAI Responses API, `gpt-4o-mini` by default (override with the `CHAT_MODEL` env var in Netlify).
+  Needs `OPENAI_API_KEY` set in Netlify. Set a monthly usage limit on that key in the OpenAI dashboard.
+- Knowledge: the whole website is compiled into `netlify/functions/knowledge.mjs` (company pages, a
+  structured index of every project page, and the company-profile PDF) and sent with every question.
+  The old OpenAI vector store (`OPENAI_VECTOR_STORE_ID`) is no longer used.
+- **After any content change, rebuild the knowledge and commit it:**
+  `pip install -r tools/knowledge/requirements.txt && python3 tools/knowledge/build_context.py`
+- Safeguards live in `RULES` in `chat.mjs`: answers only from the knowledge base; declines politics,
+  religion, other companies, legal/financial/medical advice and off-topic requests.

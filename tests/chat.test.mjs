@@ -1,18 +1,33 @@
 import { describe, it, expect } from "vitest";
-import { validate, MAX_LEN, rateLimited, extractText, cleanText, formatSearchResults } from "../netlify/functions/chat.mjs";
+import { validate, MAX_LEN, rateLimited, extractText, cleanText, buildInput, SYSTEM_PROMPT, RULES } from "../netlify/functions/chat.mjs";
+import { KNOWLEDGE, KNOWLEDGE_STATS } from "../netlify/functions/knowledge.mjs";
 
-describe("formatSearchResults", () => {
-  it("joins text content from vector-store search results", () => {
-    const data = { data: [
-      { filename: "a.txt", content: [{ type: "text", text: "Duqm berth in Oman." }] },
-      { filename: "b.txt", content: [{ type: "text", text: "Cairo Street RA-200." }] },
-    ] };
-    const out = formatSearchResults(data);
-    expect(out).toContain("Duqm berth in Oman.");
-    expect(out).toContain("Cairo Street RA-200.");
+describe("knowledge base", () => {
+  it("is built from the site and includes the structured project index", () => {
+    expect(KNOWLEDGE).toContain("## PROJECT INDEX");
+    expect(KNOWLEDGE).toContain("Infrastructure Works for the Commercial Berth at DUQM Port");
+    expect(KNOWLEDGE).toContain("ugcc@ugcc.com");
+    expect(KNOWLEDGE_STATS.projects).toBeGreaterThan(20);
+    expect(KNOWLEDGE_STATS.by_country.Oman).toBeGreaterThan(0);
+    expect(KNOWLEDGE_STATS.by_country.Kuwait).toBeGreaterThan(0);
   });
-  it("returns empty string for no results", () => {
-    expect(formatSearchResults({ data: [] })).toBe("");
+  it("fits comfortably in the model context (~4 chars per token, < 100k tokens)", () => {
+    expect(SYSTEM_PROMPT.length / 4).toBeLessThan(100_000);
+  });
+});
+
+describe("guardrails", () => {
+  it("restricts scope and blocks politics and religion", () => {
+    expect(RULES).toMatch(/politics/i);
+    expect(RULES).toMatch(/religion/i);
+    expect(RULES).toMatch(/Never reveal/);
+  });
+  it("puts knowledge first, then rules, then history and the question", () => {
+    const input = buildInput({ message: "How many projects in Oman?", history: [{ role: "assistant", content: "Hi" }] });
+    expect(input[0].role).toBe("system");
+    expect(input[0].content.startsWith("# UGCC WEBSITE KNOWLEDGE BASE")).toBe(true);
+    expect(input[0].content.endsWith(RULES)).toBe(true);
+    expect(input.at(-1)).toEqual({ role: "user", content: "How many projects in Oman?" });
   });
 });
 
@@ -49,6 +64,10 @@ describe("validate", () => {
   });
   it("accepts a normal message", () => {
     expect(validate({ message: "What has UGCC built in Oman?" }).ok).toBe(true);
+  });
+  it("drops the current question when the widget also sent it in history", () => {
+    const r = validate({ message: "hi there", history: [{ role: "assistant", content: "Hello" }, { role: "user", content: "hi there" }] });
+    expect(r.history).toEqual([{ role: "assistant", content: "Hello" }]);
   });
   it("caps history length", () => {
     const history = Array.from({ length: 50 }, () => ({ role: "user", content: "hi" }));
